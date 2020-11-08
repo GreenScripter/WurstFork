@@ -7,6 +7,11 @@
  */
 package net.wurstclient.commands;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.stream.StreamSupport;
 
@@ -30,6 +35,8 @@ public final class GoToCmd extends Command
 	private PathFinder pathFinder;
 	private PathProcessor processor;
 	private boolean enabled;
+	
+	private static int index = 0;
 	
 	public GoToCmd()
 	{
@@ -70,8 +77,83 @@ public final class GoToCmd extends Command
 		EVENTS.add(RenderListener.class, this);
 	}
 	
+	
 	private BlockPos argsToPos(String... args) throws CmdException
 	{
+		if (args.length == 1 && args[0].equalsIgnoreCase("previous")) {
+			File f = new File("coordinates.txt");
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(f));
+				try {
+					String line = reader.readLine();
+					int i = 0;
+					while (line != null) {
+						if (i == index-2) {
+							ChatUtils.message("Going to position " + index + " at " + line);
+							return argsToPos(line.split(" "));
+						}
+						i++;
+						line = reader.readLine();
+					}
+					throw new CmdError("End of list reached.");
+				} catch (Exception e) {
+					throw new CmdError("Error reading coordinates file.");
+				} finally {
+					try {
+						reader.close();
+					} catch (IOException e) {
+					}
+				}
+			} catch (FileNotFoundException e) {
+				throw new CmdError("No coordinates file found.");
+			}
+			
+		}
+		if (args.length == 1 && args[0].equalsIgnoreCase("start")) {
+			index = 0;
+			ChatUtils.message("Set route index to 1");
+			throw new CmdError("Use next to go there.");
+		}
+		if (args.length == 2 && args[0].equalsIgnoreCase("index")) {
+			try {
+				index = Integer.parseInt(args[1])-1;
+				ChatUtils.message("Set route index to " + (1+index));
+				throw new CmdError("Use next to go there.");
+			} catch (NumberFormatException e){
+				throw new CmdError("Please use a number.");
+
+			}
+			
+		}
+		if (args.length == 1 && args[0].equalsIgnoreCase("next")) {
+			File f = new File("coordinates.txt");
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(f));
+				try {
+					String line = reader.readLine();
+					int i = 0;
+					while (line != null) {
+						if (i == index) {
+							index++;
+							ChatUtils.message("Going to position " + index + " at " + line);
+							return argsToPos(line.split(" "));
+						}
+						line = reader.readLine();
+						i++;
+					}
+					throw new CmdError("End of list reached.");
+				} catch (Exception e) {
+					throw new CmdError("Error reading coordinates file.");
+				} finally {
+					try {
+						reader.close();
+					} catch (IOException e) {
+					}
+				}
+			} catch (FileNotFoundException e) {
+				throw new CmdError("No coordinates file found.");
+			}
+		}
 		switch(args.length)
 		{
 			default:
@@ -181,12 +263,14 @@ public final class GoToCmd extends Command
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
-		
+		if (!pathFinder.isFailed())
+			ChatUtils.message("Destination reached.");
 		pathFinder = null;
 		processor = null;
 		PathProcessor.releaseControls();
 		
 		enabled = false;
+
 	}
 	
 	public boolean isActive()

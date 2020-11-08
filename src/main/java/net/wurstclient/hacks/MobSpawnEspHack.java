@@ -328,12 +328,12 @@ public final class MobSpawnEspHack extends Hack
 				GL11.glColor4f(1, 0, 0, 0.5F);
 				GL11.glBegin(GL11.GL_LINES);
 				new ArrayList<>(red).forEach(pos -> {
-					GL11.glVertex3d(pos.getX(), pos.getY() + 0.01, pos.getZ());
-					GL11.glVertex3d(pos.getX() + 1, pos.getY() + 0.01,
+					GL11.glVertex3d(pos.getX(), pos.getY() + 0.03, pos.getZ());
+					GL11.glVertex3d(pos.getX() + 1, pos.getY() + 0.03,
 						pos.getZ() + 1);
-					GL11.glVertex3d(pos.getX() + 1, pos.getY() + 0.01,
+					GL11.glVertex3d(pos.getX() + 1, pos.getY() + 0.03,
 						pos.getZ());
-					GL11.glVertex3d(pos.getX(), pos.getY() + 0.01,
+					GL11.glVertex3d(pos.getX(), pos.getY() + 0.03,
 						pos.getZ() + 1);
 				});
 				

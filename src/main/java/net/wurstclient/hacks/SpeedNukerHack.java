@@ -20,6 +20,7 @@ import net.minecraft.block.Material;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Box;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.LeftClickListener;
@@ -35,7 +36,7 @@ import net.wurstclient.util.BlockBreaker;
 import net.wurstclient.util.BlockUtils;
 import net.wurstclient.util.RotationUtils;
 
-@SearchTags({"speed nuker", "FastNuker", "fast nuker"})
+@SearchTags({"speed nuker", "FastNuker", "fast nuker", "flat"})
 public final class SpeedNukerHack extends Hack
 	implements LeftClickListener, UpdateListener
 {
@@ -51,7 +52,9 @@ public final class SpeedNukerHack extends Hack
 			+ "\u00a7lFlat\u00a7r mode flattens the area around you,\n"
 			+ "but won't dig down.\n"
 			+ "\u00a7lSmash\u00a7r mode only breaks blocks that\n"
-			+ "can be destroyed instantly (e.g. tall grass).",
+			+ "can be destroyed instantly (e.g. tall grass)."
+			+ "\u00a7lBox\u00a7r mode only breaks blocks that\n"
+			+ "are in a specified rectangle.",
 		Mode.values(), Mode.NORMAL);
 	
 	private final BlockSetting id =
@@ -69,6 +72,8 @@ public final class SpeedNukerHack extends Hack
 		"minecraft:glowstone", "minecraft:gold_ore", "minecraft:iron_ore",
 		"minecraft:lapis_ore", "minecraft:nether_gold_ore",
 		"minecraft:nether_quartz_ore", "minecraft:redstone_ore");
+	
+	public static Box box;
 	
 	public SpeedNukerHack()
 	{
@@ -119,6 +124,9 @@ public final class SpeedNukerHack extends Hack
 	@Override
 	public void onUpdate()
 	{
+		if(mode.getSelected() == Mode.BOX && box == null) {
+			return;
+		}
 		// abort if using IDNuker without an ID being set
 		if(mode.getSelected() == Mode.ID && id.getBlock() == Blocks.AIR)
 			return;
@@ -194,12 +202,15 @@ public final class SpeedNukerHack extends Hack
 					: " IDs]"),
 			(n, p) -> n.multiIdList.getBlockNames()
 				.contains(BlockUtils.getName(p))),
-		
+		 
 		FLAT("Flat", n -> "FlatSpeedNuker",
-			(n, pos) -> pos.getY() >= MC.player.getY()),
+			(n, pos) -> pos.getY() >= Math.floor(MC.player.getY())),
 		
 		SMASH("Smash", n -> "SmashSpeedNuker",
-			(n, pos) -> BlockUtils.getHardness(pos) >= 1);
+			(n, pos) -> BlockUtils.getHardness(pos) >= 1),
+		
+		BOX("Box", n -> "BoxSpeedNuker",
+				(n, pos) -> (pos.getY() >= Math.floor(MC.player.getY()) && SpeedNukerHack.box.maxX>=pos.getX() && SpeedNukerHack.box.minX<=pos.getX() && SpeedNukerHack.box.maxY>=pos.getY() && SpeedNukerHack.box.minY<=pos.getY() && SpeedNukerHack.box.maxZ>=pos.getZ() && SpeedNukerHack.box.minZ<=pos.getZ()));
 		
 		private final String name;
 		private final Function<SpeedNukerHack, String> renderName;

@@ -66,9 +66,17 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 			if(stack.isEmpty() || !(stack.getItem() instanceof BlockItem))
 				continue;
 			
+			if (stack.getItem().getTranslationKey().contains("shulker")){
+				continue;
+			}
+			
 			// filter out non-solid blocks
 			Block block = Block.getBlockFromItem(stack.getItem());
+			
+		
+			
 			BlockState state = block.getDefaultState();
+			
 			if(!state.isFullCube(EmptyBlockView.INSTANCE, BlockPos.ORIGIN))
 				continue;
 			

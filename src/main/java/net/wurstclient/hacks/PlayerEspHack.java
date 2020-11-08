@@ -8,6 +8,8 @@
 package net.wurstclient.hacks;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +22,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
+import net.wurstclient.commands.ConnectCmd;
 import net.wurstclient.events.CameraTransformViewBobbingListener;
 import net.wurstclient.events.RenderListener;
 import net.wurstclient.events.UpdateListener;
@@ -188,8 +191,11 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
 		
 		GL11.glBegin(GL11.GL_LINES);
+		Set<String> names = new HashSet<>();
+		names.add(MC.player.getName().asString());
 		for(PlayerEntity e : players)
 		{
+			names.add(e.getName().asString());
 			Vec3d end = e.getBoundingBox().getCenter()
 				.subtract(new Vec3d(e.getX(), e.getY(), e.getZ())
 					.subtract(e.prevX, e.prevY, e.prevZ)
@@ -205,6 +211,20 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 			
 			GL11.glVertex3d(start.x, start.y, start.z);
 			GL11.glVertex3d(end.x, end.y, end.z);
+		}
+		if (ConnectCmd.privateChat != null){
+			synchronized (ConnectCmd.privateChat.players) {
+				for (String e : ConnectCmd.privateChat.players.keySet()) {
+					if (!names.contains(e) && ConnectCmd.privateChat.playersDim.get(e) == ConnectCmd.dimension) {
+						Vec3d end = ConnectCmd.privateChat.players.get(e);
+						
+						GL11.glColor4f(0, 1, 1, 0.5F);
+						
+						GL11.glVertex3d(start.x, start.y, start.z);
+						GL11.glVertex3d(end.x, end.y, end.z);
+					}
+				}
+			}
 		}
 		GL11.glEnd();
 	}

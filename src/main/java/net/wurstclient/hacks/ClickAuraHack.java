@@ -22,6 +22,7 @@ import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
@@ -36,6 +37,8 @@ import net.minecraft.util.math.Box;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.LeftClickListener;
+import net.wurstclient.events.RightClickListener;
+import net.wurstclient.events.RightClickListener.RightClickEvent;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.settings.CheckboxSetting;
@@ -48,7 +51,7 @@ import net.wurstclient.util.RotationUtils.Rotation;
 
 @SearchTags({"click aura", "ClickAimbot", "click aimbot"})
 public final class ClickAuraHack extends Hack
-	implements UpdateListener, LeftClickListener
+	implements UpdateListener, RightClickListener, LeftClickListener
 {
 	private final SliderSetting range =
 		new SliderSetting("Range", 5, 1, 10, 0.05, ValueDisplay.DECIMAL);
@@ -104,7 +107,11 @@ public final class ClickAuraHack extends Hack
 	private final CheckboxSetting filterStands = new CheckboxSetting(
 		"Filter armor stands", "Won't attack armor stands.", false);
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
-		"Filter end crystals", "Won't attack end crystals.", false);
+			"Filter end crystals", "Won't attack end crystals.", false);
+	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
+			"Filter villager zombies", "Won't attack villager zombies.", false);
+	private final CheckboxSetting rightClick = new CheckboxSetting(
+			"Use Interact", "Will interact with the closest entity rather than attacking.", false);
 	
 	public ClickAuraHack()
 	{
@@ -132,6 +139,8 @@ public final class ClickAuraHack extends Hack
 		addSetting(filterNamed);
 		addSetting(filterStands);
 		addSetting(filterCrystals);
+		addSetting(filterVillageZombies);
+		addSetting(rightClick);
 	}
 	
 	@Override
@@ -147,6 +156,7 @@ public final class ClickAuraHack extends Hack
 		WURST.getHax().tpAuraHack.setEnabled(false);
 		
 		EVENTS.add(UpdateListener.class, this);
+		EVENTS.add(RightClickListener.class, this);
 		EVENTS.add(LeftClickListener.class, this);
 	}
 	
@@ -154,12 +164,18 @@ public final class ClickAuraHack extends Hack
 	public void onDisable()
 	{
 		EVENTS.remove(UpdateListener.class, this);
+		EVENTS.remove(RightClickListener.class, this);
 		EVENTS.remove(LeftClickListener.class, this);
 	}
-	
+	long lastinteract = System.currentTimeMillis();
 	@Override
 	public void onUpdate()
 	{
+		
+//		if(!MC.options.keyUse.isPressed()){
+//			interact();
+//		}
+		
 		if(!MC.options.keyAttack.isPressed())
 			return;
 		
@@ -169,14 +185,18 @@ public final class ClickAuraHack extends Hack
 		attack();
 	}
 	
-	@Override
-	public void onLeftClick(LeftClickEvent event)
+	public void onRightClick(RightClickEvent event)
 	{
-		attack();
+		interact();
 	}
-	
+
+	public void onLeftClick(LeftClickEvent event) {		attack();
+}
 	private void attack()
 	{
+		if (rightClick.isChecked()){
+			return;
+		}
 		// set entity
 		ClientPlayerEntity player = MC.player;
 		ClientWorld world = MC.world;
@@ -257,6 +277,9 @@ public final class ClickAuraHack extends Hack
 		if(filterCrystals.isChecked())
 			stream = stream.filter(e -> !(e instanceof EndCrystalEntity));
 		
+		if(filterVillageZombies.isChecked())
+			stream = stream.filter(e -> !(e instanceof ZombieVillagerEntity));
+		
 		Entity target =
 			stream.min(priority.getSelected().comparator).orElse(null);
 		if(target == null)
@@ -274,6 +297,113 @@ public final class ClickAuraHack extends Hack
 		// attack entity
 		WURST.getHax().criticalsHack.doCritical();
 		MC.interactionManager.attackEntity(player, target);
+		player.swingHand(Hand.MAIN_HAND);
+	}private void interact()
+	{if (!rightClick.isChecked()){
+		return;
+	}
+		if (System.currentTimeMillis()-lastinteract<10){
+			return;
+		}
+		lastinteract = System.currentTimeMillis();
+		
+		// set entity
+		ClientPlayerEntity player = MC.player;
+		ClientWorld world = MC.world;
+		
+		double rangeSq = Math.pow(range.getValue(), 2);
+		Stream<Entity> stream =
+			StreamSupport.stream(MC.world.getEntities().spliterator(), true)
+				.filter(e -> !e.removed)
+				.filter(e -> e instanceof LivingEntity
+					&& ((LivingEntity)e).getHealth() > 0
+					|| e instanceof EndCrystalEntity)
+				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+				.filter(e -> e != player)
+				.filter(e -> !(e instanceof FakePlayerEntity))
+				.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
+		
+		if(filterPlayers.isChecked())
+			stream = stream.filter(e -> !(e instanceof PlayerEntity));
+		
+		if(filterSleeping.isChecked())
+			stream = stream.filter(e -> !(e instanceof PlayerEntity
+				&& ((PlayerEntity)e).isSleeping()));
+		
+		if(filterFlying.getValue() > 0)
+			stream = stream.filter(e -> {
+				
+				if(!(e instanceof PlayerEntity))
+					return true;
+				
+				Box box = e.getBoundingBox();
+				box = box.union(box.offset(0, -filterFlying.getValue(), 0));
+				return world.isSpaceEmpty(box);
+			});
+		
+		if(filterMonsters.isChecked())
+			stream = stream.filter(e -> !(e instanceof Monster));
+		
+		if(filterPigmen.isChecked())
+			stream = stream.filter(e -> !(e instanceof ZombifiedPiglinEntity));
+		
+		if(filterEndermen.isChecked())
+			stream = stream.filter(e -> !(e instanceof EndermanEntity));
+		
+		if(filterAnimals.isChecked())
+			stream = stream.filter(
+				e -> !(e instanceof AnimalEntity || e instanceof AmbientEntity
+					|| e instanceof WaterCreatureEntity));
+		
+		if(filterBabies.isChecked())
+			stream = stream.filter(e -> !(e instanceof PassiveEntity
+				&& ((PassiveEntity)e).isBaby()));
+		
+		if(filterPets.isChecked())
+			stream = stream
+				.filter(e -> !(e instanceof TameableEntity
+					&& ((TameableEntity)e).isTamed()))
+				.filter(e -> !(e instanceof HorseBaseEntity
+					&& ((HorseBaseEntity)e).isTame()));
+		
+		if(filterTraders.isChecked())
+			stream = stream.filter(e -> !(e instanceof MerchantEntity));
+		
+		if(filterGolems.isChecked())
+			stream = stream.filter(e -> !(e instanceof GolemEntity));
+		
+		if(filterInvisible.isChecked())
+			stream = stream.filter(e -> !e.isInvisible());
+		
+		if(filterNamed.isChecked())
+			stream = stream.filter(e -> !e.hasCustomName());
+		
+		if(filterStands.isChecked())
+			stream = stream.filter(e -> !(e instanceof ArmorStandEntity));
+		
+		if(filterCrystals.isChecked())
+			stream = stream.filter(e -> !(e instanceof EndCrystalEntity));
+		
+		if(filterVillageZombies.isChecked())
+			stream = stream.filter(e -> !(e instanceof ZombieVillagerEntity));
+		
+		Entity target =
+			stream.min(priority.getSelected().comparator).orElse(null);
+		if(target == null)
+			return;
+		
+		WURST.getHax().autoSwordHack.setSlot();
+		
+		// face entity
+		Rotation rotation = RotationUtils
+			.getNeededRotations(target.getBoundingBox().getCenter());
+		PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(
+			rotation.getYaw(), rotation.getPitch(), MC.player.isOnGround());
+		MC.player.networkHandler.sendPacket(packet);
+		
+		// attack entity
+		WURST.getHax().criticalsHack.doCritical();
+		MC.interactionManager.interactEntity(player, target, Hand.MAIN_HAND);
 		player.swingHand(Hand.MAIN_HAND);
 	}
 	
@@ -303,4 +433,5 @@ public final class ClickAuraHack extends Hack
 			return name;
 		}
 	}
+
 }

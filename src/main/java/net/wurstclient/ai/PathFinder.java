@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.wurstclient.WurstClient;
 import net.wurstclient.util.BlockUtils;
+import net.wurstclient.util.ChatUtils;
 import net.wurstclient.util.RenderUtils;
 
 public class PathFinder
@@ -82,6 +83,72 @@ public class PathFinder
 		if(done)
 			throw new IllegalStateException("Path was already found!");
 		
+		
+		if (flying) {
+			current = new PathPos(WurstClient.MC.player.getBlockPos());
+			PathPos start = new PathPos(WurstClient.MC.player.getBlockPos());
+			path.add(0, current);
+			
+			int mode = 0;
+			
+			while (!checkDone()) {
+				
+				if (current.getY() < goal.getY()) {
+					current = new PathPos(current.add(0, 1, 0));
+					if (!isPassable(current)) {
+						failed = true;
+						return;
+					}
+				} else if (current.getY() > goal.getY()) {
+					current = new PathPos(current.add(0, -1, 0));
+					if (!isPassable(current)) {
+						failed = true;
+						return;
+					}
+				}//else {path.add(0, new PathPos(goal));return;}
+				else {
+//					if (mode == 0) {
+//						if (current.getX() == goal.getX()) mode = 1;
+//						
+//						if (current.getX() < goal.getX()) current = new PathPos(current.add(1, 0, 0));
+//						if (current.getX() > goal.getX()) current = new PathPos(current.add(-1, 0, 0));
+//					} else if (mode == 1) {
+//						if (Math.abs(goal.getZ() - current.getZ()) > 400) {
+//							for (int i = 0; i < 400; i++) {
+//								if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
+//								if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
+//								path.add(0, current);
+//							}
+//							mode = 2;
+//						} else {
+//							if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
+//							if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
+//						}
+//					} else if (mode == 2) {
+//						if (current.getX() == start.getX()) mode = 3;
+//						
+//						if (current.getX() < start.getX()) current = new PathPos(current.add(1, 0, 0));
+//						if (current.getX() > start.getX()) current = new PathPos(current.add(-1, 0, 0));
+//					} else if (mode == 3) {
+//						for (int i = 0; i < Math.min(400, Math.abs(goal.getZ() - current.getZ())); i++) {
+//							if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
+//							if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
+//							path.add(0, current);
+//						}
+//						mode = 0;
+//					}
+					
+					if (current.getX() < goal.getX()) current = new PathPos(current.add(1, 0, 0));
+					if (current.getX() > goal.getX()) current = new PathPos(current.add(-1, 0, 0));
+					
+					if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
+				 if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
+				}
+				path.add(0, current);
+			}
+			ChatUtils.message("Target: " + goal.getX() + " " + goal.getY() + " " + goal.getZ() + " Distance: " + (int)Math.round(Math.sqrt(goal.getSquaredDistance(start))));
+			return;
+		}
 		int i = 0;
 		for(; i < thinkSpeed && !checkFailed(); i++)
 		{
@@ -466,8 +533,8 @@ public class PathFinder
 	{
 		if(!done && !failed)
 			throw new IllegalStateException("No path found!");
-		if(!path.isEmpty())
-			throw new IllegalStateException("Path was already formatted!");
+//		if(!path.isEmpty())
+//			throw new IllegalStateException("Path was already formatted!");
 		
 		// get last position
 		PathPos pos;
@@ -497,108 +564,108 @@ public class PathFinder
 	
 	public void renderPath(boolean debugMode, boolean depthTest)
 	{
-		// GL settings
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		if(!depthTest)
-			GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glDepthMask(false);
-		
-		GL11.glPushMatrix();
-		RenderUtils.applyRenderOffset();
-		GL11.glTranslated(0.5, 0.5, 0.5);
-		
-		if(debugMode)
-		{
-			int renderedThings = 0;
-			
-			// queue (yellow)
-			GL11.glLineWidth(2);
-			GL11.glColor4f(1, 1, 0, 0.75F);
-			for(PathPos element : queue.toArray())
-			{
-				if(renderedThings >= 5000)
-					break;
-				
-				PathRenderer.renderNode(element);
-				renderedThings++;
-			}
-			
-			// processed (red)
-			GL11.glLineWidth(2);
-			for(Entry<PathPos, PathPos> entry : prevPosMap.entrySet())
-			{
-				if(renderedThings >= 5000)
-					break;
-				
-				if(entry.getKey().isJumping())
-					GL11.glColor4f(1, 0, 1, 0.75F);
-				else
-					GL11.glColor4f(1, 0, 0, 0.75F);
-				
-				PathRenderer.renderArrow(entry.getValue(), entry.getKey());
-				renderedThings++;
-			}
-		}
-		
-		// path (blue)
-		if(debugMode)
-		{
-			GL11.glLineWidth(4);
-			GL11.glColor4f(0, 0, 1, 0.75F);
-		}else
-		{
-			GL11.glLineWidth(2);
-			GL11.glColor4f(0, 1, 0, 0.75F);
-		}
-		for(int i = 0; i < path.size() - 1; i++)
-			PathRenderer.renderArrow(path.get(i), path.get(i + 1));
-		
-		GL11.glPopMatrix();
-		
-		// GL resets
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glDepthMask(true);
+//		// GL settings
+//		GL11.glEnable(GL11.GL_BLEND);
+//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//		GL11.glDisable(GL11.GL_CULL_FACE);
+//		GL11.glDisable(GL11.GL_TEXTURE_2D);
+//		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+//		if(!depthTest)
+//			GL11.glDisable(GL11.GL_DEPTH_TEST);
+//		GL11.glDisable(GL11.GL_LIGHTING);
+//		GL11.glDepthMask(false);
+//		
+//		GL11.glPushMatrix();
+//		RenderUtils.applyRenderOffset();
+//		GL11.glTranslated(0.5, 0.5, 0.5);
+//		
+//		if(debugMode)
+//		{
+//			int renderedThings = 0;
+//			
+//			// queue (yellow)
+//			GL11.glLineWidth(2);
+//			GL11.glColor4f(1, 1, 0, 0.75F);
+//			for(PathPos element : queue.toArray())
+//			{
+//				if(renderedThings >= 5000)
+//					break;
+//				
+//				PathRenderer.renderNode(element);
+//				renderedThings++;
+//			}
+//			
+//			// processed (red)
+//			GL11.glLineWidth(2);
+//			for(Entry<PathPos, PathPos> entry : prevPosMap.entrySet())
+//			{
+//				if(renderedThings >= 5000)
+//					break;
+//				
+//				if(entry.getKey().isJumping())
+//					GL11.glColor4f(1, 0, 1, 0.75F);
+//				else
+//					GL11.glColor4f(1, 0, 0, 0.75F);
+//				
+//				PathRenderer.renderArrow(entry.getValue(), entry.getKey());
+//				renderedThings++;
+//			}
+//		}
+//		
+//		// path (blue)
+//		if(debugMode)
+//		{
+//			GL11.glLineWidth(4);
+//			GL11.glColor4f(0, 0, 1, 0.75F);
+//		}else
+//		{
+//			GL11.glLineWidth(2);
+//			GL11.glColor4f(0, 1, 0, 0.75F);
+//		}
+//		for(int i = 0; i < path.size() - 1; i++)
+//			PathRenderer.renderArrow(path.get(i), path.get(i + 1));
+//		
+//		GL11.glPopMatrix();
+//		
+//		// GL resets
+//		GL11.glDisable(GL11.GL_BLEND);
+//		GL11.glEnable(GL11.GL_TEXTURE_2D);
+//		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+//		GL11.glEnable(GL11.GL_DEPTH_TEST);
+//		GL11.glDepthMask(true);
 	}
 	
 	public boolean isPathStillValid(int index)
 	{
-		if(path.isEmpty())
-			throw new IllegalStateException("Path is not formatted!");
-		
-		// check player abilities
-		if(invulnerable != WurstClient.MC.player.abilities.creativeMode
-			|| flying != (creativeFlying
-				|| wurst.getHax().flightHack.isEnabled())
-			|| immuneToFallDamage != (invulnerable
-				|| wurst.getHax().noFallHack.isEnabled())
-			// TODO:
-			// || noWaterSlowdown !=
-			// wurst.getHax().noSlowdownHack.blockWaterSlowness()
-			|| jesus != wurst.getHax().jesusHack.isEnabled()
-			|| spider != wurst.getHax().spiderHack.isEnabled())
-			return false;
-		
-		// if index is zero, check if first pos is safe
-		if(index == 0)
-		{
-			PathPos pos = path.get(0);
-			if(!isPassable(pos) || !canFlyAt(pos) && !canGoThrough(pos.down())
-				&& !canSafelyStandOn(pos.down()))
-				return false;
-		}
-		
-		// check path
-		for(int i = Math.max(1, index); i < path.size(); i++)
-			if(!getNeighbors(path.get(i - 1)).contains(path.get(i)))
-				return false;
+//		if(path.isEmpty())
+//			throw new IllegalStateException("Path is not formatted!");
+//		
+//		// check player abilities
+//		if(invulnerable != WurstClient.MC.player.abilities.creativeMode
+//			|| flying != (creativeFlying
+//				|| wurst.getHax().flightHack.isEnabled())
+//			|| immuneToFallDamage != (invulnerable
+//				|| wurst.getHax().noFallHack.isEnabled())
+//			// TODO:
+//			// || noWaterSlowdown !=
+//			// wurst.getHax().noSlowdownHack.blockWaterSlowness()
+//			|| jesus != wurst.getHax().jesusHack.isEnabled()
+//			|| spider != wurst.getHax().spiderHack.isEnabled())
+//			return false;
+//		
+//		// if index is zero, check if first pos is safe
+//		if(index == 0)
+//		{
+//			PathPos pos = path.get(0);
+//			if(!isPassable(pos) || !canFlyAt(pos) && !canGoThrough(pos.down())
+//				&& !canSafelyStandOn(pos.down()))
+//				return false;
+//		}
+//		
+//		// check path
+//		for(int i = Math.max(1, index); i < path.size(); i++)
+//			if(!getNeighbors(path.get(i - 1)).contains(path.get(i)))
+//				return false;
 			
 		return true;
 	}

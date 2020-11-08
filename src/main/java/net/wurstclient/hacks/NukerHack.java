@@ -21,14 +21,24 @@ import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FallingBlock;
+import net.minecraft.block.Material;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.EmptyBlockView;
 import net.wurstclient.Category;
 import net.wurstclient.events.LeftClickListener;
 import net.wurstclient.events.RenderListener;
@@ -44,6 +54,7 @@ import net.wurstclient.util.BlockBreaker;
 import net.wurstclient.util.BlockUtils;
 import net.wurstclient.util.RenderUtils;
 import net.wurstclient.util.RotationUtils;
+import net.wurstclient.util.RotationUtils.Rotation;
 
 public final class NukerHack extends Hack
 	implements UpdateListener, LeftClickListener, RenderListener
@@ -156,16 +167,14 @@ public final class NukerHack extends Hack
 		
 		ArrayList<BlockPos> blocks = BlockUtils.getAllInBox(min, max);
 		Stream<BlockPos> stream = blocks.parallelStream();
-		
 		List<BlockPos> blocks2 = stream
 			.filter(pos -> eyesPos.squaredDistanceTo(Vec3d.of(pos)) <= rangeSq)
-			.filter(pos -> BlockUtils.canBeClicked(pos))
+			.filter(pos -> (BlockUtils.canBeClicked(pos) || (mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava"))))
 			.filter(mode.getSelected().getValidator(this))
 			.sorted(Comparator.comparingDouble(
 				pos -> eyesPos.squaredDistanceTo(Vec3d.of(pos))))
 			.collect(Collectors.toList());
-		
-		if(player.abilities.creativeMode)
+		if(player.abilities.creativeMode && !(mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")))
 		{
 			Stream<BlockPos> stream2 = blocks2.parallelStream();
 			for(Set<BlockPos> set : prevBlocks)
@@ -186,12 +195,19 @@ public final class NukerHack extends Hack
 			return;
 		}
 		
-		for(BlockPos pos : blocks2)
-			if(BlockBreaker.breakOneBlock(pos))
+		for(BlockPos pos : blocks2) {
+			if (mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")) {
+				placeBlockFromHotbar(pos);
+				return;
+			} else if(BlockBreaker.breakOneBlock(pos))
 			{
 				currentBlock = pos;
 				break;
 			}
+		}
+		if (mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")){
+			return;
+		}
 		
 		if(currentBlock == null)
 			MC.interactionManager.cancelBlockBreaking();
@@ -209,6 +225,90 @@ public final class NukerHack extends Hack
 			progress = 1;
 			prevProgress = 1;
 		}
+	}
+	
+	private void placeBlockFromHotbar(BlockPos pos) {
+		// search blocks in hotbar
+		int newSlot = -1;
+		for (int i = 0; i < 9; i++) {
+			// filter out non-block items
+			ItemStack stack = MC.player.inventory.getStack(i);
+			if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
+			
+			
+			
+			// filter out non-solid blocks
+			Block block = Block.getBlockFromItem(stack.getItem());
+			
+			BlockState state = block.getDefaultState();
+			
+			if (state.getMaterial().equals(Material.SHULKER_BOX)) {
+				continue;
+			}
+			
+			if (!state.isFullCube(EmptyBlockView.INSTANCE, BlockPos.ORIGIN)) continue;
+			
+			// filter out blocks that would fall
+			if (block instanceof FallingBlock) continue;
+			
+			newSlot = i;
+			break;
+		}
+		
+		// check if any blocks were found
+		if (newSlot == -1) return;
+		
+		// set slot
+		int oldSlot = MC.player.inventory.selectedSlot;
+		MC.player.inventory.selectedSlot = newSlot;
+		placeBlock(pos);
+		
+		// reset slot
+		MC.player.inventory.selectedSlot = oldSlot;
+	}
+	
+	private boolean placeBlock(BlockPos pos)
+	{
+		Vec3d eyesPos = new Vec3d(MC.player.getX(),
+			MC.player.getY() + MC.player.getEyeHeight(MC.player.getPose()),
+			MC.player.getZ());
+		
+		for(Direction side : Direction.values())
+		{
+			BlockPos neighbor = pos.offset(side);
+			Direction side2 = side.getOpposite();
+			
+			// check if side is visible (facing away from player)
+			if(eyesPos.squaredDistanceTo(Vec3d.ofCenter(pos)) >= eyesPos
+				.squaredDistanceTo(Vec3d.ofCenter(neighbor)))
+				continue;
+			
+			// check if neighbor can be right clicked
+			if(!BlockUtils.canBeClicked(neighbor))
+				continue;
+			
+			Vec3d hitVec = Vec3d.ofCenter(neighbor)
+				.add(Vec3d.of(side2.getVector()).multiply(0.5));
+			
+			// check if hitVec is within range (4.25 blocks)
+			if(eyesPos.squaredDistanceTo(hitVec) > 18.0625)
+				continue;
+			
+			// place block
+			Rotation rotation = RotationUtils.getNeededRotations(hitVec);
+			PlayerMoveC2SPacket.LookOnly packet =
+				new PlayerMoveC2SPacket.LookOnly(rotation.getYaw(),
+					rotation.getPitch(), MC.player.isOnGround());
+			MC.player.networkHandler.sendPacket(packet);
+			IMC.getInteractionManager().rightClickBlock(neighbor, side2,
+				hitVec);
+			MC.player.swingHand(Hand.MAIN_HAND);
+			IMC.setItemUseCooldown(4);
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override

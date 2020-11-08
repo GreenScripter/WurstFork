@@ -24,6 +24,7 @@ import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
@@ -125,6 +126,8 @@ public final class KillauraHack extends Hack
 		"Filter armor stands", "Won't attack armor stands.", false);
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
 		"Filter end crystals", "Won't attack end crystals.", false);
+	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
+			"Filter villager zombies", "Won't attack villager zombies.", false);
 	
 	private Entity target;
 	private Entity renderTarget;
@@ -150,6 +153,7 @@ public final class KillauraHack extends Hack
 		addSetting(filterNamed);
 		addSetting(filterStands);
 		addSetting(filterCrystals);
+		addSetting(filterVillageZombies);
 	}
 	
 	@Override
@@ -261,6 +265,9 @@ public final class KillauraHack extends Hack
 		
 		if(filterCrystals.isChecked())
 			stream = stream.filter(e -> !(e instanceof EndCrystalEntity));
+		
+		if(filterVillageZombies.isChecked())
+			stream = stream.filter(e -> !(e instanceof ZombieVillagerEntity));
 		
 		target = stream.min(priority.getSelected().comparator).orElse(null);
 		renderTarget = target;

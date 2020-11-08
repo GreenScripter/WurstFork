@@ -10,11 +10,13 @@ package net.wurstclient.hacks;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -77,6 +79,7 @@ public final class AutoBuildHack extends Hack
 	private Status status = Status.NO_TEMPLATE;
 	private AutoBuildTemplate template;
 	private LinkedHashSet<BlockPos> remainingBlocks = new LinkedHashSet<>();
+	private LinkedHashMap<BlockPos, Long> doubleCheck = new LinkedHashMap<>();
 	
 	public AutoBuildHack()
 	{
@@ -193,7 +196,7 @@ public final class AutoBuildHack extends Hack
 	{
 		updateRemainingBlocks();
 		
-		if(remainingBlocks.isEmpty())
+		if(remainingBlocks.isEmpty() && doubleCheck.isEmpty())
 		{
 			status = Status.IDLE;
 			return;
@@ -212,8 +215,24 @@ public final class AutoBuildHack extends Hack
 			BlockPos pos = itr.next();
 			BlockState state = BlockUtils.getState(pos);
 			
-			if(!state.getMaterial().isReplaceable())
+			if(!state.getMaterial().isReplaceable()){
 				itr.remove();
+				doubleCheck.put(pos, System.currentTimeMillis()+1000);
+			}
+		}
+		for(Iterator<BlockPos> itr = doubleCheck.keySet().iterator(); itr.hasNext();)
+		{
+			BlockPos pos = itr.next();
+			BlockState state = BlockUtils.getState(pos);
+			
+			if(state.getMaterial().isReplaceable()){
+				remainingBlocks.add(pos);
+				itr.remove();
+			} else {
+				if (doubleCheck.get(pos)<System.currentTimeMillis()) {
+					itr.remove();
+				}
+			}
 		}
 	}
 	
@@ -272,6 +291,10 @@ public final class AutoBuildHack extends Hack
 				side.getOpposite(), hitVec);
 			MC.player.swingHand(Hand.MAIN_HAND);
 			IMC.setItemUseCooldown(4);
+//			if (MC.player.inventory.getMainHandStack().getItem() instanceof BlockItem && !MC.player.abilities.creativeMode) {
+//				int amount = MC.player.inventory.getMainHandStack().getCount();
+//				MC.player.inventory.getMainHandStack().setCount(Math.max(0, amount - 1));
+//			}
 			return true;
 		}
 		
@@ -362,7 +385,7 @@ public final class AutoBuildHack extends Hack
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glColor4f(0F, 0F, 0F, 0.5F);
+		GL11.glColor4f(0F, 1F, 1F, 0.5F);
 		
 		GL11.glPushMatrix();
 		RenderUtils.applyRenderOffset();
@@ -391,6 +414,25 @@ public final class AutoBuildHack extends Hack
 			blocksDrawn++;
 		}
 		
+		for(Iterator<BlockPos> itr = doubleCheck.keySet().iterator(); itr.hasNext()
+				&& blocksDrawn < 1024;)
+			{
+				BlockPos pos = itr.next();
+				if(!BlockUtils.getState(pos).getMaterial().isReplaceable())
+					continue;
+				
+				GL11.glPushMatrix();
+				GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+				GL11.glTranslated(offset, offset, offset);
+				GL11.glScaled(scale, scale, scale);
+				
+				
+				drawYellowBox();
+				
+				GL11.glPopMatrix();
+				blocksDrawn++;
+			}
+		
 		GL11.glPopMatrix();
 		
 		// GL resets
@@ -407,7 +449,18 @@ public final class AutoBuildHack extends Hack
 		RenderUtils.drawSolidBox();
 		GL11.glDepthMask(true);
 		
-		GL11.glColor4f(0F, 0F, 0F, 0.5F);
+		GL11.glColor4f(0F, 1F, 1F, 0.5F);
+		RenderUtils.drawOutlinedBox();
+	}
+	
+	private void drawYellowBox()
+	{
+		GL11.glDepthMask(false);
+		GL11.glColor4f(1F, 1F, 0F, 0.15F);
+		RenderUtils.drawSolidBox();
+		GL11.glDepthMask(true);
+		
+		GL11.glColor4f(0F, 1F, 1F, 0.5F);
 		RenderUtils.drawOutlinedBox();
 	}
 	

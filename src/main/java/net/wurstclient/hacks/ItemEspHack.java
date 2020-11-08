@@ -72,7 +72,7 @@ public final class ItemEspHack extends Hack implements UpdateListener,
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glColor4f(1, 1, 0, 0.5F);
+		GL11.glColor4f(0, 0.5F, 1, 0.5F);
 		RenderUtils.drawOutlinedBox(new Box(-0.5, 0, -0.5, 0.5, 1, 0.5));
 		GL11.glEndList();
 	}

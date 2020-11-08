@@ -50,6 +50,13 @@ public enum ChatUtils
 		component(new LiteralText(message));
 	}
 	
+	public static void rawMessage(String message)
+	{
+		ChatHud chatHud = MC.inGameHud.getChatHud();
+		chatHud.addMessage(new LiteralText(message));
+
+	}
+	
 	public static void warning(String message)
 	{
 		message(WARNING_PREFIX + message);

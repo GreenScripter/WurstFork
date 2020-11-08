@@ -24,6 +24,8 @@ public final class CmdList
 	public final BindsCmd bindsCmd = new BindsCmd();
 	public final BlinkCmd blinkCmd = new BlinkCmd();
 	public final ClearCmd clearCmd = new ClearCmd();
+	public final ConnectCmd connectCmd = new ConnectCmd();
+	public final SwapChatCmd swapChatCmd = new SwapChatCmd();
 	public final CopyItemCmd copyitemCmd = new CopyItemCmd();
 	public final DamageCmd damageCmd = new DamageCmd();
 	public final DigCmd digCmd = new DigCmd();
@@ -31,6 +33,7 @@ public final class CmdList
 	public final EnabledHaxCmd enabledHaxCmd = new EnabledHaxCmd();
 	public final EnchantCmd enchantCmd = new EnchantCmd();
 	public final ExcavateCmd excavateCmd = new ExcavateCmd();
+	public final BoxNukerCmd boxNukerCmd = new BoxNukerCmd();
 	public final FeaturesCmd featuresCmd = new FeaturesCmd();
 	public final FollowCmd followCmd = new FollowCmd();
 	public final FriendsCmd friendsCmd = new FriendsCmd();

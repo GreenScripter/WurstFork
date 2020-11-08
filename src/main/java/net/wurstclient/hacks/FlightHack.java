@@ -22,7 +22,7 @@ public final class FlightHack extends Hack
 	implements UpdateListener, IsPlayerInWaterListener
 {
 	public final SliderSetting speed =
-		new SliderSetting("Speed", 1, 0.05, 5, 0.05, ValueDisplay.DECIMAL);
+		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
 	
 	public FlightHack()
 	{

@@ -1,23 +1,34 @@
 /*
- * Copyright (C) 2014 - 2020 | Alexander01998 | All rights reserved.
- *
- * This source code is subject to the terms of the GNU General Public
- * License, version 3. If a copy of the GPL was not distributed with this
- * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
+ * Copyright (C) 2014 - 2020 | Alexander01998 | All rights reserved. This source code is subject to
+ * the terms of the GNU General Public License, version 3. If a copy of the GPL was not distributed
+ * with this file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
  */
 package net.wurstclient.hacks;
+
+import java.lang.reflect.Field;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.options.Perspective;
+import net.minecraft.client.render.Camera;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
-import net.wurstclient.events.*;
+import net.wurstclient.WurstClient;
+import net.wurstclient.events.CameraTransformViewBobbingListener;
+import net.wurstclient.events.IsNormalCubeListener;
+import net.wurstclient.events.IsPlayerInWaterListener;
+import net.wurstclient.events.PacketOutputListener;
+import net.wurstclient.events.PlayerMoveListener;
+import net.wurstclient.events.RenderListener;
+import net.wurstclient.events.SetOpaqueCubeListener;
+import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.DontSaveState;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.mixinterface.IClientPlayerEntity;
@@ -30,32 +41,28 @@ import net.wurstclient.util.RenderUtils;
 import net.wurstclient.util.RotationUtils;
 
 @DontSaveState
-@SearchTags({"free camera", "spectator"})
-public final class FreecamHack extends Hack
-	implements UpdateListener, PacketOutputListener, PlayerMoveListener,
-	IsPlayerInWaterListener, CameraTransformViewBobbingListener,
-	IsNormalCubeListener, SetOpaqueCubeListener, RenderListener
-{
-	private final SliderSetting speed =
-		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
-	private final CheckboxSetting tracer = new CheckboxSetting("Tracer",
-		"Draws a line to your character's actual position.", false);
+@SearchTags({ "free camera", "spectator" })
+public final class FreecamHack extends Hack implements UpdateListener, PacketOutputListener, PlayerMoveListener, IsPlayerInWaterListener, CameraTransformViewBobbingListener, IsNormalCubeListener, SetOpaqueCubeListener, RenderListener {
+	
+	private final SliderSetting speed = new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
+	private final CheckboxSetting tracer = new CheckboxSetting("Tracer", "Draws a line to your character's actual position.", false);
 	
 	private FakePlayerEntity fakePlayer;
 	private int playerBox;
 	
-	public FreecamHack()
-	{
-		super("Freecam",
-			"Allows you to move the camera without moving your character.");
+	public static Vec3d offset;
+	public static Vec3d lastOffset;
+	public static float partialTicks;
+	private Perspective start;
+	public FreecamHack() {
+		super("Freecam", "Allows you to move the camera without moving your character.");
 		setCategory(Category.RENDER);
 		addSetting(speed);
 		addSetting(tracer);
 	}
 	
 	@Override
-	public void onEnable()
-	{
+	public void onEnable() {
 		EVENTS.add(UpdateListener.class, this);
 		EVENTS.add(PacketOutputListener.class, this);
 		EVENTS.add(IsPlayerInWaterListener.class, this);
@@ -64,26 +71,40 @@ public final class FreecamHack extends Hack
 		EVENTS.add(IsNormalCubeListener.class, this);
 		EVENTS.add(SetOpaqueCubeListener.class, this);
 		EVENTS.add(RenderListener.class, this);
-		
-		fakePlayer = new FakePlayerEntity();
+		offset = Vec3d.ZERO;
+//		fakePlayer = new FakePlayerEntity();
+//		fakePlayerDisplay = new FakePlayerEntity();
+//		fakePlayer.setPos(MC.player.getX(), MC.player.getY(), MC.player.getZ());
+//		fakePlayer.setGameMode(GameMode.SPECTATOR);
+		MC.chunkCullingEnabled = false;
+		start = MC.options.getPerspective();
+		MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
 		
 		GameOptions gs = MC.options;
-		KeyBinding[] bindings = {gs.keyForward, gs.keyBack, gs.keyLeft,
-			gs.keyRight, gs.keyJump, gs.keySneak};
+		KeyBinding[] bindings = { gs.keyForward, gs.keyBack, gs.keyLeft, gs.keyRight, gs.keyJump, gs.keySneak };
 		
-		for(KeyBinding binding : bindings)
-			binding.setPressed(((IKeyBinding)binding).isActallyPressed());
+		for (KeyBinding binding : bindings)
+			binding.setPressed(((IKeyBinding) binding).isActallyPressed());
 		
 		playerBox = GL11.glGenLists(1);
 		GL11.glNewList(playerBox, GL11.GL_COMPILE);
 		Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
 		RenderUtils.drawOutlinedBox(bb);
 		GL11.glEndList();
+//		MC.setCameraEntity(fakePlayer);
+		try {
+			Field f = Camera.class.getDeclaredField("pos");
+			f.setAccessible(true);
+			Camera c = MC.gameRenderer.getCamera();
+			f.set(c, c.getPos().add(0, 100, 0));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	@Override
-	public void onDisable()
-	{
+	public void onDisable() {
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(PacketOutputListener.class, this);
 		EVENTS.remove(IsPlayerInWaterListener.class, this);
@@ -92,80 +113,126 @@ public final class FreecamHack extends Hack
 		EVENTS.remove(IsNormalCubeListener.class, this);
 		EVENTS.remove(SetOpaqueCubeListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
-		
-		fakePlayer.resetPlayerPosition();
-		fakePlayer.despawn();
+		MC.options.method_31043(start);
+
+		offset = null;
+//		fakePlayer.resetPlayerPosition();
+//		fakePlayer.despawn();
+//		fakePlayerDisplay.despawn();
+//		MC.setCameraEntity(MC.player);
 		
 		ClientPlayerEntity player = MC.player;
 		player.setVelocity(Vec3d.ZERO);
 		
 		MC.worldRenderer.reload();
+		MC.chunkCullingEnabled = true;
 		
 		GL11.glDeleteLists(playerBox, 1);
 		playerBox = 0;
 	}
 	
 	@Override
-	public void onUpdate()
-	{
-		ClientPlayerEntity player = MC.player;
-		player.setVelocity(Vec3d.ZERO);
+	public void onUpdate() {
 		
-		player.setOnGround(false);
-		player.flyingSpeed = speed.getValueF();
-		Vec3d velcity = player.getVelocity();
+		//		ClientPlayerEntity player = MC.player;
+		//		player.setVelocity(Vec3d.ZERO);
 		
-		if(MC.options.keyJump.isPressed())
-			player.setVelocity(velcity.add(0, speed.getValue(), 0));
+		//		player.setOnGround(false);
+		//		player.flyingSpeed = speed.getValueF();
+		//		Vec3d velcity = fakePlayer.getVelocity();
+		Vec3d pos = offset;
+//		Vec3d eyePos = fakePlayer.getPos();
+//		eyePos = new Vec3d(eyePos.x, fakePlayer.getEyeY(), eyePos.z);
+//		//		if (Math.abs(RotationUtils.getClientLookVec().normalize().y) != 1) fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, eyePos.add(RotationUtils.getClientLookVec()));
+//		fakePlayer.setYaw(MC.player.yaw);
+//		fakePlayer.setHeadYaw(MC.player.headYaw);
+//		fakePlayer.pitch = MC.player.pitch;
+//		
+//		if (MC.player.getHealth() < fakePlayer.getHealth()) {
+//			fakePlayer.animateDamage();
+//		}
+//		fakePlayer.setHealth(MC.player.getHealth());
+//		fakePlayer.setAir(MC.player.getAir());
+//		fakePlayer.getHungerManager().setFoodLevel(MC.player.getHungerManager().getFoodLevel());
+		//		
 		
-		if(MC.options.keySneak.isPressed())
-			player.setVelocity(velcity.subtract(0, speed.getValue(), 0));
+		if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)){
+			MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+		}
+		lastOffset = offset;
+		MC.options.keyJump.setPressed(((IKeyBinding) MC.options.keyJump).isActallyPressed());
+		if (MC.options.keyJump.isPressed()) {
+			offset = new Vec3d(pos.x, pos.y + 1, pos.z);
+			MC.options.keyJump.setPressed(false);
+			
+		}
+		MC.options.keySneak.setPressed(((IKeyBinding) MC.options.keySneak).isActallyPressed());
+		if (MC.options.keySneak.isPressed()) {
+			offset = new Vec3d(pos.x, pos.y - 1, pos.z);
+			MC.options.keySneak.setPressed(false);
+			
+		}
+		Vec3d look = RotationUtils.getClientLookVec();
+		look = new Vec3d(look.x, 0, look.z).normalize();
+		MC.options.keyForward.setPressed(((IKeyBinding) MC.options.keyForward).isActallyPressed());
+		if (MC.options.keyForward.isPressed()) {
+			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
+			MC.options.keyForward.setPressed(false);
+		}
+		MC.options.keyBack.setPressed(((IKeyBinding) MC.options.keyBack).isActallyPressed());
+		if (MC.options.keyBack.isPressed()) {
+			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
+			MC.options.keyBack.setPressed(false);
+		}
+		look = look.crossProduct(new Vec3d(0, 1, 0));
+		MC.options.keyLeft.setPressed(((IKeyBinding) MC.options.keyLeft).isActallyPressed());
+		if (MC.options.keyLeft.isPressed()) {
+			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
+			MC.options.keyLeft.setPressed(false);
+		}
+		MC.options.keyRight.setPressed(((IKeyBinding) MC.options.keyRight).isActallyPressed());
+		if (MC.options.keyRight.isPressed()) {
+			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
+			MC.options.keyRight.setPressed(false);
+		}
+		WurstClient.MC.player.setSprinting(false);
+		
 	}
 	
 	@Override
-	public void onSentPacket(PacketOutputEvent event)
-	{
-		if(event.getPacket() instanceof PlayerMoveC2SPacket)
-			event.cancel();
+	public void onSentPacket(PacketOutputEvent event) {
+		if (event.getPacket() instanceof PlayerMoveC2SPacket) event.cancel();
 	}
 	
 	@Override
-	public void onPlayerMove(IClientPlayerEntity player)
-	{
-		player.setNoClip(true);
+	public void onPlayerMove(IClientPlayerEntity player) {
+		//		player.setNoClip(true);
 	}
 	
 	@Override
-	public void onIsPlayerInWater(IsPlayerInWaterEvent event)
-	{
-		event.setInWater(false);
+	public void onIsPlayerInWater(IsPlayerInWaterEvent event) {
+		//		event.setInWater(false);
 	}
 	
 	@Override
-	public void onCameraTransformViewBobbing(
-		CameraTransformViewBobbingEvent event)
-	{
-		if(tracer.isChecked())
-			event.cancel();
+	public void onCameraTransformViewBobbing(CameraTransformViewBobbingEvent event) {
+		if (tracer.isChecked()) event.cancel();
 	}
 	
 	@Override
-	public void onIsNormalCube(IsNormalCubeEvent event)
-	{
+	public void onIsNormalCube(IsNormalCubeEvent event) {
 		event.cancel();
 	}
 	
 	@Override
-	public void onSetOpaqueCube(SetOpaqueCubeEvent event)
-	{
+	public void onSetOpaqueCube(SetOpaqueCubeEvent event) {
 		event.cancel();
 	}
 	
 	@Override
-	public void onRender(float partialTicks)
-	{
-		if(fakePlayer == null || !tracer.isChecked())
-			return;
+	public void onRender(float partialTicks) {
+		FreecamHack.partialTicks = partialTicks;
+		if (fakePlayer == null || !tracer.isChecked()) return;
 		
 		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
@@ -183,16 +250,13 @@ public final class FreecamHack extends Hack
 		
 		// box
 		GL11.glPushMatrix();
-		GL11.glTranslated(fakePlayer.getX(), fakePlayer.getY(),
-			fakePlayer.getZ());
-		GL11.glScaled(fakePlayer.getWidth() + 0.1, fakePlayer.getHeight() + 0.1,
-			fakePlayer.getWidth() + 0.1);
+		GL11.glTranslated(fakePlayer.getX(), fakePlayer.getY(), fakePlayer.getZ());
+		GL11.glScaled(fakePlayer.getWidth() + 0.1, fakePlayer.getHeight() + 0.1, fakePlayer.getWidth() + 0.1);
 		GL11.glCallList(playerBox);
 		GL11.glPopMatrix();
 		
 		// line
-		Vec3d start =
-			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
+		Vec3d start = RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
 		Vec3d end = fakePlayer.getBoundingBox().getCenter();
 		
 		GL11.glBegin(GL11.GL_LINES);

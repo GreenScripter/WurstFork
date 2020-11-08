@@ -1,0 +1,58 @@
+/*
+ * Copyright (C) 2014 - 2020 | Alexander01998 | All rights reserved.
+ *
+ * This source code is subject to the terms of the GNU General Public
+ * License, version 3. If a copy of the GPL was not distributed with this
+ * file, You can obtain one at: https://www.gnu.org/licenses/gpl-3.0.txt
+ */
+package net.wurstclient.commands;
+
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.wurstclient.command.CmdException;
+import net.wurstclient.command.CmdSyntaxError;
+import net.wurstclient.command.Command;
+import net.wurstclient.hacks.SpeedNukerHack;
+import net.wurstclient.util.MathUtils;
+
+public final class BoxNukerCmd extends Command
+{
+	public BoxNukerCmd()
+	{
+		super("boxnuker",
+			"Select a range to break with box nuker.",
+			".boxnuker <x1> <y1> <z1> <x2> <y2> <z2>");
+	}
+	
+	@Override
+	public void call(String[] args) throws CmdException
+	{
+		if(args.length != 6)
+			throw new CmdSyntaxError();
+		
+		BlockPos pos1 = argsToXyzPos(args[0], args[1], args[2]);
+		BlockPos pos2 = argsToXyzPos(args[3], args[4], args[5]);
+		SpeedNukerHack.box = new Box(pos1, pos2);
+	}
+	
+	private BlockPos argsToXyzPos(String... xyz) throws CmdSyntaxError
+	{
+		BlockPos playerPos = new BlockPos(MC.player.getPos());
+		int[] player =
+			new int[]{playerPos.getX(), playerPos.getY(), playerPos.getZ()};
+		int[] pos = new int[3];
+		
+		for(int i = 0; i < 3; i++)
+			if(MathUtils.isInteger(xyz[i]))
+				pos[i] = Integer.parseInt(xyz[i]);
+			else if(xyz[i].equals("~"))
+				pos[i] = player[i];
+			else if(xyz[i].startsWith("~")
+				&& MathUtils.isInteger(xyz[i].substring(1)))
+				pos[i] = player[i] + Integer.parseInt(xyz[i].substring(1));
+			else
+				throw new CmdSyntaxError("Invalid coordinates.");
+			
+		return new BlockPos(pos[0], pos[1], pos[2]);
+	}
+}

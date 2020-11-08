@@ -15,6 +15,8 @@ import java.util.stream.StreamSupport;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.raid.RaiderEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
@@ -143,6 +145,23 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		
 		for(MobEntity e : mobs)
 		{
+//			if (e instanceof RaiderEntity){
+//				if (((RaiderEntity)e).getRaid() != null) {
+//					BlockPos pos = ((RaiderEntity)e).getRaid().getCenter();
+//					GL11.glBegin(GL11.GL_LINES);
+//						Vec3d end = e.getBoundingBox().getCenter()
+//							.subtract(new Vec3d(e.getX(), e.getY(), e.getZ())
+//								.subtract(e.prevX, e.prevY, e.prevZ)
+//								.multiply(1 - partialTicks));
+//						
+//						GL11.glColor4f(1f, 1f, 1f, 0.25F);
+//						
+//						GL11.glVertex3d(pos.getX(), pos.getY(), pos.getZ());
+//						GL11.glVertex3d(end.x, end.y, end.z);
+//					GL11.glEnd();
+//					
+//				}
+//			}
 			GL11.glPushMatrix();
 			
 			GL11.glTranslated(e.prevX + (e.getX() - e.prevX) * partialTicks,
@@ -153,12 +172,17 @@ public final class MobEspHack extends Hack implements UpdateListener,
 				e.getWidth() + extraSize);
 			
 			float f = MC.player.distanceTo(e) / 20F;
-			GL11.glColor4f(2 - f, f, 0, 0.5F);
-			
+			if (e instanceof RaiderEntity){
+
+			GL11.glColor4f(1f, 0f, 1f, 0.25F);
+			} else {
+				GL11.glColor4f(2 - f, f, 0, 0.25F);
+			}
 			GL11.glCallList(mobBox);
 			
 			GL11.glPopMatrix();
 		}
+		
 	}
 	
 	private void renderTracers(double partialTicks)

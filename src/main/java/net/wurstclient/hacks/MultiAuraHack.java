@@ -22,6 +22,7 @@ import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.mob.WaterCreatureEntity;
+import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
@@ -105,7 +106,8 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		"Filter armor stands", "Won't attack armor stands.", false);
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
 		"Filter end crystals", "Won't attack end crystals.", false);
-	
+	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
+			"Filter villager zombies", "Won't attack villager zombies.", false);
 	private int timer;
 	
 	public MultiAuraHack()
@@ -133,6 +135,7 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		addSetting(filterNamed);
 		addSetting(filterStands);
 		addSetting(filterCrystals);
+		addSetting(filterVillageZombies);
 	}
 	
 	@Override
@@ -244,6 +247,9 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		
 		if(filterCrystals.isChecked())
 			stream = stream.filter(e -> !(e instanceof EndCrystalEntity));
+		
+		if(filterVillageZombies.isChecked())
+			stream = stream.filter(e -> !(e instanceof ZombieVillagerEntity));
 		
 		ArrayList<Entity> entities =
 			stream.collect(Collectors.toCollection(() -> new ArrayList<>()));

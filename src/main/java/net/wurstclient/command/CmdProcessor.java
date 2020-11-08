@@ -13,6 +13,7 @@ import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.wurstclient.WurstClient;
+import net.wurstclient.commands.ConnectCmd;
 import net.wurstclient.events.ChatOutputListener;
 import net.wurstclient.hacks.TooManyHaxHack;
 import net.wurstclient.util.ChatUtils;
@@ -33,6 +34,14 @@ public final class CmdProcessor implements ChatOutputListener
 			return;
 		
 		String message = event.getOriginalMessage().trim();
+		
+		if(!message.startsWith("/") && !message.startsWith(".") && ConnectCmd.active) {
+			ConnectCmd.message(message);
+			event.cancel();
+			return;
+		}
+
+		
 		if(!message.startsWith("."))
 			return;
 		

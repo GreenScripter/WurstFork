@@ -13,6 +13,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.wurstclient.WurstClient;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity
