@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.render.Camera;
@@ -48,10 +49,13 @@ public abstract class CameraMixin
 			cir.setReturnValue(Fluids.EMPTY.getDefaultState());
 	}
 	
-	public Vec3d getPos() {
-		if (FreecamHack.offset != null && FreecamHack.lastOffset != null) {
-			return pos.add(MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z));
+	@Inject(at = {@At("HEAD")},
+			method = {"getPos()Lnet/minecraft/util/math/Vec3d;"},
+			cancellable = true)
+	public void getPos(CallbackInfoReturnable<Vec3d> cir) {
+		if (FreecamHack.offset != null && FreecamHack.lastOffset != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
+			cir.setReturnValue(pos.add(FreecamHack.offset));
 		}
-		return pos;
+		//cir.setReturnValue(pos.add(0, 10, 0));
 	}
 }

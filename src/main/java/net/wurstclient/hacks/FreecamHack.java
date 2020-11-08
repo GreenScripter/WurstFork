@@ -160,38 +160,32 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 			MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
 		}
 		lastOffset = offset;
-		MC.options.keyJump.setPressed(((IKeyBinding) MC.options.keyJump).isActallyPressed());
-		if (MC.options.keyJump.isPressed()) {
+		if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
 			offset = new Vec3d(pos.x, pos.y + 1, pos.z);
 			MC.options.keyJump.setPressed(false);
 			
 		}
-		MC.options.keySneak.setPressed(((IKeyBinding) MC.options.keySneak).isActallyPressed());
-		if (MC.options.keySneak.isPressed()) {
+		if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
 			offset = new Vec3d(pos.x, pos.y - 1, pos.z);
 			MC.options.keySneak.setPressed(false);
 			
 		}
 		Vec3d look = RotationUtils.getClientLookVec();
 		look = new Vec3d(look.x, 0, look.z).normalize();
-		MC.options.keyForward.setPressed(((IKeyBinding) MC.options.keyForward).isActallyPressed());
-		if (MC.options.keyForward.isPressed()) {
+		if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
 			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
 			MC.options.keyForward.setPressed(false);
 		}
-		MC.options.keyBack.setPressed(((IKeyBinding) MC.options.keyBack).isActallyPressed());
-		if (MC.options.keyBack.isPressed()) {
+		if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
 			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
 			MC.options.keyBack.setPressed(false);
 		}
 		look = look.crossProduct(new Vec3d(0, 1, 0));
-		MC.options.keyLeft.setPressed(((IKeyBinding) MC.options.keyLeft).isActallyPressed());
-		if (MC.options.keyLeft.isPressed()) {
+		if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
 			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
 			MC.options.keyLeft.setPressed(false);
 		}
-		MC.options.keyRight.setPressed(((IKeyBinding) MC.options.keyRight).isActallyPressed());
-		if (MC.options.keyRight.isPressed()) {
+		if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
 			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
 			MC.options.keyRight.setPressed(false);
 		}
