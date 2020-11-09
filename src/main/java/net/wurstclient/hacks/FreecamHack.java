@@ -120,11 +120,11 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 //		fakePlayerDisplay.despawn();
 //		MC.setCameraEntity(MC.player);
 		
-		ClientPlayerEntity player = MC.player;
-		player.setVelocity(Vec3d.ZERO);
-		
-		MC.worldRenderer.reload();
+//		ClientPlayerEntity player = MC.player;
+//		player.setVelocity(Vec3d.ZERO);
 		MC.chunkCullingEnabled = true;
+
+		MC.worldRenderer.reload();
 		
 		GL11.glDeleteLists(playerBox, 1);
 		playerBox = 0;
@@ -139,7 +139,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		//		player.setOnGround(false);
 		//		player.flyingSpeed = speed.getValueF();
 		//		Vec3d velcity = fakePlayer.getVelocity();
-		Vec3d pos = offset;
+//		Vec3d pos = offset;
 //		Vec3d eyePos = fakePlayer.getPos();
 //		eyePos = new Vec3d(eyePos.x, fakePlayer.getEyeY(), eyePos.z);
 //		//		if (Math.abs(RotationUtils.getClientLookVec().normalize().y) != 1) fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, eyePos.add(RotationUtils.getClientLookVec()));
@@ -160,32 +160,32 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		}
 		lastOffset = offset;
 		if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
-			offset = new Vec3d(pos.x, pos.y + 1, pos.z);
+			offset = new Vec3d(offset.x, offset.y + speed.getValue(), offset.z);
 			MC.options.keyJump.setPressed(false);
 			
 		}
 		if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
-			offset = new Vec3d(pos.x, pos.y - 1, pos.z);
+			offset = new Vec3d(offset.x, offset.y - speed.getValue(), offset.z);
 			MC.options.keySneak.setPressed(false);
 			
 		}
 		Vec3d look = RotationUtils.getClientLookVec();
-		look = new Vec3d(look.x, 0, look.z).normalize();
+		look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue());
 		if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
-			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
+			offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
 			MC.options.keyForward.setPressed(false);
 		}
 		if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
-			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
+			offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
 			MC.options.keyBack.setPressed(false);
 		}
-		look = look.crossProduct(new Vec3d(0, 1, 0));
+		look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue());
 		if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
-			offset = new Vec3d(pos.x - look.x, pos.y, pos.z - look.z);
+			offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
 			MC.options.keyLeft.setPressed(false);
 		}
 		if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
-			offset = new Vec3d(pos.x + look.x, pos.y, pos.z + look.z);
+			offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
 			MC.options.keyRight.setPressed(false);
 		}
 		WurstClient.MC.player.setSprinting(false);
@@ -194,7 +194,6 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	
 	@Override
 	public void onSentPacket(PacketOutputEvent event) {
-		if (event.getPacket() instanceof PlayerMoveC2SPacket) event.cancel();
 	}
 	
 	@Override
@@ -214,12 +213,10 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	
 	@Override
 	public void onIsNormalCube(IsNormalCubeEvent event) {
-		event.cancel();
 	}
 	
 	@Override
 	public void onSetOpaqueCube(SetOpaqueCubeEvent event) {
-		event.cancel();
 	}
 	
 	@Override
