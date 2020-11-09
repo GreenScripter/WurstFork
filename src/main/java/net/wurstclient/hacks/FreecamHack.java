@@ -36,7 +36,6 @@ import net.wurstclient.mixinterface.IKeyBinding;
 import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
-import net.wurstclient.util.FakePlayerEntity;
 import net.wurstclient.util.RenderUtils;
 import net.wurstclient.util.RotationUtils;
 
@@ -49,7 +48,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	
 	private int playerBox;
 	
-	public static Vec3d offset;
+	public static Vec3d position;
 	public static Vec3d lastOffset;
 	public static float partialTicks;
 	private Perspective start;
@@ -70,7 +69,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		EVENTS.add(IsNormalCubeListener.class, this);
 		EVENTS.add(SetOpaqueCubeListener.class, this);
 		EVENTS.add(RenderListener.class, this);
-		offset = Vec3d.ZERO;
+		position = new Vec3d(MC.player.getPos().x, MC.player.getEyeY(), MC.player.getPos().z);
 //		fakePlayer = new FakePlayerEntity();
 //		fakePlayerDisplay = new FakePlayerEntity();
 //		fakePlayer.setPos(MC.player.getX(), MC.player.getY(), MC.player.getZ());
@@ -114,7 +113,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		EVENTS.remove(RenderListener.class, this);
 		MC.options.method_31043(start);
 
-		offset = null;
+		position = null;
 //		fakePlayer.resetPlayerPosition();
 //		fakePlayer.despawn();
 //		fakePlayerDisplay.despawn();
@@ -158,34 +157,34 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
 				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
 			}
-			lastOffset = offset;
+			lastOffset = position;
 			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
-				offset = new Vec3d(offset.x, offset.y + speed.getValue(), offset.z);
+				position = new Vec3d(position.x, position.y + speed.getValue(), position.z);
 				MC.options.keyJump.setPressed(false);
 				
 			}
 			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
-				offset = new Vec3d(offset.x, offset.y - speed.getValue(), offset.z);
+				position = new Vec3d(position.x, position.y - speed.getValue(), position.z);
 				MC.options.keySneak.setPressed(false);
 				
 			}
 			Vec3d look = RotationUtils.getClientLookVec();
 			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue());
 			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
-				offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
+				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
 				MC.options.keyForward.setPressed(false);
 			}
 			if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
-				offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
+				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
 				MC.options.keyBack.setPressed(false);
 			}
 			look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue());
 			if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
-				offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
+				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
 				MC.options.keyLeft.setPressed(false);
 			}
 			if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
-				offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
+				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
 				MC.options.keyRight.setPressed(false);
 			}
 			WurstClient.MC.player.setSprinting(false);

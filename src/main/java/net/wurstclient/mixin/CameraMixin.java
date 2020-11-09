@@ -11,13 +11,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.render.Camera;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.WurstClient;
 import net.wurstclient.hacks.FreecamHack;
@@ -55,9 +53,8 @@ public abstract class CameraMixin
 			method = {"getPos()Lnet/minecraft/util/math/Vec3d;"},
 			cancellable = true)
 	public void getPos(CallbackInfoReturnable<Vec3d> cir) {
-		if (FreecamHack.offset != null && FreecamHack.lastOffset != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
-			cir.setReturnValue(pos.add(FreecamHack.offset));
+		if (FreecamHack.position != null && FreecamHack.lastOffset != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
+			cir.setReturnValue(FreecamHack.position);
 		}
-		//cir.setReturnValue(pos.add(0, 10, 0));
 	}
 }
