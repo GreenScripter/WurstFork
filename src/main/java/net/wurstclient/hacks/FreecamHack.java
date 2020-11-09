@@ -154,41 +154,42 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 //		fakePlayer.setAir(MC.player.getAir());
 //		fakePlayer.getHungerManager().setFoodLevel(MC.player.getHungerManager().getFoodLevel());
 		//		
-		
-		if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)){
-			MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+		if (MC.currentScreen == null) {
+			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
+				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+			}
+			lastOffset = offset;
+			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
+				offset = new Vec3d(offset.x, offset.y + speed.getValue(), offset.z);
+				MC.options.keyJump.setPressed(false);
+				
+			}
+			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
+				offset = new Vec3d(offset.x, offset.y - speed.getValue(), offset.z);
+				MC.options.keySneak.setPressed(false);
+				
+			}
+			Vec3d look = RotationUtils.getClientLookVec();
+			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue());
+			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
+				offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
+				MC.options.keyForward.setPressed(false);
+			}
+			if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
+				offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
+				MC.options.keyBack.setPressed(false);
+			}
+			look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue());
+			if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
+				offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
+				MC.options.keyLeft.setPressed(false);
+			}
+			if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
+				offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
+				MC.options.keyRight.setPressed(false);
+			}
+			WurstClient.MC.player.setSprinting(false);
 		}
-		lastOffset = offset;
-		if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
-			offset = new Vec3d(offset.x, offset.y + speed.getValue(), offset.z);
-			MC.options.keyJump.setPressed(false);
-			
-		}
-		if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
-			offset = new Vec3d(offset.x, offset.y - speed.getValue(), offset.z);
-			MC.options.keySneak.setPressed(false);
-			
-		}
-		Vec3d look = RotationUtils.getClientLookVec();
-		look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue());
-		if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
-			offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
-			MC.options.keyForward.setPressed(false);
-		}
-		if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
-			offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
-			MC.options.keyBack.setPressed(false);
-		}
-		look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue());
-		if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
-			offset = new Vec3d(offset.x - look.x, offset.y, offset.z - look.z);
-			MC.options.keyLeft.setPressed(false);
-		}
-		if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
-			offset = new Vec3d(offset.x + look.x, offset.y, offset.z + look.z);
-			MC.options.keyRight.setPressed(false);
-		}
-		WurstClient.MC.player.setSprinting(false);
 		
 	}
 	
