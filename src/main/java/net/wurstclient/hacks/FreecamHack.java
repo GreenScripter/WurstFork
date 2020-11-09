@@ -47,7 +47,6 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	private final SliderSetting speed = new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
 	private final CheckboxSetting tracer = new CheckboxSetting("Tracer", "Draws a line to your character's actual position.", false);
 	
-	private FakePlayerEntity fakePlayer;
 	private int playerBox;
 	
 	public static Vec3d offset;
@@ -226,7 +225,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	@Override
 	public void onRender(float partialTicks) {
 		FreecamHack.partialTicks = partialTicks;
-		if (fakePlayer == null || !tracer.isChecked()) return;
+		if (!tracer.isChecked()) return;
 		
 		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
@@ -244,14 +243,14 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		
 		// box
 		GL11.glPushMatrix();
-		GL11.glTranslated(fakePlayer.getX(), fakePlayer.getY(), fakePlayer.getZ());
-		GL11.glScaled(fakePlayer.getWidth() + 0.1, fakePlayer.getHeight() + 0.1, fakePlayer.getWidth() + 0.1);
+		GL11.glTranslated(MC.player.getX(), MC.player.getY(), MC.player.getZ());
+		GL11.glScaled(MC.player.getWidth() + 0.1, MC.player.getHeight() + 0.1, MC.player.getWidth() + 0.1);
 		GL11.glCallList(playerBox);
 		GL11.glPopMatrix();
 		
 		// line
 		Vec3d start = RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
-		Vec3d end = fakePlayer.getBoundingBox().getCenter();
+		Vec3d end = MC.player.getBoundingBox().getCenter();
 		
 		GL11.glBegin(GL11.GL_LINES);
 		GL11.glVertex3d(start.x, start.y, start.z);
