@@ -36,7 +36,9 @@ public abstract class CameraMixin
 	private void onClipToSpace(double desiredCameraDistance,
 		CallbackInfoReturnable<Double> cir)
 	{
-		if(WurstClient.INSTANCE.getHax().cameraNoClipHack.isEnabled() || WurstClient.INSTANCE.getHax().freecamHack.isEnabled())
+		if (WurstClient.INSTANCE.getHax().freecamHack.isEnabled()){
+			cir.setReturnValue(0d);
+		} else if(WurstClient.INSTANCE.getHax().cameraNoClipHack.isEnabled())
 			cir.setReturnValue(desiredCameraDistance);
 	}
 	
@@ -45,7 +47,7 @@ public abstract class CameraMixin
 		cancellable = true)
 	private void getSubmergedFluidState(CallbackInfoReturnable<FluidState> cir)
 	{
-		if(WurstClient.INSTANCE.getHax().noOverlayHack.isEnabled())
+		if(WurstClient.INSTANCE.getHax().noOverlayHack.isEnabled() || WurstClient.INSTANCE.getHax().freecamHack.isEnabled())
 			cir.setReturnValue(Fluids.EMPTY.getDefaultState());
 	}
 	

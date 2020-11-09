@@ -30,3 +30,6 @@ run/
 hs_err_pid*
 
 desktop.ini
+
+# macos x
+**.DS_Store
