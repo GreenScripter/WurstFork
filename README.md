@@ -1,8 +1,10 @@
 # Wurst Client v7
 
 ## Downloads (for users)
-
+Normal Wurst Client:
 https://www.wurstclient.net/download/
+
+Builds for the latest version are created on push and are available in the releases section of this repo.
 
 ## Setup (for developers) (using Windows 10 & Eclipse)
 
