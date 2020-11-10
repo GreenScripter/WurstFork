@@ -14,6 +14,7 @@ import net.wurstclient.SearchTags;
 import net.wurstclient.events.IsPlayerInWaterListener;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
+import net.wurstclient.mixinterface.IKeyBinding;
 import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
@@ -51,6 +52,7 @@ public final class FlightHack extends Hack
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(IsPlayerInWaterListener.class, this);
+		MC.options.keySneak.setPressed(((IKeyBinding) MC.options.keySneak).isActallyPressed());
 	}
 	
 	@Override
@@ -63,14 +65,23 @@ public final class FlightHack extends Hack
 		
 		player.setVelocity(0, 0, 0);
 		Vec3d velocity = player.getVelocity();
-		//Allow shifing in air
-		if (MC.options.keyJump.isPressed() && MC.options.keySneak.isPressed())
-			return;
-		if(MC.options.keyJump.isPressed())
-			player.setVelocity(velocity.add(0, speed.getValue(), 0));
-		
-		if(MC.options.keySneak.isPressed())
-			player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? 3 : speed.getValue()), 0));
+		if (MC.currentScreen == null) {
+			//Allow shifing in air
+			if (MC.options.keyJump.isPressed() && ((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
+				MC.options.keySneak.setPressed(true);
+				return;
+			}
+			if (MC.options.keyJump.isPressed()) {
+				player.setVelocity(velocity.add(0, speed.getValue(), 0));
+				player.flyingSpeed =  (float) Math.min(speed.getValueF(), 10 - player.getVelocity().y);
+			}
+			
+			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()){
+				MC.options.keySneak.setPressed(false);
+				player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? 3 : speed.getValue()), 0));
+				player.flyingSpeed =  (float) Math.min(speed.getValueF(), 10 + player.getVelocity().y);
+			}
+		}
 	}
 	
 	@Override
