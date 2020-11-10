@@ -53,7 +53,7 @@ public abstract class CameraMixin
 			method = {"getPos()Lnet/minecraft/util/math/Vec3d;"},
 			cancellable = true)
 	public void getPos(CallbackInfoReturnable<Vec3d> cir) {
-		if (FreecamHack.position != null && FreecamHack.lastOffset != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
+		if (FreecamHack.position != null && FreecamHack.lastPosition != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
 			cir.setReturnValue(FreecamHack.position);
 		}
 	}

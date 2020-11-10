@@ -9,15 +9,12 @@ import java.lang.reflect.Field;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.options.Perspective;
 import net.minecraft.client.render.Camera;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameMode;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.WurstClient;
@@ -49,7 +46,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	private int playerBox;
 	
 	public static Vec3d position;
-	public static Vec3d lastOffset;
+	public static Vec3d lastPosition;
 	public static float partialTicks;
 	private Perspective start;
 	public FreecamHack() {
@@ -157,7 +154,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
 				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
 			}
-			lastOffset = position;
+			lastPosition = position;
 			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
 				position = new Vec3d(position.x, position.y + speed.getValue(), position.z);
 				MC.options.keyJump.setPressed(false);
@@ -221,6 +218,45 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	
 	@Override
 	public void onRender(float partialTicks) {
+		float passed = partialTicks - FreecamHack.partialTicks;
+		if (FreecamHack.partialTicks > partialTicks) {
+			 passed = (1 + partialTicks) - FreecamHack.partialTicks;
+		}
+		if (MC.currentScreen == null) {
+			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
+				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+			}
+			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
+				position = new Vec3d(position.x, position.y + speed.getValue() * passed, position.z);
+				MC.options.keyJump.setPressed(false);
+				
+			}
+			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
+				position = new Vec3d(position.x, position.y - speed.getValue() * passed, position.z);
+				MC.options.keySneak.setPressed(false);
+				
+			}
+			Vec3d look = RotationUtils.getClientLookVec();
+			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue() * passed);
+			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
+				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
+				MC.options.keyForward.setPressed(false);
+			}
+			if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
+				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
+				MC.options.keyBack.setPressed(false);
+			}
+			look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue() * passed);
+			if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
+				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
+				MC.options.keyLeft.setPressed(false);
+			}
+			if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
+				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
+				MC.options.keyRight.setPressed(false);
+			}
+			WurstClient.MC.player.setSprinting(false);
+		}
 		FreecamHack.partialTicks = partialTicks;
 		if (!tracer.isChecked()) return;
 		
