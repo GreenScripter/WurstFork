@@ -8,6 +8,7 @@
 package net.wurstclient.hacks;
 
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
@@ -26,7 +27,9 @@ public final class FlightHack extends Hack
 	public final SliderSetting speed =
 		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
 	private final CheckboxSetting downLimit = new CheckboxSetting("Limit Downward Speed", "Prevents the player from taking damage when flying down quickly with NoFall on.", false);
+	private final CheckboxSetting arrowFix = new CheckboxSetting("Reposition for Bows", "Modifies the flight pattern slightly so that arrows will shoot correctly.", false);
 
+	private int lastGoingUp = 10;
 	
 	public FlightHack()
 	{
@@ -36,6 +39,7 @@ public final class FlightHack extends Hack
 		setCategory(Category.MOVEMENT);
 		addSetting(speed);
 		addSetting(downLimit);
+		addSetting(arrowFix);
 	}
 	
 	@Override
@@ -76,14 +80,24 @@ public final class FlightHack extends Hack
 				return;
 			}
 			if (MC.options.keyJump.isPressed()) {
+				lastGoingUp = 0;
 				player.setVelocity(velocity.add(0, speed.getValue(), 0));
-				player.flyingSpeed =  (float) Math.min(speed.getValueF(), 10 - player.getVelocity().y);
-			}
-			
-			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()){
+				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 - player.getVelocity().y);
+			} else if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
 				MC.options.keySneak.setPressed(false);
 				player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? 3 : speed.getValue()), 0));
-				player.flyingSpeed =  (float) Math.min(speed.getValueF(), 10 + player.getVelocity().y);
+				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 + player.getVelocity().y);
+			} else {
+				if (arrowFix.isChecked()) {
+					if (lastGoingUp < 3) {
+						lastGoingUp++;
+						player.setVelocity(velocity.add(0, -1, 0));
+					} else {
+						player.setVelocity(velocity.add(0, 0.01, 0));
+						
+					}
+				}
+
 			}
 		}
 	}
