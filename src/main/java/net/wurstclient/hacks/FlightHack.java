@@ -64,6 +64,10 @@ public final class FlightHack extends Hack
 		player.flyingSpeed = speed.getValueF();
 		
 		player.setVelocity(0, 0, 0);
+		if (WURST.getHax().freecamHack.isEnabled()) {
+			//don't move when using freecam
+			return;
+		}
 		Vec3d velocity = player.getVelocity();
 		if (MC.currentScreen == null) {
 			//Allow shifing in air

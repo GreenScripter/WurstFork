@@ -39,6 +39,10 @@ public final class JetpackHack extends Hack implements UpdateListener
 	@Override
 	public void onUpdate()
 	{
+		if (WURST.getHax().freecamHack.isEnabled()) {
+			//don't move when using freecam
+			return;
+		}
 		if(MC.options.keyJump.isPressed())
 			MC.player.jump();
 	}
