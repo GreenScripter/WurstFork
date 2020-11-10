@@ -46,7 +46,6 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	private int playerBox;
 	
 	public static Vec3d position;
-	public static Vec3d lastPosition;
 	public static float partialTicks;
 	private Perspective start;
 	public FreecamHack() {
@@ -128,62 +127,16 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	
 	@Override
 	public void onUpdate() {
-		
-		//		ClientPlayerEntity player = MC.player;
-		//		player.setVelocity(Vec3d.ZERO);
-		
-		//		player.setOnGround(false);
-		//		player.flyingSpeed = speed.getValueF();
-		//		Vec3d velcity = fakePlayer.getVelocity();
-//		Vec3d pos = offset;
-//		Vec3d eyePos = fakePlayer.getPos();
-//		eyePos = new Vec3d(eyePos.x, fakePlayer.getEyeY(), eyePos.z);
-//		//		if (Math.abs(RotationUtils.getClientLookVec().normalize().y) != 1) fakePlayer.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, eyePos.add(RotationUtils.getClientLookVec()));
-//		fakePlayer.setYaw(MC.player.yaw);
-//		fakePlayer.setHeadYaw(MC.player.headYaw);
-//		fakePlayer.pitch = MC.player.pitch;
-//		
-//		if (MC.player.getHealth() < fakePlayer.getHealth()) {
-//			fakePlayer.animateDamage();
-//		}
-//		fakePlayer.setHealth(MC.player.getHealth());
-//		fakePlayer.setAir(MC.player.getAir());
-//		fakePlayer.getHungerManager().setFoodLevel(MC.player.getHungerManager().getFoodLevel());
-		//		
 		if (MC.currentScreen == null) {
 			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
 				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
 			}
-			lastPosition = position;
-			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
-				position = new Vec3d(position.x, position.y + speed.getValue(), position.z);
-				MC.options.keyJump.setPressed(false);
-				
-			}
-			if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
-				position = new Vec3d(position.x, position.y - speed.getValue(), position.z);
-				MC.options.keySneak.setPressed(false);
-				
-			}
-			Vec3d look = RotationUtils.getClientLookVec();
-			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue());
-			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
-				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
-				MC.options.keyForward.setPressed(false);
-			}
-			if (((IKeyBinding) MC.options.keyBack).isActallyPressed()) {
-				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
-				MC.options.keyBack.setPressed(false);
-			}
-			look = look.crossProduct(new Vec3d(0, 1, 0)).normalize().multiply(speed.getValue());
-			if (((IKeyBinding) MC.options.keyLeft).isActallyPressed()) {
-				position = new Vec3d(position.x - look.x, position.y, position.z - look.z);
-				MC.options.keyLeft.setPressed(false);
-			}
-			if (((IKeyBinding) MC.options.keyRight).isActallyPressed()) {
-				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
-				MC.options.keyRight.setPressed(false);
-			}
+			MC.options.keyJump.setPressed(false);
+			MC.options.keySneak.setPressed(false);
+			MC.options.keyForward.setPressed(false);
+			MC.options.keyBack.setPressed(false);
+			MC.options.keyLeft.setPressed(false);
+			MC.options.keyRight.setPressed(false);
 			WurstClient.MC.player.setSprinting(false);
 		}
 		
@@ -223,9 +176,6 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 			 passed = (1 + partialTicks) - FreecamHack.partialTicks;
 		}
 		if (MC.currentScreen == null) {
-			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
-				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
-			}
 			if (((IKeyBinding) MC.options.keyJump).isActallyPressed()) {
 				position = new Vec3d(position.x, position.y + speed.getValue() * passed, position.z);
 				MC.options.keyJump.setPressed(false);
@@ -255,7 +205,6 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
 				MC.options.keyRight.setPressed(false);
 			}
-			WurstClient.MC.player.setSprinting(false);
 		}
 		FreecamHack.partialTicks = partialTicks;
 		if (!tracer.isChecked()) return;
