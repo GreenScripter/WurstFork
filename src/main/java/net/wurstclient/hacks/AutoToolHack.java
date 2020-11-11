@@ -21,6 +21,8 @@ import net.wurstclient.events.BlockBreakingProgressListener;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.settings.CheckboxSetting;
+import net.wurstclient.settings.SliderSetting;
+import net.wurstclient.settings.SliderSetting.ValueDisplay;
 import net.wurstclient.util.BlockUtils;
 
 @SearchTags({"auto tool", "AutoSwitch", "auto switch"})
@@ -38,6 +40,8 @@ public final class AutoToolHack extends Hack
 	
 	private final CheckboxSetting repairMode = new CheckboxSetting(
 		"Repair mode", "Won't use tools that are about to break.", false);
+	private final SliderSetting repairThreshold =
+			new SliderSetting("Repair threshold", 4, 1, 200, 1, ValueDisplay.INTEGER);
 	
 	private final CheckboxSetting switchBack = new CheckboxSetting(
 		"Switch back", "After using a tool, automatically switches\n"
@@ -55,6 +59,7 @@ public final class AutoToolHack extends Hack
 		addSetting(useSwords);
 		addSetting(useHands);
 		addSetting(repairMode);
+		addSetting(repairThreshold);
 		addSetting(switchBack);
 	}
 	
@@ -196,7 +201,7 @@ public final class AutoToolHack extends Hack
 	
 	private boolean isTooDamaged(ItemStack stack)
 	{
-		return stack.getMaxDamage() - stack.getDamage() <= 4;
+		return stack.getMaxDamage() - stack.getDamage() <= repairThreshold.getValueI();
 	}
 	
 	private boolean isWrongTool(ItemStack heldItem, BlockPos pos)
