@@ -61,6 +61,10 @@ public final class AutoEatHack extends Hack implements UpdateListener
 			"Eating chorus fruit teleports you to a random location.\n"
 				+ "Not recommended.",
 			false);
+	private final CheckboxSetting allowGoldenApples =
+			new CheckboxSetting("Allow golden apples",
+				"Don't let auto eat waste your golden apples.",
+				false);
 	
 	private int oldSlot = -1;
 	
@@ -73,6 +77,7 @@ public final class AutoEatHack extends Hack implements UpdateListener
 		addSetting(allowHunger);
 		addSetting(allowPoison);
 		addSetting(allowChorus);
+		addSetting(allowGoldenApples);
 	}
 	
 	@Override
@@ -148,6 +153,9 @@ public final class AutoEatHack extends Hack implements UpdateListener
 	private boolean isAllowedFood(FoodComponent food)
 	{
 		if(!allowChorus.isChecked() && food == FoodComponents.CHORUS_FRUIT)
+			return false;
+		
+		if(!allowGoldenApples.isChecked() && (food == FoodComponents.GOLDEN_APPLE || food == FoodComponents.ENCHANTED_GOLDEN_APPLE))
 			return false;
 		
 		for(Pair<StatusEffectInstance, Float> pair : food.getStatusEffects())
