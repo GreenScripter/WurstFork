@@ -18,25 +18,21 @@ jobs:
          java-version: 1.8
          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
          settings-path: ${{ github.workspace }} # location for the settings.xml file
-
-      - name: Build with Gradle
-        run: gradle build
-      - name: "Build & test"
-        run: |
-          echo "done!"
+      - name: Hash Shortner
+        run: git_hash=$(git rev-parse --short "$GITHUB_SHA") echo '::set-output name=HASH::$git_hash'
+        id: hash-shortner
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "latest"
+          tag_name: "latest-${{ steps.hash-shortner.outputs.HASH }}"
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: true
-      - name: Hash Shortner
-        run: git_hash=$(git rev-parse --short "$GITHUB_SHA") echo '::set-output name=HASH::$git_hash'
-        id: hash-shortner
+      - name: Build with Gradle
+        run: gradle build
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
