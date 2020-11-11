@@ -34,6 +34,9 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: true
+      - name: Hash Shortner
+        run: git_hash=$(git rev-parse --short "$GITHUB_SHA") echo '::set-output name=HASH::$git_hash'
+        id: hash-shortner
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
@@ -42,5 +45,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./build/libs/Wurst-Client-v7.6.2-MC1.16.3.jar
-          asset_name: Wurst-Client-v7.6.2-MC1.16.3-${{GITHUB_SHA}}.jar
+          asset_name: Wurst-Client-v7.6.2-MC1.16.3-${{ steps.hash-shortner.outputs.HASH }}.jar
           asset_content_type: application/jar
