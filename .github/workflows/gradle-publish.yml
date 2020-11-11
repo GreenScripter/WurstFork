@@ -1,8 +1,9 @@
 name: "pre-release"
 
 on:
-  schedule:
-    - cron: 0 14 * * *
+  push:
+    branches:
+      - "master"
 
 jobs:
   pre-release:
