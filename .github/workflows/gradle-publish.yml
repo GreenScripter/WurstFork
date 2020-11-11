@@ -19,7 +19,7 @@ jobs:
          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
          settings-path: ${{ github.workspace }} # location for the settings.xml file
       - name: Hash Shortner
-        run: git_hash=$(git rev-parse --short "$GITHUB_SHA") echo '::set-output name=HASH::$git_hash'
+        run: git_hash=$(git rev-parse --short "$GITHUB_SHA") echo '::set-output name=HASH::${git_hash}'
         id: hash-shortner
       - name: Create Release
         id: create_release
