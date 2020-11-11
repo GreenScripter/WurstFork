@@ -8,6 +8,7 @@
 package net.wurstclient.util;
 
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.Camera;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.RotationFaker;
@@ -37,6 +38,20 @@ public enum RotationUtils
 		float f2 = MathHelper.sin(-player.yaw * f - pi);
 		float f3 = -MathHelper.cos(-player.pitch * f);
 		float f4 = MathHelper.sin(-player.pitch * f);
+		
+		return new Vec3d(f2 * f3, f4, f1 * f3);
+	}
+	
+	public static Vec3d getCameraLookVec()
+	{
+		Camera player = WurstClient.MC.gameRenderer.getCamera();
+		float f = 0.017453292F;
+		float pi = (float)Math.PI;
+		
+		float f1 = MathHelper.cos(-player.getYaw() * f - pi);
+		float f2 = MathHelper.sin(-player.getYaw() * f - pi);
+		float f3 = -MathHelper.cos(-player.getPitch() * f);
+		float f4 = MathHelper.sin(-player.getPitch() * f);
 		
 		return new Vec3d(f2 * f3, f4, f1 * f3);
 	}

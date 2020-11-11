@@ -186,7 +186,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 				MC.options.keySneak.setPressed(false);
 				
 			}
-			Vec3d look = RotationUtils.getClientLookVec();
+			Vec3d look = RotationUtils.getCameraLookVec();
 			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue() * passed);
 			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
 				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);
@@ -231,7 +231,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		GL11.glPopMatrix();
 		
 		// line
-		Vec3d start = RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
+		Vec3d start = RotationUtils.getCameraLookVec().add(RenderUtils.getCameraPos());
 		Vec3d end = MC.player.getBoundingBox().getCenter();
 		
 		GL11.glBegin(GL11.GL_LINES);

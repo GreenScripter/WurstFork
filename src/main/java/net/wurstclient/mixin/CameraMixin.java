@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.render.Camera;
@@ -19,13 +20,18 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.WurstClient;
 import net.wurstclient.hacks.FreecamHack;
+import net.wurstclient.mixinterface.ICamera;
 
 @Mixin(Camera.class)
-public abstract class CameraMixin
+public abstract class CameraMixin implements ICamera
 {
 	
 	@Shadow
 	private Vec3d pos;
+	@Shadow
+	private float pitch;
+	@Shadow
+	private float yaw;
 
 	
 	@Inject(at = {@At("HEAD")},
@@ -56,5 +62,21 @@ public abstract class CameraMixin
 		if (FreecamHack.position != null) {//MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.x, FreecamHack.lastOffset.x), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.y, FreecamHack.lastOffset.y), MathHelper.lerp(FreecamHack.partialTicks, FreecamHack.offset.z, FreecamHack.lastOffset.z)
 			cir.setReturnValue(FreecamHack.position);
 		}
+	}
+	
+	@Inject(at = {@At("HEAD")},
+			method = {"setRotation(FF)V"},
+			cancellable = true)
+	public void setRotation(CallbackInfo cir) {
+		if (WurstClient.INSTANCE.getHax().freecamHack.isEnabled()) {
+			cir.cancel();
+		}
+	}
+	
+	public void setPitch(float p){
+		pitch = p;
+	}
+	public void setYaw(float y){
+		yaw = y;
 	}
 }
