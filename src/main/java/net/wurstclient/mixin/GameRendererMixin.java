@@ -14,8 +14,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.SynchronousResourceReloadListener;
@@ -108,6 +111,14 @@ public abstract class GameRendererMixin
 	{
 		if(WurstClient.INSTANCE.getHax().noHurtcamHack.isEnabled())
 			ci.cancel();
+	}
+
+	@Inject(at = {@At("HEAD")},
+			method = {
+				"getFov(Lnet/minecraft/client/render/Camera;FZ)D"},
+			cancellable = true)
+	private void getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> ci) {
+		if (WurstClient.INSTANCE.getHax().freecamHack.isEnabled()) ci.setReturnValue(MinecraftClient.getInstance().options.fov);
 	}
 	
 	@Shadow
