@@ -188,7 +188,7 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 	private void renderTracers(double partialTicks)
 	{
 		Vec3d start =
-			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
+			RotationUtils.getCameraLookVec().add(RenderUtils.getCameraPos());
 		
 		GL11.glBegin(GL11.GL_LINES);
 		Set<String> names = new HashSet<>();
