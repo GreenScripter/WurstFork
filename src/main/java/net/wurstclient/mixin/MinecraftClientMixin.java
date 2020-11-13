@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 | Alexander01998 | All rights reserved.
+ * Copyright (c) 2014-2020 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -7,12 +7,10 @@
  */
 package net.wurstclient.mixin;
 
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -101,20 +99,6 @@ public abstract class MinecraftClientMixin
 			return;
 		
 		cir.setReturnValue(wurstSession);
-	}
-	
-	@Redirect(at = @At(value = "FIELD",
-		target = "Lnet/minecraft/client/MinecraftClient;session:Lnet/minecraft/client/util/Session;",
-		opcode = Opcodes.GETFIELD,
-		ordinal = 0),
-		method = {
-			"getSessionProperties()Lcom/mojang/authlib/properties/PropertyMap;"})
-	private Session getSessionForSessionProperties(MinecraftClient mc)
-	{
-		if(wurstSession != null)
-			return wurstSession;
-		else
-			return session;
 	}
 	
 	@Override
