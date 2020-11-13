@@ -188,7 +188,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 				MC.options.keySneak.setPressed(false);
 				
 			}
-			Vec3d look = RotationUtils.getCameraLookVec();
+			Vec3d look = RotationUtils.getMoveVec(MC.gameRenderer.getCamera().getYaw());
 			look = new Vec3d(look.x, 0, look.z).normalize().multiply(speed.getValue() * passed);
 			if (((IKeyBinding) MC.options.keyForward).isActallyPressed()) {
 				position = new Vec3d(position.x + look.x, position.y, position.z + look.z);

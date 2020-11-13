@@ -9,7 +9,9 @@ package net.wurstclient.util;
 
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.RotationFaker;
 import net.wurstclient.WurstClient;
@@ -40,6 +42,27 @@ public enum RotationUtils
 		float f4 = MathHelper.sin(-player.pitch * f);
 		
 		return new Vec3d(f2 * f3, f4, f1 * f3);
+	}
+	
+	public static Vec3d getMoveVec(float yaw)
+	{
+		float f = 0.017453292F;
+		float pi = (float)Math.PI;
+		
+		float f1 = MathHelper.cos(-yaw * f - pi);
+		float f2 = MathHelper.sin(-yaw * f - pi);
+		float f3 = -MathHelper.cos(-0 * f);
+		float f4 = MathHelper.sin(-0 * f);
+		
+		return new Vec3d(f2 * f3, f4, f1 * f3);
+	}
+	
+	public static Quaternion toQuaternion(float pitch, float yaw){
+		Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		q.hamiltonProduct(Vector3f.POSITIVE_Y.getDegreesQuaternion(-yaw));
+		q.hamiltonProduct(Vector3f.POSITIVE_X.getDegreesQuaternion(pitch));
+		
+		return q;
 	}
 	
 	public static Vec3d getCameraLookVec()

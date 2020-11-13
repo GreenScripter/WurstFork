@@ -25,6 +25,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
 import net.wurstclient.WurstClient;
 import net.wurstclient.hacks.NameTagsHack;
+import net.wurstclient.util.RotationUtils;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity>
@@ -71,7 +72,7 @@ public abstract class EntityRendererMixin<T extends Entity>
 		
 		matrixStack.push();
 		matrixStack.translate(0.0D, f, 0.0D);
-		matrixStack.multiply(this.dispatcher.getRotation());
+		matrixStack.multiply(RotationUtils.toQuaternion(this.dispatcher.camera.getPitch(), this.dispatcher.camera.getYaw()));
 		
 		float scale = 0.025F;
 		if(nameTagsHack.isEnabled())
