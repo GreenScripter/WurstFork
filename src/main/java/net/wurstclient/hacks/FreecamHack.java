@@ -132,6 +132,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		if (MC.currentScreen == null) {
 			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
 				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+				
 			}
 			MC.options.keyJump.setPressed(false);
 			MC.options.keySneak.setPressed(false);

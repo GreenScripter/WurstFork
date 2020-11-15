@@ -25,6 +25,7 @@ import net.minecraft.resource.SynchronousResourceReloadListener;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.wurstclient.WurstClient;
+import net.wurstclient.event.EventManager;
 import net.wurstclient.events.CameraTransformViewBobbingListener.CameraTransformViewBobbingEvent;
 import net.wurstclient.events.HitResultRayTraceListener.HitResultRayTraceEvent;
 import net.wurstclient.events.RenderListener.RenderEvent;
@@ -44,7 +45,7 @@ public abstract class GameRendererMixin
 	{
 		CameraTransformViewBobbingEvent event =
 			new CameraTransformViewBobbingEvent();
-		WurstClient.INSTANCE.getEventManager().fire(event);
+		EventManager.fire(event);
 		
 		if(event.isCancelled())
 			return;
@@ -63,7 +64,7 @@ public abstract class GameRendererMixin
 		MatrixStack matrixStack, CallbackInfo ci)
 	{
 		RenderEvent event = new RenderEvent(partialTicks);
-		WurstClient.INSTANCE.getEventManager().fire(event);
+		EventManager.fire(event);
 	}
 	
 	@Redirect(
@@ -85,7 +86,7 @@ public abstract class GameRendererMixin
 	private void onHitResultRayTrace(float float_1, CallbackInfo ci)
 	{
 		HitResultRayTraceEvent event = new HitResultRayTraceEvent(float_1);
-		WurstClient.INSTANCE.getEventManager().fire(event);
+		EventManager.fire(event);
 	}
 	
 	@Redirect(
