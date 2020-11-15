@@ -8,7 +8,6 @@
 package net.wurstclient.hacks;
 
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
@@ -85,7 +84,7 @@ public final class FlightHack extends Hack
 				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 - player.getVelocity().y);
 			} else if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
 				MC.options.keySneak.setPressed(false);
-				player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? 3 : speed.getValue()), 0));
+				player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? Math.min(3, speed.getValue()) : speed.getValue()), 0));
 				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 + player.getVelocity().y);
 			} else {
 				if (arrowFix.isChecked()) {
