@@ -45,6 +45,7 @@ public final class HackList implements UpdateListener
 	public final AutoFarmHack autoFarmHack = new AutoFarmHack();
 	public final AutoFishHack autoFishHack = new AutoFishHack();
 	public final AutoMineHack autoMineHack = new AutoMineHack();
+	public final AutoPlaceHack autoPlaceHack = new AutoPlaceHack();
 	public final AutoPotionHack autoPotionHack = new AutoPotionHack();
 	public final AutoReconnectHack autoReconnectHack = new AutoReconnectHack();
 	public final AutoRespawnHack autoRespawnHack = new AutoRespawnHack();
