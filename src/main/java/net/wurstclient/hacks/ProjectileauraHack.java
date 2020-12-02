@@ -18,29 +18,39 @@ import java.util.stream.StreamSupport;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.util.Hand;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.PostMotionListener;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
+import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
 
-@SearchTags({"fireball aura"})
-public final class FireballauraHack extends Hack
+@SearchTags({"fireball aura", "bullet aura", "projectile aura"})
+public final class ProjectileauraHack extends Hack
 	implements UpdateListener, PostMotionListener
 {
 	private final SliderSetting range = new SliderSetting("Range",
-		"Determines how far ireballaura will reach\n" + "to hit fireballs.\n",
+		"Determines how far Projectile Aura will reach\n"
+			+ "to hit fireballs or shulker bullets.\n",
 		5, 1, 10, 0.05, ValueDisplay.DECIMAL);
+	
+	private final CheckboxSetting targetFireballs = new CheckboxSetting(
+		"Target fireballs", "Automatically hit away fireballs.", true);
+	
+	private final CheckboxSetting targetBullets = new CheckboxSetting(
+		"Target bullets", "Automatically smash shulker bullets.", true);
 	
 	private Entity target;
 	private Map<UUID, Long> hit = new HashMap<>();
 	
-	public FireballauraHack()
+	public ProjectileauraHack()
 	{
-		super("Fireballaura", "Automatically punch fireballs around you.");
+		super("Projectileaura",
+			"Automatically punch fireballs or shulker bullets around you.");
 		setCategory(Category.COMBAT);
 		addSetting(range);
 	}
@@ -67,11 +77,15 @@ public final class FireballauraHack extends Hack
 		ClientPlayerEntity player = MC.player;
 		
 		double rangeSq = Math.pow(range.getValue(), 2);
-		Stream<Entity> stream = StreamSupport
-			.stream(MC.world.getEntities().spliterator(), true)
-			.filter(e -> !e.removed).filter(e -> e instanceof FireballEntity)
-			.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
-			.filter(e -> !hit.keySet().contains(e.getUuid()));
+		Stream<Entity> stream =
+			StreamSupport.stream(MC.world.getEntities().spliterator(), true)
+				.filter(e -> !e.removed)
+				.filter(e -> ((e instanceof FireballEntity
+					&& targetFireballs.isChecked())
+					|| (e instanceof ShulkerBulletEntity
+						&& targetBullets.isChecked())))
+				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+				.filter(e -> !hit.keySet().contains(e.getUuid()));
 		
 		target = stream.findFirst().orElse(null);
 		if(target == null)
