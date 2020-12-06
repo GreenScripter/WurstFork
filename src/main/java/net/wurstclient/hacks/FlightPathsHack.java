@@ -21,6 +21,7 @@ import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
@@ -83,6 +84,7 @@ public final class FlightPathsHack extends Hack
 			(Stream<ProjectileEntity>)(Object)(StreamSupport
 				.stream(MC.world.getEntities().spliterator(), true)
 				.filter(e -> e instanceof ProjectileEntity)
+				.filter(e -> !(e instanceof ShulkerBulletEntity))
 				.filter(e -> !(e instanceof PersistentProjectileEntity)
 					|| !((IPersistentProjectileEntity)e).inGround()));
 		projectiles.addAll(stream.collect(Collectors.toList()));
@@ -130,9 +132,11 @@ public final class FlightPathsHack extends Hack
 	private void drawLine(ArrayList<Vec3d> path, Vec3d camPos)
 	{
 		GL11.glBegin(GL11.GL_LINE_STRIP);
-		if (pathHitsUs){
+		if(pathHitsUs)
+		{
 			GL11.glColor4f(1, 0, 0, 0.75F);
-		} else {
+		}else
+		{
 			GL11.glColor4f(1, 1, 0, 0.75F);
 		}
 		
@@ -188,8 +192,8 @@ public final class FlightPathsHack extends Hack
 		double arrowMotionZ = projectile.getVelocity().z;
 		
 		double gravity = getProjectileGravity(projectile);
-		Vec3d lastPos =
-			new Vec3d(projectile.getX(), projectile.getEyeY(), projectile.getZ());
+		Vec3d lastPos = new Vec3d(projectile.getX(), projectile.getEyeY(),
+			projectile.getZ());
 		
 		for(int i = 0; i < 1000; i++)
 		{
@@ -213,7 +217,9 @@ public final class FlightPathsHack extends Hack
 			// check for collision
 			if(!pathHitsUs)
 			{
-				if (MC.player.getBoundingBox().expand(1).raycast(lastPos, arrowPos).isPresent()){
+				if(MC.player.getBoundingBox().expand(1)
+					.raycast(lastPos, arrowPos).isPresent())
+				{
 					pathHitsUs = true;
 				}
 			}

@@ -102,6 +102,10 @@ public final class TrajectoriesHack extends Hack
 		{
 			players.add(MC.player);
 		}
+		if(!showSelf.isChecked())
+		{
+			players.remove(MC.player);
+		}
 	}
 	
 	@Override
