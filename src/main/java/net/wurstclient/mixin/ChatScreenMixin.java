@@ -16,8 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.wurstclient.WurstClient;
+import net.wurstclient.commands.ConnectCmd;
 
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin extends Screen
@@ -35,5 +37,20 @@ public class ChatScreenMixin extends Screen
 	{
 		if(WurstClient.INSTANCE.getHax().infiniChatHack.isEnabled())
 			chatField.setMaxLength(Integer.MAX_VALUE);
+	}
+	
+	@Inject(at = @At("HEAD"),
+		method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V",
+		cancellable = true)
+	private void inRender(MatrixStack m, int i, int i2, float f,
+		CallbackInfo ci)
+	{
+		if(ConnectCmd.active)
+		{
+			chatField.setEditableColor(0x8CFF8C);
+		}else
+		{
+			chatField.setEditableColor(14737632);
+		}
 	}
 }
