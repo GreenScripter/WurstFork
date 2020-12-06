@@ -8,42 +8,96 @@
 package net.wurstclient.hacks;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.EggItem;
+import net.minecraft.item.EnderPearlItem;
+import net.minecraft.item.FishingRodItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.LingeringPotionItem;
+import net.minecraft.item.PotionItem;
+import net.minecraft.item.RangedWeaponItem;
+import net.minecraft.item.SnowballItem;
+import net.minecraft.item.SplashPotionItem;
+import net.minecraft.item.TridentItem;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.RenderListener;
+import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
+import net.wurstclient.settings.CheckboxSetting;
+import net.wurstclient.util.FakePlayerEntity;
 import net.wurstclient.util.RenderUtils;
-import net.wurstclient.util.RotationUtils;
 
 @SearchTags({"ArrowTrajectories", "ArrowPrediction", "aim assist",
 	"arrow trajectories"})
-public final class TrajectoriesHack extends Hack implements RenderListener
+public final class TrajectoriesHack extends Hack
+	implements RenderListener, UpdateListener
 {
+	
+	private final CheckboxSetting showOthers = new CheckboxSetting(
+		"Draw Other Players",
+		"Will draw the trajectories of items held by other players.", true);
+	private final CheckboxSetting othersDepth = new CheckboxSetting(
+		"Depth Test Others",
+		"If the trajectories of other player's items\nshould be on top of blocks.",
+		true);
+	
 	public TrajectoriesHack()
 	{
 		super("Trajectories",
 			"Predicts the flight path of arrows and throwable items.");
 		setCategory(Category.RENDER);
+		addSetting(showOthers);
+		addSetting(othersDepth);
 	}
+	
+	private final ArrayList<PlayerEntity> players = new ArrayList<>();
 	
 	@Override
 	public void onEnable()
 	{
 		EVENTS.add(RenderListener.class, this);
+		EVENTS.add(UpdateListener.class, this);
 	}
 	
 	@Override
 	public void onDisable()
 	{
 		EVENTS.remove(RenderListener.class, this);
+		EVENTS.remove(UpdateListener.class, this);
+	}
+	
+	@Override
+	public void onUpdate()
+	{
+		ClientWorld world = MC.world;
+		
+		players.clear();
+		if(showOthers.isChecked())
+		{
+			Stream<AbstractClientPlayerEntity> stream = world.getPlayers()
+				.parallelStream().filter(e -> !e.removed && e.getHealth() > 0)
+				.filter(e -> !(e instanceof FakePlayerEntity))
+				.filter(e -> Math.abs(e.getY() - MC.player.getY()) <= 1e6);
+			
+			players.addAll(stream.collect(Collectors.toList()));
+		}else
+		{
+			players.add(MC.player);
+		}
 	}
 	
 	@Override
@@ -53,25 +107,41 @@ public final class TrajectoriesHack extends Hack implements RenderListener
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		if(!othersDepth.isChecked())
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDepthMask(false);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glLineWidth(2);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		
 		RenderUtils.applyCameraRotationOnly();
-		
-		ArrayList<Vec3d> path = getPath(partialTicks);
-		Vec3d camPos = RenderUtils.getCameraPos();
-		
-		drawLine(path, camPos);
-		
-		if(!path.isEmpty())
+		for(PlayerEntity player : players)
 		{
-			Vec3d end = path.get(path.size() - 1);
-			drawEndOfLine(end, camPos);
+			if(othersDepth.isChecked())
+			{
+				if(player == MC.player)
+				{
+					GL11.glDisable(GL11.GL_DEPTH_TEST);
+				}
+			}
+			ArrayList<Vec3d> path = getPath(partialTicks, player);
+			Vec3d camPos = RenderUtils.getCameraPos();
+			
+			drawLine(path, camPos);
+			
+			if(!path.isEmpty())
+			{
+				Vec3d end = path.get(path.size() - 1);
+				drawEndOfLine(end, camPos);
+			}
+			if(othersDepth.isChecked())
+			{
+				if(player == MC.player)
+				{
+					GL11.glEnable(GL11.GL_DEPTH_TEST);
+				}
+			}
 		}
-		
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -111,9 +181,8 @@ public final class TrajectoriesHack extends Hack implements RenderListener
 		GL11.glPopMatrix();
 	}
 	
-	private ArrayList<Vec3d> getPath(float partialTicks)
+	private ArrayList<Vec3d> getPath(float partialTicks, PlayerEntity player)
 	{
-		ClientPlayerEntity player = MC.player;
 		ArrayList<Vec3d> path = new ArrayList<>();
 		
 		ItemStack stack = player.getMainHandStack();
@@ -179,7 +248,8 @@ public final class TrajectoriesHack extends Hack implements RenderListener
 		}
 		
 		double gravity = getProjectileGravity(item);
-		Vec3d eyesPos = RotationUtils.getEyesPos();
+		Vec3d eyesPos =
+			new Vec3d(player.getX(), player.getEyeY(), player.getZ());
 		
 		for(int i = 0; i < 1000; i++)
 		{
@@ -203,9 +273,10 @@ public final class TrajectoriesHack extends Hack implements RenderListener
 			// check for collision
 			RaycastContext context = new RaycastContext(eyesPos, arrowPos,
 				RaycastContext.ShapeType.COLLIDER,
-				RaycastContext.FluidHandling.NONE, MC.player);
+				RaycastContext.FluidHandling.NONE, player);
 			if(MC.world.raycast(context).getType() != HitResult.Type.MISS)
 				break;
+			eyesPos = arrowPos;
 		}
 		
 		return path;
