@@ -47,11 +47,14 @@ public final class TrajectoriesHack extends Hack
 	implements RenderListener, UpdateListener
 {
 	
-	private final CheckboxSetting showOthers = new CheckboxSetting(
-		"Draw Other Players",
-		"Will draw the trajectories of items held by other players.", true);
+	private final CheckboxSetting showOthers =
+		new CheckboxSetting("Draw other players",
+			"Will draw the trajectories of items held by other players.", true);
+	private final CheckboxSetting showSelf =
+		new CheckboxSetting("Draw your trajectories",
+			"Will draw the trajectories of items held by you.", true);
 	private final CheckboxSetting othersDepth = new CheckboxSetting(
-		"Depth Test Others",
+		"Depth test other players",
 		"If the trajectories of other player's items\nshould be on top of blocks.",
 		true);
 	
@@ -60,6 +63,7 @@ public final class TrajectoriesHack extends Hack
 		super("Trajectories",
 			"Predicts the flight path of arrows and throwable items.");
 		setCategory(Category.RENDER);
+		addSetting(showSelf);
 		addSetting(showOthers);
 		addSetting(othersDepth);
 	}
@@ -190,7 +194,13 @@ public final class TrajectoriesHack extends Hack
 		
 		// check if item is throwable
 		if(stack.isEmpty() || !isThrowable(item))
-			return path;
+		{
+			// If it isn't look at offhand
+			stack = player.getOffHandStack();
+			item = stack.getItem();
+			if(stack.isEmpty() || !isThrowable(item))
+				return path;
+		}
 		
 		// calculate starting position
 		double arrowPosX = player.lastRenderX

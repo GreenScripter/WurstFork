@@ -77,7 +77,6 @@ public final class FlightPathsHack extends Hack
 	@Override
 	public void onUpdate()
 	{
-		// MC.options.keyForward.setPressed(true);
 		projectiles.clear();
 		@SuppressWarnings("unchecked")
 		Stream<ProjectileEntity> stream =
@@ -187,14 +186,6 @@ public final class FlightPathsHack extends Hack
 		double arrowMotionX = projectile.getVelocity().x;
 		double arrowMotionY = projectile.getVelocity().y;
 		double arrowMotionZ = projectile.getVelocity().z;
-		
-		// 3D Pythagorean theorem. Returns the length of the arrowMotion vector.
-		// double arrowMotion = Math.sqrt(arrowMotionX * arrowMotionX
-		// + arrowMotionY * arrowMotionY + arrowMotionZ * arrowMotionZ);
-		//
-		// arrowMotionX /= arrowMotion;
-		// arrowMotionY /= arrowMotion;
-		// arrowMotionZ /= arrowMotion;
 		
 		double gravity = getProjectileGravity(projectile);
 		Vec3d lastPos =
