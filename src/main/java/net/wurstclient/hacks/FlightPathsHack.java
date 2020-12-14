@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.DragonFireballEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
@@ -24,6 +25,7 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.entity.projectile.TridentEntity;
+import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -253,6 +255,12 @@ public final class FlightPathsHack extends Hack
 			return 0;
 		
 		if(entity instanceof SmallFireballEntity)
+			return 0;
+		
+		if(entity instanceof WitherSkullEntity)
+			return 0;
+		
+		if(entity instanceof DragonFireballEntity)
 			return 0;
 		
 		return 0.03;
