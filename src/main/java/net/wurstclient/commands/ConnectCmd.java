@@ -84,9 +84,10 @@ public final class ConnectCmd extends Command implements UpdateListener {
 		DataOutputStream out;
 		public Map<String, Vec3d> players = new HashMap<>();
 		public Map<String, Integer> playersDim = new HashMap<>();
+		Thread input;
 		
 		public PrivateChat(String string, int port) {
-			new Thread(() -> {
+			input = new Thread(() -> {
 				try {
 					s = new Socket(string, port);
 					in = new DataInputStream(s.getInputStream());
@@ -106,7 +107,8 @@ public final class ConnectCmd extends Command implements UpdateListener {
 					privateChat = null;
 				}
 				
-			}).start();
+			});
+			input.start();
 		}
 		
 		public void run() {
@@ -172,11 +174,13 @@ public final class ConnectCmd extends Command implements UpdateListener {
 			}
 		}
 		
+		@SuppressWarnings("deprecation")
 		public void disconnect() {
 			try {
 				s.close();
 			} catch (IOException e1) {
 			}
+			input.stop();
 			privateChat = null;
 			messages.add("^Message client disconnected.");
 		}
