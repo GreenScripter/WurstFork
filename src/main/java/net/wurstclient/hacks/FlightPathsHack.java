@@ -19,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.DragonFireballEntity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -261,6 +262,9 @@ public final class FlightPathsHack extends Hack
 			return 0;
 		
 		if(entity instanceof DragonFireballEntity)
+			return 0;
+		
+		if(entity instanceof FireworkRocketEntity)
 			return 0;
 		
 		return 0.03;
