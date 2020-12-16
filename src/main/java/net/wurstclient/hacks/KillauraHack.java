@@ -25,6 +25,7 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.Monster;
+import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
@@ -117,7 +118,7 @@ public final class KillauraHack extends Hack
 	
 	private final CheckboxSetting filterGolems =
 		new CheckboxSetting("Filter golems",
-			"Won't attack iron golems,\n" + "snow golems and shulkers.", false);
+			"Won't attack iron golems and\n" + "snow golems.", false);
 	
 	private final CheckboxSetting filterInvisible = new CheckboxSetting(
 		"Filter invisible", "Won't attack invisible entities.", false);
@@ -228,7 +229,8 @@ public final class KillauraHack extends Hack
 			});
 		
 		if(filterMonsters.isChecked())
-			stream = stream.filter(e -> !(e instanceof Monster));
+			stream = stream.filter(
+				e -> !(e instanceof Monster || e instanceof ShulkerEntity));
 		
 		if(filterPigmen.isChecked())
 			stream = stream.filter(e -> !(e instanceof ZombifiedPiglinEntity));
@@ -256,7 +258,8 @@ public final class KillauraHack extends Hack
 			stream = stream.filter(e -> !(e instanceof MerchantEntity));
 		
 		if(filterGolems.isChecked())
-			stream = stream.filter(e -> !(e instanceof GolemEntity));
+			stream = stream.filter(
+				e -> !(e instanceof GolemEntity) || e instanceof ShulkerEntity);
 		
 		if(filterInvisible.isChecked())
 			stream = stream.filter(e -> !e.isInvisible());
