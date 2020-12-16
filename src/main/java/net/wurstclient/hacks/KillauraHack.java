@@ -18,6 +18,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.mob.AmbientEntity;
@@ -127,7 +129,7 @@ public final class KillauraHack extends Hack
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
 		"Filter end crystals", "Won't attack end crystals.", false);
 	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
-			"Filter villager zombies", "Won't attack villager zombies.", false);
+		"Filter villager zombies", "Won't attack villager zombies.", false);
 	
 	private Entity target;
 	private Entity renderTarget;
@@ -194,16 +196,18 @@ public final class KillauraHack extends Hack
 			return;
 		
 		double rangeSq = Math.pow(range.getValue(), 2);
-		Stream<Entity> stream =
-			StreamSupport.stream(MC.world.getEntities().spliterator(), true)
-				.filter(e -> !e.removed)
-				.filter(e -> e instanceof LivingEntity
-					&& ((LivingEntity)e).getHealth() > 0
-					|| e instanceof EndCrystalEntity)
-				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
-				.filter(e -> e != player)
-				.filter(e -> !(e instanceof FakePlayerEntity))
-				.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
+		Stream<Entity> stream = StreamSupport
+			.stream(world.getOtherEntities(player,
+				player.getBoundingBox().expand(10), null).spliterator(), true)
+			.filter(e -> !e.removed)
+			.filter(e -> (e instanceof LivingEntity
+				&& ((LivingEntity)e).getHealth() > 0)
+				|| e instanceof EndCrystalEntity
+				|| e instanceof EnderDragonPart)
+			.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+			.filter(e -> !(e instanceof FakePlayerEntity))
+			.filter(e -> !(e instanceof EnderDragonEntity))
+			.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
 		
 		if(filterPlayers.isChecked())
 			stream = stream.filter(e -> !(e instanceof PlayerEntity));
@@ -375,7 +379,12 @@ public final class KillauraHack extends Hack
 		private Priority(String name, ToDoubleFunction<Entity> keyExtractor)
 		{
 			this.name = name;
-			comparator = Comparator.comparingDouble(keyExtractor);
+			// Always go after the highest ranking part of the ender dragon if
+			// possible
+			comparator =
+				Comparator.comparingDouble(e -> (e instanceof EnderDragonPart
+					? Integer.MIN_VALUE + e.getEntityId()
+					: keyExtractor.applyAsDouble(e)));
 		}
 		
 		@Override

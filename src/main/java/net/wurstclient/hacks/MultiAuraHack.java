@@ -8,6 +8,7 @@
 package net.wurstclient.hacks;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -16,6 +17,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.mob.AmbientEntity;
@@ -176,16 +179,18 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		
 		// get entities
 		double rangeSq = Math.pow(range.getValue(), 2);
-		Stream<Entity> stream =
-			StreamSupport.stream(world.getEntities().spliterator(), true)
-				.filter(e -> !e.removed)
-				.filter(e -> e instanceof LivingEntity
-					&& ((LivingEntity)e).getHealth() > 0
-					|| e instanceof EndCrystalEntity)
-				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
-				.filter(e -> e != player)
-				.filter(e -> !(e instanceof FakePlayerEntity))
-				.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
+		Stream<Entity> stream = StreamSupport
+			.stream(world.getOtherEntities(player,
+				player.getBoundingBox().expand(10), null).spliterator(), true)
+			.filter(e -> !e.removed)
+			.filter(e -> (e instanceof LivingEntity
+				&& ((LivingEntity)e).getHealth() > 0)
+				|| e instanceof EndCrystalEntity
+				|| e instanceof EnderDragonPart)
+			.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+			.filter(e -> !(e instanceof FakePlayerEntity))
+			.filter(e -> !(e instanceof EnderDragonEntity))
+			.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
 		
 		if(filterPlayers.isChecked())
 			stream = stream.filter(e -> !(e instanceof PlayerEntity));
@@ -256,14 +261,16 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		if(entities.isEmpty())
 			return;
 		
-		WURST.getHax().autoSwordHack.setSlot();
+		//In the case of the ender dragon being near this will hit the head first meaning it will take the most damage.
+		entities.sort(
+			Comparator.comparingDouble(e -> ((Entity)e).getEntityId()));
 		
+		WURST.getHax().autoSwordHack.setSlot();
 		// attack entities
 		for(Entity entity : entities)
 		{
 			RotationUtils.Rotation rotations = RotationUtils
 				.getNeededRotations(entity.getBoundingBox().getCenter());
-			
 			WurstClient.MC.player.networkHandler
 				.sendPacket(new PlayerMoveC2SPacket.LookOnly(rotations.getYaw(),
 					rotations.getPitch(), MC.player.isOnGround()));
