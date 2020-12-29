@@ -27,6 +27,9 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable
 	{
 		if(WurstClient.INSTANCE.getHax().noWeatherHack.isRainDisabled())
 			cir.setReturnValue(0F);
+		
+		if(WurstClient.INSTANCE.getHax().noWeatherHack.isRainForced())
+			cir.setReturnValue(1F);
 	}
 	
 	// getSkyAngle

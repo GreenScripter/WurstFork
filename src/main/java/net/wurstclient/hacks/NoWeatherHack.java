@@ -10,13 +10,18 @@ package net.wurstclient.hacks;
 import net.wurstclient.Category;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.settings.CheckboxSetting;
+import net.wurstclient.settings.EnumSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
 
 public final class NoWeatherHack extends Hack
 {
-	private final CheckboxSetting disableRain =
-		new CheckboxSetting("Disable Rain", true);
+	private final EnumSetting<Weather> weather = new EnumSetting<>("Weather",
+		"Determines what the weather should be.\n"
+			+ "\u00a7lNo Change\u00a7r - Weather remains the same.\n"
+			+ "\u00a7lClear\u00a7r - Weather stays clear.\n"
+			+ "\u00a7lRain\u00a7r - Weather stays stormy.",
+			Weather.values(), Weather.CLEAR);
 	
 	private final CheckboxSetting changeTime =
 		new CheckboxSetting("Change World Time", false);
@@ -36,7 +41,7 @@ public final class NoWeatherHack extends Hack
 			+ "time and moon phase.");
 		setCategory(Category.RENDER);
 		
-		addSetting(disableRain);
+		addSetting(weather);
 		addSetting(changeTime);
 		addSetting(time);
 		addSetting(changeMoonPhase);
@@ -45,7 +50,12 @@ public final class NoWeatherHack extends Hack
 	
 	public boolean isRainDisabled()
 	{
-		return isEnabled() && disableRain.isChecked();
+		return isEnabled() && weather.getSelected().equals(Weather.CLEAR);
+	}
+	
+	public boolean isRainForced()
+	{
+		return isEnabled() && weather.getSelected().equals(Weather.RAIN);
 	}
 	
 	public boolean isTimeChanged()
@@ -66,5 +76,9 @@ public final class NoWeatherHack extends Hack
 	public int getChangedMoonPhase()
 	{
 		return moonPhase.getValueI();
+	}
+	
+	static enum Weather {
+		NO_CHANGE,CLEAR,RAIN
 	}
 }
