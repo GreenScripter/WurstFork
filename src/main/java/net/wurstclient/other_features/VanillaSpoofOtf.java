@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2020 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -8,7 +8,7 @@
 package net.wurstclient.other_features;
 
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.impl.networking.CustomPayloadC2SPacketAccessor;
+import net.fabricmc.fabric.mixin.networking.accessor.CustomPayloadC2SPacketAccessor;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.wurstclient.DontBlock;
