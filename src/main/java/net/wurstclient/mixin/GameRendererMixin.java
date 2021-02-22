@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2020 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -21,6 +21,7 @@ import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.resource.SynchronousResourceReloadListener;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -29,6 +30,7 @@ import net.wurstclient.event.EventManager;
 import net.wurstclient.events.CameraTransformViewBobbingListener.CameraTransformViewBobbingEvent;
 import net.wurstclient.events.HitResultRayTraceListener.HitResultRayTraceEvent;
 import net.wurstclient.events.RenderListener.RenderEvent;
+import net.wurstclient.hacks.FullbrightHack;
 import net.wurstclient.mixinterface.IGameRenderer;
 
 @Mixin(GameRenderer.class)
@@ -101,6 +103,20 @@ public abstract class GameRendererMixin
 			return MathHelper.lerp(delta, first, second);
 		
 		return 0;
+	}
+	
+	@Inject(at = {@At("HEAD")},
+		method = {
+			"getNightVisionStrength(Lnet/minecraft/entity/LivingEntity;F)F"},
+		cancellable = true)
+	private static void onGetNightVisionStrength(LivingEntity livingEntity,
+		float f, CallbackInfoReturnable<Float> cir)
+	{
+		FullbrightHack fullbright =
+			WurstClient.INSTANCE.getHax().fullbrightHack;
+		
+		if(fullbright.isNightVisionActive())
+			cir.setReturnValue(fullbright.getNightVisionStrength());
 	}
 	
 	@Inject(at = {@At("HEAD")},

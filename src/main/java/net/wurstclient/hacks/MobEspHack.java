@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2020 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -121,13 +121,17 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		GL11.glDisable(GL11.GL_LIGHTING);
 		
 		GL11.glPushMatrix();
-		RenderUtils.applyRenderOffset();
+		RenderUtils.applyRegionalRenderOffset();
+		
+		BlockPos camPos = RenderUtils.getCameraBlockPos();
+		int regionX = (camPos.getX() >> 9) * 512;
+		int regionZ = (camPos.getZ() >> 9) * 512;
 		
 		if(style.getSelected().boxes)
-			renderBoxes(partialTicks);
+			renderBoxes(partialTicks, regionX, regionZ);
 		
 		if(style.getSelected().lines)
-			renderTracers(partialTicks);
+			renderTracers(partialTicks, regionX, regionZ);
 		
 		GL11.glPopMatrix();
 		
@@ -139,43 +143,46 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
 	}
 	
-	private void renderBoxes(double partialTicks)
+	private void renderBoxes(double partialTicks, int regionX, int regionZ)
 	{
 		double extraSize = boxSize.getSelected().extraSize;
 		
 		for(MobEntity e : mobs)
 		{
-//			if (e instanceof RaiderEntity){
-//				if (((RaiderEntity)e).getRaid() != null) {
-//					BlockPos pos = ((RaiderEntity)e).getRaid().getCenter();
-//					GL11.glBegin(GL11.GL_LINES);
-//						Vec3d end = e.getBoundingBox().getCenter()
-//							.subtract(new Vec3d(e.getX(), e.getY(), e.getZ())
-//								.subtract(e.prevX, e.prevY, e.prevZ)
-//								.multiply(1 - partialTicks));
-//						
-//						GL11.glColor4f(1f, 1f, 1f, 0.25F);
-//						
-//						GL11.glVertex3d(pos.getX(), pos.getY(), pos.getZ());
-//						GL11.glVertex3d(end.x, end.y, end.z);
-//					GL11.glEnd();
-//					
-//				}
-//			}
+			// if (e instanceof RaiderEntity){
+			// if (((RaiderEntity)e).getRaid() != null) {
+			// BlockPos pos = ((RaiderEntity)e).getRaid().getCenter();
+			// GL11.glBegin(GL11.GL_LINES);
+			// Vec3d end = e.getBoundingBox().getCenter()
+			// .subtract(new Vec3d(e.getX(), e.getY(), e.getZ())
+			// .subtract(e.prevX, e.prevY, e.prevZ)
+			// .multiply(1 - partialTicks));
+			//
+			// GL11.glColor4f(1f, 1f, 1f, 0.25F);
+			//
+			// GL11.glVertex3d(pos.getX(), pos.getY(), pos.getZ());
+			// GL11.glVertex3d(end.x, end.y, end.z);
+			// GL11.glEnd();
+			//
+			// }
+			// }
 			GL11.glPushMatrix();
 			
-			GL11.glTranslated(e.prevX + (e.getX() - e.prevX) * partialTicks,
+			GL11.glTranslated(
+				e.prevX + (e.getX() - e.prevX) * partialTicks - regionX,
 				e.prevY + (e.getY() - e.prevY) * partialTicks,
-				e.prevZ + (e.getZ() - e.prevZ) * partialTicks);
+				e.prevZ + (e.getZ() - e.prevZ) * partialTicks - regionZ);
 			
 			GL11.glScaled(e.getWidth() + extraSize, e.getHeight() + extraSize,
 				e.getWidth() + extraSize);
 			
 			float f = MC.player.distanceTo(e) / 20F;
-			if (e instanceof RaiderEntity){
-
-			GL11.glColor4f(1f, 0f, 1f, 0.25F);
-			} else {
+			if(e instanceof RaiderEntity)
+			{
+				
+				GL11.glColor4f(1f, 0f, 1f, 0.25F);
+			}else
+			{
 				GL11.glColor4f(2 - f, f, 0, 0.25F);
 			}
 			GL11.glCallList(mobBox);
@@ -185,7 +192,7 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		
 	}
 	
-	private void renderTracers(double partialTicks)
+	private void renderTracers(double partialTicks, int regionX, int regionZ)
 	{
 		Vec3d start =
 			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
@@ -201,8 +208,8 @@ public final class MobEspHack extends Hack implements UpdateListener,
 			float f = MC.player.distanceTo(e) / 20F;
 			GL11.glColor4f(2 - f, f, 0, 0.5F);
 			
-			GL11.glVertex3d(start.x, start.y, start.z);
-			GL11.glVertex3d(end.x, end.y, end.z);
+			GL11.glVertex3d(start.x - regionX, start.y, start.z - regionZ);
+			GL11.glVertex3d(end.x - regionX, end.y, end.z - regionZ);
 		}
 		GL11.glEnd();
 	}
