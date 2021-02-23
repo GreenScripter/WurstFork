@@ -18,12 +18,16 @@ import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.mixinterface.IClientPlayerInteractionManager;
 import net.wurstclient.settings.CheckboxSetting;
+import net.wurstclient.settings.SliderSetting;
+import net.wurstclient.settings.SliderSetting.ValueDisplay;
 
 @SearchTags({"auto totem"})
 public final class AutoTotemHack extends Hack implements UpdateListener
 {
 	private final CheckboxSetting showCounter = new CheckboxSetting(
 		"Show totem counter", "Displays the number of totems you have.", true);
+	public final SliderSetting threshold = new SliderSetting("Health Threshold",
+		20, 1, 20, 1, ValueDisplay.INTEGER);
 	
 	private int nextTickSlot;
 	private int totems;
@@ -34,6 +38,7 @@ public final class AutoTotemHack extends Hack implements UpdateListener
 			"Automatically moves totems of undying to your off-hand.");
 		setCategory(Category.COMBAT);
 		addSetting(showCounter);
+		addSetting(threshold);
 	}
 	
 	@Override
@@ -69,6 +74,10 @@ public final class AutoTotemHack extends Hack implements UpdateListener
 	@Override
 	public void onUpdate()
 	{
+		if(MC.player.getHealth() > threshold.getValueI() && nextTickSlot == -1)
+		{
+			return;
+		}
 		finishMovingTotem();
 		
 		PlayerInventory inventory = MC.player.inventory;
