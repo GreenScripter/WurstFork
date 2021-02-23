@@ -74,7 +74,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 //		fakePlayer.setGameMode(GameMode.SPECTATOR);
 		MC.chunkCullingEnabled = false;
 		start = MC.options.getPerspective();
-		MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+		MC.options.setPerspective(Perspective.THIRD_PERSON_BACK);
 		
 		GameOptions gs = MC.options;
 		KeyBinding[] bindings = { gs.keyForward, gs.keyBack, gs.keyLeft, gs.keyRight, gs.keyJump, gs.keySneak };
@@ -109,7 +109,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 		EVENTS.remove(IsNormalCubeListener.class, this);
 		EVENTS.remove(SetOpaqueCubeListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
-		MC.options.method_31043(start);
+		MC.options.setPerspective(start);
 
 		position = null;
 //		fakePlayer.resetPlayerPosition();
@@ -131,7 +131,7 @@ public final class FreecamHack extends Hack implements UpdateListener, PacketOut
 	public void onUpdate() {
 		if (MC.currentScreen == null) {
 			if (!MC.options.getPerspective().equals(Perspective.THIRD_PERSON_BACK)) {
-				MC.options.method_31043(Perspective.THIRD_PERSON_BACK);
+				MC.options.setPerspective(Perspective.THIRD_PERSON_BACK);
 				
 			}
 			MC.options.keyJump.setPressed(false);
