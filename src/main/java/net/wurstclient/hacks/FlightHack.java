@@ -18,21 +18,34 @@ import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
 
-@SearchTags({ "FlyHack", "fly hack", "flying" })
-public final class FlightHack extends Hack implements UpdateListener, IsPlayerInWaterListener {
+@SearchTags({"FlyHack", "fly hack", "flying"})
+public final class FlightHack extends Hack
+	implements UpdateListener, IsPlayerInWaterListener
+{
 	
-	public final SliderSetting speed = new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
-	private final CheckboxSetting downLimit = new CheckboxSetting("Limit Downward Speed", "Prevents the player from taking damage when flying down quickly with NoFall on.", false);
-	private final CheckboxSetting arrowFix = new CheckboxSetting("Reposition for Bows", "Modifies the flight pattern slightly so that arrows will shoot correctly.", false);
+	public final SliderSetting speed =
+		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
+	private final CheckboxSetting downLimit = new CheckboxSetting(
+		"Limit Downward Speed",
+		"Prevents the player from taking damage when flying down quickly with NoFall on.",
+		false);
+	private final CheckboxSetting arrowFix = new CheckboxSetting(
+		"Reposition for Bows",
+		"Modifies the flight pattern slightly so that arrows will shoot correctly.",
+		false);
 	
 	private int lastGoingUp = 10;
 	
-	public final CheckboxSetting anti_flykick = new CheckboxSetting("Anti Flykick", "Bypass the Fly check on Vanilla Servers.", false);
+	public final CheckboxSetting anti_flykick = new CheckboxSetting(
+		"Anti Flykick", "Bypass the Fly check on Vanilla Servers.", false);
 	
 	private int fly_ticks = 0;
 	
-	public FlightHack() {
-		super("Flight", "Allows you to you fly.\n\n" + "\u00a7c\u00a7lWARNING:\u00a7r" + " You will take fall damage if you don't use NoFall.");
+	public FlightHack()
+	{
+		super("Flight",
+			"Allows you to you fly.\n\n" + "\u00a7c\u00a7lWARNING:\u00a7r"
+				+ " You will take fall damage if you don't use NoFall.");
 		setCategory(Category.MOVEMENT);
 		addSetting(speed);
 		addSetting(downLimit);
@@ -41,7 +54,8 @@ public final class FlightHack extends Hack implements UpdateListener, IsPlayerIn
 	}
 	
 	@Override
-	public void onEnable() {
+	public void onEnable()
+	{
 		WURST.getHax().jetpackHack.setEnabled(false);
 		
 		EVENTS.add(UpdateListener.class, this);
@@ -49,45 +63,64 @@ public final class FlightHack extends Hack implements UpdateListener, IsPlayerIn
 	}
 	
 	@Override
-	public void onDisable() {
+	public void onDisable()
+	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(IsPlayerInWaterListener.class, this);
-		MC.options.keySneak.setPressed(((IKeyBinding) MC.options.keySneak).isActallyPressed());
+		MC.options.keySneak
+			.setPressed(((IKeyBinding)MC.options.keySneak).isActallyPressed());
 	}
 	
 	@Override
-	public void onUpdate() {
+	public void onUpdate()
+	{
 		ClientPlayerEntity player = MC.player;
 		
 		player.abilities.flying = false;
 		player.flyingSpeed = speed.getValueF();
 		
 		player.setVelocity(0, 0, 0);
-		if (WURST.getHax().freecamHack.isEnabled()) {
-			//don't move when using freecam
+		if(WURST.getHax().freecamHack.isEnabled())
+		{
+			// don't move when using freecam
 			return;
 		}
 		Vec3d velocity = player.getVelocity();
-		if (MC.currentScreen == null) {
-			//Allow shifing in air
-			if (MC.options.keyJump.isPressed() && ((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
+		if(MC.currentScreen == null)
+		{
+			// Allow shifing in air
+			if(MC.options.keyJump.isPressed()
+				&& ((IKeyBinding)MC.options.keySneak).isActallyPressed())
+			{
 				MC.options.keySneak.setPressed(true);
 				return;
 			}
-			if (MC.options.keyJump.isPressed()) {
+			if(MC.options.keyJump.isPressed())
+			{
 				lastGoingUp = 0;
 				player.setVelocity(velocity.add(0, speed.getValue(), 0));
-				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 - player.getVelocity().y);
-			} else if (((IKeyBinding) MC.options.keySneak).isActallyPressed()) {
+				player.flyingSpeed = (float)Math.min(speed.getValueF(),
+					10 - player.getVelocity().y);
+			}else if(((IKeyBinding)MC.options.keySneak).isActallyPressed())
+			{
 				MC.options.keySneak.setPressed(false);
-				player.setVelocity(velocity.subtract(0, (downLimit.isChecked() ? Math.min(3, speed.getValue()) : speed.getValue()), 0));
-				player.flyingSpeed = (float) Math.min(speed.getValueF(), 10 + player.getVelocity().y);
-			} else {
-				if (arrowFix.isChecked()) {
-					if (lastGoingUp < 3) {
+				player
+					.setVelocity(velocity.subtract(
+						0, (downLimit.isChecked()
+							? Math.min(3, speed.getValue()) : speed.getValue()),
+						0));
+				player.flyingSpeed = (float)Math.min(speed.getValueF(),
+					10 + player.getVelocity().y);
+			}else
+			{
+				if(arrowFix.isChecked())
+				{
+					if(lastGoingUp < 3)
+					{
 						lastGoingUp++;
 						player.setVelocity(velocity.add(0, -1, 0));
-					} else {
+					}else
+					{
 						player.setVelocity(velocity.add(0, 0.01, 0));
 						
 					}
@@ -95,17 +128,22 @@ public final class FlightHack extends Hack implements UpdateListener, IsPlayerIn
 			}
 		}
 		// If enabled, fly down 0.02 blocks every 2 seconds to prevent kicks
-		if (anti_flykick.isChecked()) {
+		if(anti_flykick.isChecked())
+		{
 			fly_ticks--;
-			if (fly_ticks <= 0) {
+			if(fly_ticks <= 0)
+			{
 				fly_ticks = 40;
-				if (velocity.y >= 0) player.setVelocity(velocity.subtract(0, velocity.y + 0.05, 0));
+				if(velocity.y >= 0)
+					player.setVelocity(
+						velocity.subtract(0, velocity.y + 0.05, 0));
 			}
 		}
 	}
 	
 	@Override
-	public void onIsPlayerInWater(IsPlayerInWaterEvent event) {
+	public void onIsPlayerInWater(IsPlayerInWaterEvent event)
+	{
 		event.setInWater(false);
 	}
 }
