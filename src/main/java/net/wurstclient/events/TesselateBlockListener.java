@@ -34,7 +34,7 @@ public interface TesselateBlockListener extends Listener
 		{
 			return state;
 		}
-
+		
 		public BlockPos getPos()
 		{
 			return pos;

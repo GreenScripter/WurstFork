@@ -31,7 +31,8 @@ public class TerrainRenderContextMixin
 		final BakedModel model, MatrixStack matrixStack,
 		CallbackInfoReturnable<Boolean> cir)
 	{
-		TesselateBlockEvent event = new TesselateBlockEvent(blockState, blockPos);
+		TesselateBlockEvent event =
+			new TesselateBlockEvent(blockState, blockPos);
 		EventManager.fire(event);
 		
 		if(event.isCancelled())
