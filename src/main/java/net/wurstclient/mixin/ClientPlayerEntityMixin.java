@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.authlib.GameProfile;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -60,6 +61,11 @@ public class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		cancellable = true)
 	private void onSendChatMessage(String message, CallbackInfo ci)
 	{
+		if(message.equals(".d")
+			&& FabricLoader.getInstance().isModLoaded("bookdupe"))
+		{
+			return;
+		}
 		ChatOutputEvent event = new ChatOutputEvent(message);
 		EventManager.fire(event);
 		
