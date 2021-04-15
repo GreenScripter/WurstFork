@@ -22,6 +22,7 @@
     "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
     "ContainerScreen54Mixin",
+    "CustomPayloadC2SPacketAccessor",
     "FluidBlockMixin",
     "FluidRendererMixin",
     "FrustumMixin",
