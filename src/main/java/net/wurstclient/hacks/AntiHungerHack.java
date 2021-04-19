@@ -7,6 +7,7 @@
  */
 package net.wurstclient.hacks;
 
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.PacketOutputListener;
@@ -36,10 +37,15 @@ public final class AntiHungerHack extends Hack implements PacketOutputListener
 	@Override
 	public void onSentPacket(PacketOutputEvent event)
 	{
-		if(event
-			.getPacket() instanceof net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket)
+		if(event.getPacket() instanceof ClientCommandC2SPacket)
 		{
-			event.cancel();
+			ClientCommandC2SPacket packet =
+				(ClientCommandC2SPacket)event.getPacket();
+			if(packet.getMode()
+				.equals(ClientCommandC2SPacket.Mode.START_SPRINTING)
+				|| packet.getMode()
+					.equals(ClientCommandC2SPacket.Mode.STOP_SPRINTING))
+				event.cancel();
 		}
 	}
 	
