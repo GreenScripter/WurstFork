@@ -19,7 +19,7 @@ jobs:
          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
          settings-path: ${{ github.workspace }} # location for the settings.xml file
       - name: Build with Gradle
-        run: gradle build
+        run: ./gradlew build
       - name: Hash Shortner
         run: echo ::set-output name=HASH::${GITHUB_SHA::7}
         id: hash-shortner
