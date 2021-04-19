@@ -37,6 +37,7 @@ dependencies {
 	
 	//Baritone
 	modImplementation 'cabaletta:baritone-api-fabric:1.6.3'
+	//Package baritone in so it doesn't have to be installed manually.
 	include 'cabaletta:baritone-api-fabric:1.6.3'
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.

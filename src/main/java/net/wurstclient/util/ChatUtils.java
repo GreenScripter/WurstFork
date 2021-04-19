@@ -42,7 +42,19 @@ public enum ChatUtils
 		
 		ChatHud chatHud = MC.inGameHud.getChatHud();
 		LiteralText prefix = new LiteralText(WURST_PREFIX);
-		chatHud.addMessage(prefix.append(component));
+		try
+		{
+			chatHud.addMessage(prefix.append(component));
+		}catch(Exception e)
+		{
+			try
+			{
+				chatHud.addMessage(prefix.append(component));
+			}catch(Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
 	}
 	
 	public static void message(String message)
@@ -54,7 +66,7 @@ public enum ChatUtils
 	{
 		ChatHud chatHud = MC.inGameHud.getChatHud();
 		chatHud.addMessage(new LiteralText(message));
-
+		
 	}
 	
 	public static void warning(String message)

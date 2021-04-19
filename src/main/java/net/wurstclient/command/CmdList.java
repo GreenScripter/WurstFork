@@ -52,6 +52,7 @@ public final class CmdList
 	public final PeekCmd peekCmd = new PeekCmd();
 	public final PotionCmd potionCmd = new PotionCmd();
 	public final ProtectCmd protectCmd = new ProtectCmd();
+	public final RandomCmd randomCmd = new RandomCmd();
 	public final RenameCmd renameCmd = new RenameCmd();
 	public final RepairCmd repairCmd = new RepairCmd();
 	public final RvCmd rvCmd = new RvCmd();

@@ -120,6 +120,12 @@ public abstract class ClientPlayerInteractionManagerMixin
 	}
 	
 	@Override
+	public ItemStack windowClick_THROW1(int slot)
+	{
+		return clickSlot(0, slot, 0, SlotActionType.THROW, client.player);
+	}
+	
+	@Override
 	public void rightClickItem()
 	{
 		interactItem(client.player, client.world, Hand.MAIN_HAND);

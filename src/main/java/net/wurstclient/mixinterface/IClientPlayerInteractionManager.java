@@ -25,6 +25,8 @@ public interface IClientPlayerInteractionManager
 	
 	public ItemStack windowClick_THROW(int slot);
 	
+	public ItemStack windowClick_THROW1(int slot);
+	
 	public void rightClickItem();
 	
 	public void rightClickBlock(BlockPos pos, Direction side, Vec3d hitVec);
@@ -33,4 +35,5 @@ public interface IClientPlayerInteractionManager
 		BlockPos blockPos, Direction direction);
 	
 	public void setBlockHitDelay(int delay);
+	
 }

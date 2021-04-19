@@ -36,6 +36,7 @@
     "FluidRendererMixin",
     "GameMenuScreenMixin",
     "GameRendererMixin",
+    "HandledScreenMixin",
     "IngameHudMixin",
     "InGameOverlayRendererMixin",
     "KeyBindingMixin",
