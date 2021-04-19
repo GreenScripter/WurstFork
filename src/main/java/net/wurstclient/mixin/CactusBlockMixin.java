@@ -26,14 +26,14 @@ import net.wurstclient.events.CactusCollisionShapeListener.CactusCollisionShapeE
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends Block
 {
-	private CactusBlockMixin(WurstClient wurst, Settings block$Settings_1)
+	private CactusBlockMixin(Settings block$Settings_1)
 	{
 		super(block$Settings_1);
 	}
 	
 	@Inject(at = {@At("HEAD")},
 		method = {
-			"getOutlineShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"},
+			"getCollisionShape(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;"},
 		cancellable = true)
 	private void onGetCollisionShape(BlockState blockState_1,
 		BlockView blockView_1, BlockPos blockPos_1,
