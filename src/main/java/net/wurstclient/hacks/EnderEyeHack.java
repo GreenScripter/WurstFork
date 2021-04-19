@@ -1,10 +1,13 @@
 package net.wurstclient.hacks;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -37,6 +40,7 @@ public final class EnderEyeHack extends Hack
 	Vec3d start = null;
 	
 	int next = Integer.MIN_VALUE;
+	Map<Integer, Vec3d> eyePaths = new HashMap<>();
 	
 	@Override
 	protected void onEnable()
@@ -50,6 +54,15 @@ public final class EnderEyeHack extends Hack
 	{
 		EVENTS.remove(PacketInputListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
+		positionLast = null;
+		positionNext = null;
+		directionLast = null;
+		pos = null;
+		
+		start = null;
+		
+		next = Integer.MIN_VALUE;
+		eyePaths.clear();
 	}
 	
 	@Override
@@ -131,8 +144,8 @@ public final class EnderEyeHack extends Hack
 				if(id == next)
 				{
 					Vec2f position = positionNext;
-					Vec3d now =
-						MC.world.getEntityById(id).getPos().subtract(start);
+					Vec3d now = MC.world.getEntityById(id).getPos()
+						.subtract(eyePaths.remove(id));
 					Vec2f direction =
 						new Vec2f((float)now.getX(), (float)now.getZ());
 					if(positionLast != null)
@@ -165,6 +178,7 @@ public final class EnderEyeHack extends Hack
 					new Vec2f((float)packet.getX(), (float)packet.getZ());
 				start = new Vec3d(packet.getX(), packet.getY(), packet.getZ());
 				positionNext = position;
+				eyePaths.put(next, start);
 				
 			}
 			
