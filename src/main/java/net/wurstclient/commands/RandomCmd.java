@@ -662,7 +662,6 @@ public final class RandomCmd extends Command
 			ChatUtils.message("Could not find exterior air gap.");
 			return false;
 		}
-		System.out.println(torchDirection);
 		sides = torches();
 		return true;
 	}
