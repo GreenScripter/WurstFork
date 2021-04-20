@@ -114,7 +114,6 @@ public final class ProjectileauraHack extends Hack
 		if(target == null)
 			return;
 		
-		WURST.getHax().criticalsHack.doCritical();
 		ClientPlayerEntity player = MC.player;
 		MC.interactionManager.attackEntity(player, target);
 		player.swingHand(Hand.MAIN_HAND);
