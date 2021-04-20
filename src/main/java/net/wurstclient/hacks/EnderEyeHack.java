@@ -141,11 +141,11 @@ public final class EnderEyeHack extends Hack
 				(EntitiesDestroyS2CPacket)event.getPacket();
 			for(int id : packet.getEntityIds())
 			{
-				if(id == next)
+				if(eyePaths.containsKey(id))
 				{
-					Vec2f position = positionNext;
-					Vec3d now = MC.world.getEntityById(id).getPos()
-						.subtract(eyePaths.remove(id));
+					Vec3d position = eyePaths.remove(id);
+					Vec3d now =
+						MC.world.getEntityById(id).getPos().subtract(position);
 					Vec2f direction =
 						new Vec2f((float)now.getX(), (float)now.getZ());
 					if(positionLast != null)
@@ -153,14 +153,15 @@ public final class EnderEyeHack extends Hack
 						float m1 = directionLast.y / directionLast.x;
 						float m2 = direction.y / direction.x;
 						float a = positionLast.y - m1 * positionLast.x;
-						float b = position.y - m2 * position.x;
+						float b = (float)(position.z - m2 * position.x);
 						float x = (b - a) / (m1 - m2);
 						float y = m2 * x + b;
 						pos = new Vec3i(x, 60, y);
 						ChatUtils.message("End portal location: X: "
 							+ pos.getX() + " Z: " + pos.getZ());
 					}
-					positionLast = position;
+					positionLast =
+						new Vec2f((float)position.x, (float)position.z);
 					directionLast = direction;
 					next = Integer.MIN_VALUE;
 					return;
