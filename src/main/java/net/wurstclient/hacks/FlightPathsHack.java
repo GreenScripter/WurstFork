@@ -168,9 +168,9 @@ public final class FlightPathsHack extends Hack
 		GL11.glPopMatrix();
 	}
 	
-	private boolean pathHitsUs = false;
+	public boolean pathHitsUs = false;
 	
-	private ArrayList<Vec3d> getPath(float partialTicks,
+	public ArrayList<Vec3d> getPath(float partialTicks,
 		ProjectileEntity projectile)
 	{
 		pathHitsUs = false;
