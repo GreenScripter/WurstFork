@@ -24,6 +24,7 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.HoglinEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.entity.mob.WaterCreatureEntity;
@@ -229,8 +230,8 @@ public final class KillauraHack extends Hack
 			});
 		
 		if(filterMonsters.isChecked())
-			stream = stream.filter(
-				e -> !(e instanceof Monster || e instanceof ShulkerEntity));
+			stream = stream.filter(e -> !(e instanceof Monster
+				|| e instanceof ShulkerEntity || e instanceof HoglinEntity));
 		
 		if(filterPigmen.isChecked())
 			stream = stream.filter(e -> !(e instanceof ZombifiedPiglinEntity));
@@ -241,11 +242,12 @@ public final class KillauraHack extends Hack
 		if(filterAnimals.isChecked())
 			stream = stream.filter(
 				e -> !(e instanceof AnimalEntity || e instanceof AmbientEntity
-					|| e instanceof WaterCreatureEntity));
+					|| e instanceof WaterCreatureEntity)
+					|| e instanceof HoglinEntity);
 		
 		if(filterBabies.isChecked())
 			stream = stream.filter(e -> !(e instanceof PassiveEntity
-				&& ((PassiveEntity)e).isBaby()));
+				&& ((PassiveEntity)e).isBaby()) || e instanceof HoglinEntity);
 		
 		if(filterPets.isChecked())
 			stream = stream
