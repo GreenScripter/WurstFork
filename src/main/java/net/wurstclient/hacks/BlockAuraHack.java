@@ -196,8 +196,7 @@ public final class BlockAuraHack extends Hack
 	@Override
 	public void onReceivedPacket(PacketInputEvent event)
 	{
-		if(event
-			.getPacket() instanceof net.minecraft.network.packet.s2c.play.CooldownUpdateS2CPacket)
+		if(event.getPacket() instanceof CooldownUpdateS2CPacket)
 		{
 			CooldownUpdateS2CPacket packet =
 				(CooldownUpdateS2CPacket)event.getPacket();
@@ -207,15 +206,13 @@ public final class BlockAuraHack extends Hack
 				wasBlocking = false;
 			}
 		}
-		if(event
-			.getPacket() instanceof net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket)
+		if(event.getPacket() instanceof EntityTrackerUpdateS2CPacket)
 		{
 			EntityTrackerUpdateS2CPacket packet =
 				(EntityTrackerUpdateS2CPacket)event.getPacket();
 			if(packet.id() == MC.player.getEntityId())
 			{
 				packet.getTrackedValues().forEach(e -> {
-					System.out.println(e.getData());
 					if(wasBlocking)
 					{
 						if(e.getData().getId() == 7)
