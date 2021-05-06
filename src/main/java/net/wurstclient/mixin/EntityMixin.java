@@ -43,24 +43,28 @@ public abstract class EntityMixin implements Nameable, CommandOutput
 			entity.setVelocity(velocity);
 	}
 	
-	@Inject(at = { @At("HEAD") }, method = { "changeLookDirection(DD)V" }, cancellable = true)
-	private void changeLookDirection(double dx, double dy, CallbackInfo ci) {
+	@Inject(at = {@At("HEAD")},
+		method = {"changeLookDirection(DD)V"},
+		cancellable = true)
+	private void changeLookDirection(double dx, double dy, CallbackInfo ci)
+	{
 		
-		if (WurstClient.INSTANCE.getHax().freecamHack.isEnabled()) {
-			double d = dy * 0.15D;
-		      double e = dx * 0.15D;
-		      Camera c = MinecraftClient.getInstance().gameRenderer.getCamera();
-		      ((ICamera)c).setPitch(MathHelper.clamp((float)((double)c.getPitch() + d), -90.0F, 90.0F));
-		      ((ICamera)c).setYaw((float)((double)c.getYaw() + e));
-		      
-//		      this.pitch = MathHelper.clamp(this.pitch, -90.0F, 90.0F);
-//		      this.prevPitch = (float)((double)this.prevPitch + d);
-//		      this.prevYaw = (float)((double)this.prevYaw + e);
-//		      this.prevPitch = MathHelper.clamp(this.prevPitch, -90.0F, 90.0F);
-//		      if (this.vehicle != null) {
-//		         this.vehicle.onPassengerLookAround(this);
-//		      }
-			ci.cancel();
+		if(WurstClient.INSTANCE.getHax().freecamHack.isEnabled())
+		{
+			if(!WurstClient.INSTANCE.getHax().freecamHack.lockLooking
+				.isChecked())
+			{
+				
+				double d = dy * 0.15D;
+				double e = dx * 0.15D;
+				Camera c =
+					MinecraftClient.getInstance().gameRenderer.getCamera();
+				((ICamera)c).setPitch(MathHelper
+					.clamp((float)((double)c.getPitch() + d), -90.0F, 90.0F));
+				((ICamera)c).setYaw((float)((double)c.getYaw() + e));
+				
+				ci.cancel();
+			}
 		}
 		
 	}
