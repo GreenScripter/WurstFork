@@ -79,7 +79,7 @@ public final class ProjectileauraHack extends Hack
 		double rangeSq = Math.pow(range.getValue(), 2);
 		Stream<Entity> stream =
 			StreamSupport.stream(MC.world.getEntities().spliterator(), true)
-				.filter(e -> !e.removed)
+				.filter(e -> !e.isRemoved())
 				.filter(e -> ((e instanceof FireballEntity
 					&& targetFireballs.isChecked())
 					|| (e instanceof ShulkerBulletEntity

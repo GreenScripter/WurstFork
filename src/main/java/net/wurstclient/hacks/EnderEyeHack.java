@@ -5,8 +5,9 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
@@ -66,7 +67,7 @@ public final class EnderEyeHack extends Hack
 	}
 	
 	@Override
-	public void onRender(float partialTicks)
+	public void onRender(MatrixStack stack, float partialTicks)
 	{
 		if(pos == null)
 			return;
@@ -82,7 +83,7 @@ public final class EnderEyeHack extends Hack
 		GL11.glDisable(GL11.GL_LIGHTING);
 		
 		GL11.glPushMatrix();
-		RenderUtils.applyRenderOffset();
+		RenderUtils.applyRenderOffset(stack);
 		
 		// generate rainbow color
 		float x = System.currentTimeMillis() % 2000 / 1000F;
@@ -115,10 +116,10 @@ public final class EnderEyeHack extends Hack
 			GL11.glPushMatrix();
 			GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
 			
-			RenderUtils.drawOutlinedBox();
+			RenderUtils.drawOutlinedBox(stack);
 			
 			GL11.glColor4f(red, green, blue, 0.25F);
-			RenderUtils.drawSolidBox();
+			RenderUtils.drawSolidBox(stack);
 			
 			GL11.glPopMatrix();
 		}
@@ -135,11 +136,11 @@ public final class EnderEyeHack extends Hack
 	@Override
 	public void onReceivedPacket(PacketInputEvent event)
 	{
-		if(event.getPacket() instanceof EntitiesDestroyS2CPacket)
+		if(event.getPacket() instanceof EntityDestroyS2CPacket)
 		{
-			EntitiesDestroyS2CPacket packet =
-				(EntitiesDestroyS2CPacket)event.getPacket();
-			for(int id : packet.getEntityIds())
+			EntityDestroyS2CPacket packet =
+				(EntityDestroyS2CPacket)event.getPacket();
+			int id = packet.getEntityId();
 			{
 				if(eyePaths.containsKey(id))
 				{

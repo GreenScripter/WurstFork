@@ -19,11 +19,11 @@ public interface IClientPlayerInteractionManager
 	
 	public void setBreakingBlock(boolean breakingBlock);
 	
-	public ItemStack windowClick_PICKUP(int slot);
+	public void windowClick_PICKUP(int slot);
 	
-	public ItemStack windowClick_QUICK_MOVE(int slot);
+	public void windowClick_QUICK_MOVE(int slot);
 	
-	public ItemStack windowClick_THROW(int slot);
+	public void windowClick_THROW(int slot);
 	
 	public ItemStack windowClick_THROW1(int slot);
 	

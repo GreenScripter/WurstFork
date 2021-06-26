@@ -15,6 +15,7 @@ import java.util.stream.StreamSupport;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.DragonFireballEntity;
@@ -95,7 +96,7 @@ public final class FlightPathsHack extends Hack
 	}
 	
 	@Override
-	public void onRender(float partialTicks)
+	public void onRender(MatrixStack s, float partialTicks)
 	{
 		GL11.glPushMatrix();
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -119,7 +120,7 @@ public final class FlightPathsHack extends Hack
 			if(!path.isEmpty() && showEndpoints.isChecked())
 			{
 				Vec3d end = path.get(path.size() - 1);
-				drawEndOfLine(end, camPos);
+				drawEndOfLine(s, end, camPos);
 			}
 		}
 		GL11.glColor4f(1, 1, 1, 1);
@@ -150,7 +151,7 @@ public final class FlightPathsHack extends Hack
 		GL11.glEnd();
 	}
 	
-	private void drawEndOfLine(Vec3d end, Vec3d camPos)
+	private void drawEndOfLine(MatrixStack s, Vec3d end, Vec3d camPos)
 	{
 		double renderX = end.x - camPos.x;
 		double renderY = end.y - camPos.y;
@@ -160,10 +161,10 @@ public final class FlightPathsHack extends Hack
 		GL11.glTranslated(renderX - 0.5, renderY - 0.5, renderZ - 0.5);
 		
 		GL11.glColor4f(1, 0, 0, 0.25F);
-		RenderUtils.drawSolidBox();
+		RenderUtils.drawSolidBox(s);
 		
 		GL11.glColor4f(1, 0, 0, 0.75F);
-		RenderUtils.drawOutlinedBox();
+		RenderUtils.drawOutlinedBox(s);
 		
 		GL11.glPopMatrix();
 	}
@@ -179,7 +180,7 @@ public final class FlightPathsHack extends Hack
 		// calculate starting position
 		double arrowPosX = projectile.lastRenderX
 			+ (projectile.getX() - projectile.lastRenderX) * partialTicks
-			- Math.cos(Math.toRadians(projectile.yaw)) * 0.16;
+			- Math.cos(Math.toRadians(projectile.getYaw())) * 0.16;
 		
 		double arrowPosY = projectile.lastRenderY
 			+ (projectile.getY() - projectile.lastRenderY) * partialTicks
@@ -187,7 +188,7 @@ public final class FlightPathsHack extends Hack
 		
 		double arrowPosZ = projectile.lastRenderZ
 			+ (projectile.getZ() - projectile.lastRenderZ) * partialTicks
-			- Math.sin(Math.toRadians(projectile.yaw)) * 0.16;
+			- Math.sin(Math.toRadians(projectile.getYaw())) * 0.16;
 		
 		// calculate starting motion
 		double arrowMotionX = projectile.getVelocity().x;

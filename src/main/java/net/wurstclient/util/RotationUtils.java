@@ -9,10 +9,10 @@ package net.wurstclient.util;
 
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.wurstclient.RotationFaker;
 import net.wurstclient.WurstClient;
 import net.wurstclient.mixinterface.IClientPlayerEntity;
@@ -36,10 +36,10 @@ public enum RotationUtils
 		float f = 0.017453292F;
 		float pi = (float)Math.PI;
 		
-		float f1 = MathHelper.cos(-player.yaw * f - pi);
-		float f2 = MathHelper.sin(-player.yaw * f - pi);
-		float f3 = -MathHelper.cos(-player.pitch * f);
-		float f4 = MathHelper.sin(-player.pitch * f);
+		float f1 = MathHelper.cos(-player.getYaw() * f - pi);
+		float f2 = MathHelper.sin(-player.getYaw() * f - pi);
+		float f3 = -MathHelper.cos(-player.getPitch() * f);
+		float f4 = MathHelper.sin(-player.getPitch() * f);
 		
 		return new Vec3d(f2 * f3, f4, f1 * f3);
 	}
@@ -59,8 +59,8 @@ public enum RotationUtils
 	
 	public static Quaternion toQuaternion(float pitch, float yaw){
 		Quaternion q = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-		q.hamiltonProduct(Vector3f.POSITIVE_Y.getDegreesQuaternion(-yaw));
-		q.hamiltonProduct(Vector3f.POSITIVE_X.getDegreesQuaternion(pitch));
+		q.hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-yaw));
+		q.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(pitch));
 		
 		return q;
 	}
@@ -113,8 +113,8 @@ public enum RotationUtils
 		Rotation needed = getNeededRotations(vec);
 		
 		ClientPlayerEntity player = WurstClient.MC.player;
-		float currentYaw = MathHelper.wrapDegrees(player.yaw);
-		float currentPitch = MathHelper.wrapDegrees(player.pitch);
+		float currentYaw = MathHelper.wrapDegrees(player.getYaw());
+		float currentPitch = MathHelper.wrapDegrees(player.getPitch());
 		
 		float diffYaw = currentYaw - needed.yaw;
 		float diffPitch = currentPitch - needed.pitch;
@@ -139,7 +139,8 @@ public enum RotationUtils
 	public static float getHorizontalAngleToLookVec(Vec3d vec)
 	{
 		Rotation needed = getNeededRotations(vec);
-		return MathHelper.wrapDegrees(WurstClient.MC.player.yaw) - needed.yaw;
+		return MathHelper.wrapDegrees(WurstClient.MC.player.getYaw())
+			- needed.yaw;
 	}
 	
 	public static final class Rotation

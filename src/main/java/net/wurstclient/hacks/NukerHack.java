@@ -21,12 +21,16 @@ import java.util.stream.Stream;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.Material;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -174,7 +178,7 @@ public final class NukerHack extends Hack
 			.sorted(Comparator.comparingDouble(
 				pos -> eyesPos.squaredDistanceTo(Vec3d.of(pos))))
 			.collect(Collectors.toList());
-		if(player.abilities.creativeMode && !(mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")))
+		if(player.getAbilities().creativeMode && !(mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")))
 		{
 			Stream<BlockPos> stream2 = blocks2.parallelStream();
 			for(Set<BlockPos> set : prevBlocks)
@@ -232,7 +236,7 @@ public final class NukerHack extends Hack
 		int newSlot = -1;
 		for (int i = 0; i < 9; i++) {
 			// filter out non-block items
-			ItemStack stack = MC.player.inventory.getStack(i);
+			ItemStack stack = MC.player.getInventory().getStack(i);
 			if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
 			
 			
@@ -259,12 +263,12 @@ public final class NukerHack extends Hack
 		if (newSlot == -1) return;
 		
 		// set slot
-		int oldSlot = MC.player.inventory.selectedSlot;
-		MC.player.inventory.selectedSlot = newSlot;
+		int oldSlot = MC.player.getInventory().selectedSlot;
+		MC.player.getInventory().selectedSlot = newSlot;
 		placeBlock(pos);
 		
 		// reset slot
-		MC.player.inventory.selectedSlot = oldSlot;
+		MC.player.getInventory().selectedSlot = oldSlot;
 	}
 	
 	private boolean placeBlock(BlockPos pos)
@@ -296,8 +300,8 @@ public final class NukerHack extends Hack
 			
 			// place block
 			Rotation rotation = RotationUtils.getNeededRotations(hitVec);
-			PlayerMoveC2SPacket.LookOnly packet =
-				new PlayerMoveC2SPacket.LookOnly(rotation.getYaw(),
+			PlayerMoveC2SPacket.LookAndOnGround packet =
+				new PlayerMoveC2SPacket.LookAndOnGround(rotation.getYaw(),
 					rotation.getPitch(), MC.player.isOnGround());
 			MC.player.networkHandler.sendPacket(packet);
 			IMC.getInteractionManager().rightClickBlock(neighbor, side2,
@@ -330,7 +334,7 @@ public final class NukerHack extends Hack
 	}
 	
 	@Override
-	public void onRender(float partialTicks)
+	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
 		if(currentBlock == null)
 			return;
@@ -339,14 +343,11 @@ public final class NukerHack extends Hack
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		GL11.glLineWidth(2);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL11.GL_LIGHTING);
 		
-		GL11.glPushMatrix();
-		RenderUtils.applyRegionalRenderOffset();
+		matrixStack.push();
+		RenderUtils.applyRegionalRenderOffset(matrixStack);
 		
 		BlockPos camPos = RenderUtils.getCameraBlockPos();
 		int regionX = (camPos.getX() >> 9) * 512;
@@ -357,27 +358,28 @@ public final class NukerHack extends Hack
 		float red = p * 2F;
 		float green = 2 - red;
 		
-		GL11.glTranslated(currentBlock.getX() - regionX, currentBlock.getY(),
-			currentBlock.getZ() - regionZ);
+		matrixStack.translate(currentBlock.getX() - regionX,
+			currentBlock.getY(), currentBlock.getZ() - regionZ);
 		if(p < 1)
 		{
-			GL11.glTranslated(0.5, 0.5, 0.5);
-			GL11.glScaled(p, p, p);
-			GL11.glTranslated(-0.5, -0.5, -0.5);
+			matrixStack.translate(0.5, 0.5, 0.5);
+			matrixStack.scale(p, p, p);
+			matrixStack.translate(-0.5, -0.5, -0.5);
 		}
 		
-		GL11.glColor4f(red, green, 0, 0.25F);
-		RenderUtils.drawSolidBox(box);
+		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
-		GL11.glColor4f(red, green, 0, 0.5F);
-		RenderUtils.drawOutlinedBox(box);
+		RenderSystem.setShaderColor(red, green, 0, 0.25F);
+		RenderUtils.drawSolidBox(box, matrixStack);
 		
-		GL11.glPopMatrix();
+		RenderSystem.setShaderColor(red, green, 0, 0.5F);
+		RenderUtils.drawOutlinedBox(box, matrixStack);
+		
+		matrixStack.pop();
 		
 		// GL resets
-		GL11.glColor4f(1, 1, 1, 1);
+		RenderSystem.setShaderColor(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
 		

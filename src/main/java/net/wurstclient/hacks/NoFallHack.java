@@ -8,7 +8,7 @@
 package net.wurstclient.hacks;
 
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.OnGroundOnly;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
@@ -54,7 +54,7 @@ public final class NoFallHack extends Hack implements UpdateListener
 		if (speedLimit.isChecked() && player.getVelocity().y < -3) {
 			player.setVelocity(new Vec3d(player.getVelocity().x, -3, player.getVelocity().z));
 		}
-		player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+		player.networkHandler.sendPacket(new OnGroundOnly(true));
 	}
 	
 	private boolean isFallingFastEnoughToCauseDamage(ClientPlayerEntity player)

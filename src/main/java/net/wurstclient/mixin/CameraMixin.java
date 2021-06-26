@@ -15,8 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.render.Camera;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
+import net.minecraft.client.render.CameraSubmersionType;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.WurstClient;
 import net.wurstclient.hacks.FreecamHack;
@@ -47,12 +46,14 @@ public abstract class CameraMixin implements ICamera
 	}
 	
 	@Inject(at = {@At("HEAD")},
-		method = {"getSubmergedFluidState()Lnet/minecraft/fluid/FluidState;"},
+		method = {
+			"getSubmersionType()Lnet/minecraft/client/render/CameraSubmersionType;"},
 		cancellable = true)
-	private void getSubmergedFluidState(CallbackInfoReturnable<FluidState> cir)
+	private void onGetSubmersionType(
+		CallbackInfoReturnable<CameraSubmersionType> cir)
 	{
 		if(WurstClient.INSTANCE.getHax().noOverlayHack.isEnabled() || WurstClient.INSTANCE.getHax().freecamHack.isEnabled())
-			cir.setReturnValue(Fluids.EMPTY.getDefaultState());
+			cir.setReturnValue(CameraSubmersionType.NONE);
 	}
 	
 	@Inject(at = {@At("HEAD")},

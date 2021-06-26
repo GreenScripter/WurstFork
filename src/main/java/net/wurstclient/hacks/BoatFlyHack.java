@@ -55,7 +55,7 @@ public final class BoatFlyHack extends Hack implements UpdateListener
 		Vec3d velocity = vehicle.getVelocity();
 		double motionY = MC.options.keyJump.isPressed() ? speed.getValueF() : 0;
 		if (speed.getValueF() != 1 && velocity.length() >= 0.1 && MC.options.keyForward.isPressed()) {
-			velocity = RotationUtils.getMoveVec(vehicle.yaw);
+			velocity = RotationUtils.getMoveVec(vehicle.getYaw());
 			velocity = new Vec3d(velocity.x, 0, velocity.z).normalize().multiply(speed.getValue());
 		}
 		vehicle.setVelocity(new Vec3d(velocity.x, motionY, velocity.z));

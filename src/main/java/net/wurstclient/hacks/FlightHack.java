@@ -22,7 +22,7 @@ import net.wurstclient.settings.SliderSetting.ValueDisplay;
 public final class FlightHack extends Hack
 	implements UpdateListener, IsPlayerInWaterListener
 {
-	
+
 	public final SliderSetting speed =
 		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
 	private final CheckboxSetting downLimit = new CheckboxSetting(
@@ -33,14 +33,14 @@ public final class FlightHack extends Hack
 		"Reposition for Bows",
 		"Modifies the flight pattern slightly so that arrows will shoot correctly.",
 		false);
-	
+
 	private int lastGoingUp = 10;
-	
+
 	public final CheckboxSetting anti_flykick = new CheckboxSetting(
 		"Anti Flykick", "Bypass the Fly check on Vanilla Servers.", false);
-	
+
 	private int fly_ticks = 0;
-	
+
 	public FlightHack()
 	{
 		super("Flight",
@@ -52,16 +52,16 @@ public final class FlightHack extends Hack
 		addSetting(arrowFix);
 		addSetting(anti_flykick);
 	}
-	
+
 	@Override
 	public void onEnable()
 	{
 		WURST.getHax().jetpackHack.setEnabled(false);
-		
+
 		EVENTS.add(UpdateListener.class, this);
 		EVENTS.add(IsPlayerInWaterListener.class, this);
 	}
-	
+
 	@Override
 	public void onDisable()
 	{
@@ -70,15 +70,15 @@ public final class FlightHack extends Hack
 		MC.options.keySneak
 			.setPressed(((IKeyBinding)MC.options.keySneak).isActallyPressed());
 	}
-	
+
 	@Override
 	public void onUpdate()
 	{
 		ClientPlayerEntity player = MC.player;
-		
-		player.abilities.flying = false;
+
+		player.getAbilities().flying = false;
 		player.flyingSpeed = speed.getValueF();
-		
+
 		player.setVelocity(0, 0, 0);
 		if(WURST.getHax().freecamHack.isEnabled())
 		{
@@ -122,7 +122,7 @@ public final class FlightHack extends Hack
 					}else
 					{
 						player.setVelocity(velocity.add(0, 0.01, 0));
-						
+
 					}
 				}
 			}
@@ -140,7 +140,7 @@ public final class FlightHack extends Hack
 			}
 		}
 	}
-	
+
 	@Override
 	public void onIsPlayerInWater(IsPlayerInWaterEvent event)
 	{

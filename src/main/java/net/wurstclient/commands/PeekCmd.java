@@ -7,17 +7,14 @@
  */
 package net.wurstclient.commands;
 
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.wurstclient.command.CmdException;
-import net.wurstclient.command.CmdSyntaxError;
 import net.wurstclient.command.Command;
 import net.wurstclient.events.RenderListener;
 
@@ -26,8 +23,7 @@ public final class PeekCmd extends Command implements RenderListener
 	
 	public PeekCmd()
 	{
-		super("peek",
-			"Allows you to see the contents of a shulker box.",
+		super("peek", "Allows you to see the contents of a shulker box.",
 			".peek");
 	}
 	
@@ -38,26 +34,27 @@ public final class PeekCmd extends Command implements RenderListener
 	}
 	
 	@Override
-	public void onRender(float partialTicks)
+	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
 		ItemStack is = MC.player.getMainHandStack();
 		System.out.println(is);
 		System.out.println(is.getTag());
 		if(is.hasTag() && is.getTag().getKeys().contains("BlockEntityTag"))
 		{
-			ListTag tag =
+			NbtList tag =
 				is.getTag().getCompound("BlockEntityTag").getList("Items", 10);
 			SimpleInventory shulker = new SimpleInventory(27);
 			
 			for(int i = 0; i < tag.size(); i++)
 			{
 				System.out.println(tag.getCompound(i));
-				shulker.setStack(tag.getCompound(i).getByte("Slot"), ItemStack.fromTag(tag.getCompound(i)));
+				shulker.setStack(tag.getCompound(i).getByte("Slot"),
+					ItemStack.fromNbt(tag.getCompound(i)));
 			}
 			GenericContainerScreen screen = new GenericContainerScreen(
 				new GenericContainerScreenHandler(ScreenHandlerType.GENERIC_9X3,
-					0, MC.player.inventory, shulker, 3),
-				MC.player.inventory, is.getName());
+					0, MC.player.getInventory(), shulker, 3),
+				MC.player.getInventory(), is.getName());
 			
 			MC.openScreen(screen);
 			
@@ -65,4 +62,5 @@ public final class PeekCmd extends Command implements RenderListener
 		// ChatUtils.message("Showing inventory of " + "" + ".");
 		EVENTS.remove(RenderListener.class, this);
 	}
+	
 }

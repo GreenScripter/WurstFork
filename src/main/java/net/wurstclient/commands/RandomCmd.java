@@ -213,7 +213,7 @@ public final class RandomCmd extends Command
 							}
 						}
 						String item = Registry.ITEM
-							.getId(MC.player.inventory.getMainHandStack()
+							.getId(MC.player.getInventory().getMainHandStack()
 								.getItem())
 							.toString().replace("minecraft:", "");
 						ArrayList<Enchantments.EnchantmentInstance> wanted =
@@ -799,7 +799,7 @@ public final class RandomCmd extends Command
 		for(int i = 0; i < 9; i++)
 		{
 			// filter out non-block items
-			ItemStack stack = MC.player.inventory.getStack(i);
+			ItemStack stack = MC.player.getInventory().getStack(i);
 			if(stack.isEmpty() || !Registry.ITEM.getId(stack.getItem())
 				.toString().equals("minecraft:torch"))
 				continue;
@@ -815,7 +815,7 @@ public final class RandomCmd extends Command
 			return;
 		}
 		
-		MC.player.inventory.selectedSlot = newSlot;
+		MC.player.getInventory().selectedSlot = newSlot;
 	}
 	
 	public void restart()
@@ -889,7 +889,7 @@ public final class RandomCmd extends Command
 	private boolean dropItem(String name)
 	{
 		for(int i = 9; i < 45; i++)
-			if(Registry.ITEM.getId(MC.player.inventory.getStack(i).getItem())
+			if(Registry.ITEM.getId(MC.player.getInventory().getStack(i).getItem())
 				.toString().replace("minecraft:", "").equals(name))
 			{
 				IMC.getInteractionManager().windowClick_THROW1(i);
@@ -900,7 +900,7 @@ public final class RandomCmd extends Command
 				return true;
 			}
 		for(int i = 0; i < 9; i++)
-			if(Registry.ITEM.getId(MC.player.inventory.getStack(i).getItem())
+			if(Registry.ITEM.getId(MC.player.getInventory().getStack(i).getItem())
 				.toString().replace("minecraft:", "").equals(name))
 			{
 				IMC.getInteractionManager().windowClick_THROW1(i + 36);
@@ -996,8 +996,8 @@ public final class RandomCmd extends Command
 			
 			// face block
 			Rotation rotation = RotationUtils.getNeededRotations(hitVec);
-			PlayerMoveC2SPacket.LookOnly packet =
-				new PlayerMoveC2SPacket.LookOnly(rotation.getYaw(),
+			PlayerMoveC2SPacket.LookAndOnGround packet =
+				new PlayerMoveC2SPacket.LookAndOnGround(rotation.getYaw(),
 					rotation.getPitch(), MC.player.isOnGround());
 			MC.player.networkHandler.sendPacket(packet);
 			
@@ -1700,7 +1700,7 @@ class EnchCrackerController
 		r.setSeed(seed ^ 0x5DEECE66DL);
 		double g = p.getX() + (r.nextDouble() - 0.5D) * 16.0D;
 		double h = MathHelper.clamp(p.getY() + (double)(r.nextInt(16) - 8),
-			0.0D, (double)(WurstClient.MC.world.getDimensionHeight() - 1));
+			0.0D, (double)(WurstClient.MC.world.getHeight() - 1));
 		double j = p.getZ() + (r.nextDouble() - 0.5D) * 16.0D;
 		return new Vec3d(g, h, j);
 	}

@@ -126,15 +126,16 @@ public final class AutoCraftHack extends Hack implements UpdateListener
 				for(CraftingRecipe cr : recipes)
 				{
 					if(cr.getOutput().getItem().equals(Items.GOLD_BLOCK)
-						&& goldIngot.isChecked()
-						&& MC.player.inventory.count(Items.GOLD_INGOT) >= 9)
+						&& goldIngot.isChecked() && MC.player.getInventory()
+							.count(Items.GOLD_INGOT) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.GOLD_INGOT)
 						&& goldNugget.isChecked()
-						&& MC.player.inventory.count(Items.GOLD_NUGGET) >= 9
-						&& cr.getPreviewInputs().get(0)
+						&& MC.player.getInventory()
+							.count(Items.GOLD_NUGGET) >= 9
+						&& cr.getIngredients().get(0)
 							.test(new ItemStack(Items.GOLD_NUGGET)))
 					{
 						recipe = cr;
@@ -142,46 +143,47 @@ public final class AutoCraftHack extends Hack implements UpdateListener
 					}
 					if(cr.getOutput().getItem().equals(Items.IRON_INGOT)
 						&& ironNugget.isChecked()
-						&& MC.player.inventory.count(Items.IRON_NUGGET) >= 9
-						&& cr.getPreviewInputs().get(0)
+						&& MC.player.getInventory()
+							.count(Items.IRON_NUGGET) >= 9
+						&& cr.getIngredients().get(0)
 							.test(new ItemStack(Items.IRON_NUGGET)))
 					{
 						recipe = cr;
 						break;
 					}
 					if(cr.getOutput().getItem().equals(Items.IRON_BLOCK)
-						&& ironIngot.isChecked()
-						&& MC.player.inventory.count(Items.IRON_INGOT) >= 9)
+						&& ironIngot.isChecked() && MC.player.getInventory()
+							.count(Items.IRON_INGOT) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.REDSTONE_BLOCK)
 						&& redstone.isChecked()
-						&& MC.player.inventory.count(Items.REDSTONE) >= 9)
+						&& MC.player.getInventory().count(Items.REDSTONE) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.DIAMOND_BLOCK)
 						&& diamond.isChecked()
-						&& MC.player.inventory.count(Items.DIAMOND) >= 9)
+						&& MC.player.getInventory().count(Items.DIAMOND) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.EMERALD_BLOCK)
 						&& emerald.isChecked()
-						&& MC.player.inventory.count(Items.EMERALD) >= 9)
+						&& MC.player.getInventory().count(Items.EMERALD) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.SLIME_BLOCK)
-						&& slime.isChecked()
-						&& MC.player.inventory.count(Items.SLIME_BALL) >= 9)
+						&& slime.isChecked() && MC.player.getInventory()
+							.count(Items.SLIME_BALL) >= 9)
 					{
 						recipe = cr;
 					}
 					if(cr.getOutput().getItem().equals(Items.COAL_BLOCK)
 						&& coal.isChecked()
-						&& MC.player.inventory.count(Items.COAL) >= 9)
+						&& MC.player.getInventory().count(Items.COAL) >= 9)
 					{
 						recipe = cr;
 					}

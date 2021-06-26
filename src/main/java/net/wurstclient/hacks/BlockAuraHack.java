@@ -92,7 +92,7 @@ public final class BlockAuraHack extends Hack
 		Stream<Entity> stream = StreamSupport
 			.stream(world.getOtherEntities(player,
 				player.getBoundingBox().expand(6), null).spliterator(), true)
-			.filter(e -> !e.removed)
+			.filter(e -> !e.isRemoved())
 			.filter(e -> (e instanceof LivingEntity
 				&& ((LivingEntity)e).getHealth() > 0)
 				|| e instanceof EndCrystalEntity || e instanceof EnderDragonPart
@@ -163,7 +163,7 @@ public final class BlockAuraHack extends Hack
 		}
 		if(!MC.player.getItemCooldownManager().isCoolingDown(Items.SHIELD))
 		{
-			if(MC.player.inventory.getStack(40).getItem().equals(Items.SHIELD))
+			if(MC.player.getInventory().getStack(40).getItem().equals(Items.SHIELD))
 			{
 				if(!wasBlocking)
 				{
@@ -210,7 +210,7 @@ public final class BlockAuraHack extends Hack
 		{
 			EntityTrackerUpdateS2CPacket packet =
 				(EntityTrackerUpdateS2CPacket)event.getPacket();
-			if(packet.id() == MC.player.getEntityId())
+			if(packet.id() == MC.player.getId())
 			{
 				packet.getTrackedValues().forEach(e -> {
 					if(wasBlocking)

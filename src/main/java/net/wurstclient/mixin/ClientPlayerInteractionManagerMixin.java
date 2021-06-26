@@ -53,7 +53,7 @@ public abstract class ClientPlayerInteractionManagerMixin
 	private int blockBreakingCooldown;
 	
 	@Inject(at = {@At(value = "INVOKE",
-		target = "Lnet/minecraft/client/network/ClientPlayerEntity;getEntityId()I",
+		target = "Lnet/minecraft/client/network/ClientPlayerEntity;getId()I",
 		ordinal = 0)},
 		method = {
 			"updateBlockBreakingProgress(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z"})
@@ -102,21 +102,21 @@ public abstract class ClientPlayerInteractionManagerMixin
 	}
 	
 	@Override
-	public ItemStack windowClick_PICKUP(int slot)
+	public void windowClick_PICKUP(int slot)
 	{
-		return clickSlot(0, slot, 0, SlotActionType.PICKUP, client.player);
+		clickSlot(0, slot, 0, SlotActionType.PICKUP, client.player);
 	}
 	
 	@Override
-	public ItemStack windowClick_QUICK_MOVE(int slot)
+	public void windowClick_QUICK_MOVE(int slot)
 	{
-		return clickSlot(0, slot, 0, SlotActionType.QUICK_MOVE, client.player);
+		clickSlot(0, slot, 0, SlotActionType.QUICK_MOVE, client.player);
 	}
 	
 	@Override
-	public ItemStack windowClick_THROW(int slot)
+	public void windowClick_THROW(int slot)
 	{
-		return clickSlot(0, slot, 1, SlotActionType.THROW, client.player);
+		clickSlot(0, slot, 1, SlotActionType.THROW, client.player);
 	}
 	
 	@Override
@@ -170,6 +170,6 @@ public abstract class ClientPlayerInteractionManagerMixin
 		World world_1, Hand hand_1);
 	
 	@Shadow
-	public abstract ItemStack clickSlot(int int_1, int int_2, int int_3,
-		SlotActionType slotActionType_1, PlayerEntity playerEntity_1);
+	public abstract ItemStack clickSlot(int syncId, int slotId, int clickData,
+		SlotActionType actionType, PlayerEntity playerEntity);
 }
