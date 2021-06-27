@@ -36,9 +36,9 @@ dependencies {
 	modImplementation 'com.google.code.findbugs:jsr305:3.0.2'
 
 	//Baritone
-	modImplementation 'cabaletta:baritone-api-fabric:1.6.3'
+	//modImplementation 'cabaletta:baritone-api-fabric:1.6.3'
 	//Package baritone in so it doesn't have to be installed manually.
-	include 'cabaletta:baritone-api-fabric:1.6.3'
+	//include 'cabaletta:baritone-api-fabric:1.6.3'
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
