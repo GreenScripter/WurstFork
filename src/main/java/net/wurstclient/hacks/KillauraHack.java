@@ -202,18 +202,21 @@ public final class KillauraHack extends Hack
 			return;
 		
 		double rangeSq = Math.pow(range.getValue(), 2);
-		Stream<Entity> stream = StreamSupport
-			.stream(world.getOtherEntities(player,
-				player.getBoundingBox().expand(10), null).spliterator(), true)
-			.filter(e -> !e.isRemoved())
-			.filter(e -> (e instanceof LivingEntity
-				&& ((LivingEntity)e).getHealth() > 0)
-				|| e instanceof EndCrystalEntity
-				|| e instanceof EnderDragonPart)
-			.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
-			.filter(e -> !(e instanceof FakePlayerEntity))
-			.filter(e -> !(e instanceof EnderDragonEntity))
-			.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
+		Stream<Entity> stream =
+			StreamSupport
+				.stream(world
+					.getOtherEntities(player,
+						player.getBoundingBox().expand(10), p -> true)
+					.spliterator(), true)
+				.filter(e -> !e.isRemoved())
+				.filter(e -> (e instanceof LivingEntity
+					&& ((LivingEntity)e).getHealth() > 0)
+					|| e instanceof EndCrystalEntity
+					|| e instanceof EnderDragonPart)
+				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+				.filter(e -> !(e instanceof FakePlayerEntity))
+				.filter(e -> !(e instanceof EnderDragonEntity))
+				.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
 		
 		if(filterPlayers.isChecked())
 			stream = stream.filter(e -> !(e instanceof PlayerEntity));

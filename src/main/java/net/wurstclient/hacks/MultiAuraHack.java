@@ -181,18 +181,21 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		
 		// get entities
 		double rangeSq = Math.pow(range.getValue(), 2);
-		Stream<Entity> stream = StreamSupport
-			.stream(world.getOtherEntities(player,
-				player.getBoundingBox().expand(10), null).spliterator(), true)
-			.filter(e -> !e.isRemoved())
-			.filter(e -> (e instanceof LivingEntity
-				&& ((LivingEntity)e).getHealth() > 0)
-				|| e instanceof EndCrystalEntity
-				|| e instanceof EnderDragonPart)
-			.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
-			.filter(e -> !(e instanceof FakePlayerEntity))
-			.filter(e -> !(e instanceof EnderDragonEntity))
-			.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
+		Stream<Entity> stream =
+			StreamSupport
+				.stream(world
+					.getOtherEntities(player,
+						player.getBoundingBox().expand(10), p -> true)
+					.spliterator(), true)
+				.filter(e -> !e.isRemoved())
+				.filter(e -> (e instanceof LivingEntity
+					&& ((LivingEntity)e).getHealth() > 0)
+					|| e instanceof EndCrystalEntity
+					|| e instanceof EnderDragonPart)
+				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
+				.filter(e -> !(e instanceof FakePlayerEntity))
+				.filter(e -> !(e instanceof EnderDragonEntity))
+				.filter(e -> !WURST.getFriends().contains(e.getEntityName()));
 		
 		if(filterPlayers.isChecked())
 			stream = stream.filter(e -> !(e instanceof PlayerEntity));
@@ -268,8 +271,7 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 			
 		// In the case of the ender dragon being near this will hit the head
 		// first meaning it will take the most damage.
-		entities
-			.sort(Comparator.comparingDouble(e -> ((Entity)e).getId()));
+		entities.sort(Comparator.comparingDouble(e -> ((Entity)e).getId()));
 		
 		WURST.getHax().autoSwordHack.setSlot();
 		// attack entities
@@ -277,8 +279,8 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 		{
 			RotationUtils.Rotation rotations = RotationUtils
 				.getNeededRotations(entity.getBoundingBox().getCenter());
-			WurstClient.MC.player.networkHandler
-				.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(rotations.getYaw(),
+			WurstClient.MC.player.networkHandler.sendPacket(
+				new PlayerMoveC2SPacket.LookAndOnGround(rotations.getYaw(),
 					rotations.getPitch(), MC.player.isOnGround()));
 			
 			WURST.getHax().criticalsHack.doCritical();
