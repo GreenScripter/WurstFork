@@ -47,3 +47,8 @@ jobs:
           asset_path: ./build/libs/Wurst-Client-v7.15.3-MC1.17.jar
           asset_name: Wurst-Client-v7.15.3-MC1.17-${{ steps.hash-shortner.outputs.HASH }}.jar
           asset_content_type: application/jar
+      - uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
