@@ -15,6 +15,14 @@ import java.util.stream.StreamSupport;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
@@ -31,6 +39,7 @@ import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.wurstclient.Category;
@@ -96,9 +105,9 @@ public final class FlightPathsHack extends Hack
 	}
 	
 	@Override
-	public void onRender(MatrixStack s, float partialTicks)
+	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
-		GL11.glPushMatrix();
+		matrixStack.push();
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -115,58 +124,67 @@ public final class FlightPathsHack extends Hack
 			ArrayList<Vec3d> path = getPath(partialTicks, player);
 			Vec3d camPos = RenderUtils.getCameraPos();
 			
-			drawLine(path, camPos);
+			drawLine(matrixStack, path, camPos);
 			
 			if(!path.isEmpty() && showEndpoints.isChecked())
 			{
 				Vec3d end = path.get(path.size() - 1);
-				drawEndOfLine(s, end, camPos);
+				drawEndOfLine(matrixStack, end, camPos);
 			}
 		}
-		GL11.glColor4f(1, 1, 1, 1);
+		RenderSystem.setShaderColor(1, 1, 1, 1);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(!depthTest.isChecked())
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glDepthMask(true);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-		GL11.glPopMatrix();
+		matrixStack.pop();
 	}
 	
-	private void drawLine(ArrayList<Vec3d> path, Vec3d camPos)
+	private void drawLine(MatrixStack matrixStack, ArrayList<Vec3d> path,
+		Vec3d camPos)
 	{
-		GL11.glBegin(GL11.GL_LINE_STRIP);
+		Matrix4f matrix = matrixStack.peek().getModel();
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		RenderSystem.setShader(GameRenderer::getPositionShader);
+		
+		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP,
+			VertexFormats.POSITION);
 		if(pathHitsUs)
 		{
-			GL11.glColor4f(1, 0, 0, 0.75F);
+			RenderSystem.setShaderColor(1, 0, 0, 0.75F);
 		}else
 		{
-			GL11.glColor4f(1, 1, 0, 0.75F);
+			RenderSystem.setShaderColor(1, 1, 0, 0.75F);
 		}
 		
 		for(Vec3d point : path)
-			GL11.glVertex3d(point.x - camPos.x, point.y - camPos.y,
-				point.z - camPos.z);
+			bufferBuilder
+				.vertex(matrix, (float)(point.x - camPos.x),
+					(float)(point.y - camPos.y), (float)(point.z - camPos.z))
+				.next();
 		
-		GL11.glEnd();
+		bufferBuilder.end();
+		BufferRenderer.draw(bufferBuilder);
 	}
 	
-	private void drawEndOfLine(MatrixStack s, Vec3d end, Vec3d camPos)
+	private void drawEndOfLine(MatrixStack matrixStack, Vec3d end, Vec3d camPos)
 	{
 		double renderX = end.x - camPos.x;
 		double renderY = end.y - camPos.y;
 		double renderZ = end.z - camPos.z;
 		
-		GL11.glPushMatrix();
-		GL11.glTranslated(renderX - 0.5, renderY - 0.5, renderZ - 0.5);
+		matrixStack.push();
+		matrixStack.translate(renderX - 0.5, renderY - 0.5, renderZ - 0.5);
 		
-		GL11.glColor4f(1, 0, 0, 0.25F);
-		RenderUtils.drawSolidBox(s);
+		RenderSystem.setShaderColor(1, 0, 0, 0.25F);
+		RenderUtils.drawSolidBox(matrixStack);
 		
-		GL11.glColor4f(1, 0, 0, 0.75F);
-		RenderUtils.drawOutlinedBox(s);
+		RenderSystem.setShaderColor(1, 0, 0, 0.75F);
+		RenderUtils.drawOutlinedBox(matrixStack);
 		
-		GL11.glPopMatrix();
+		matrixStack.pop();
 	}
 	
 	public boolean pathHitsUs = false;

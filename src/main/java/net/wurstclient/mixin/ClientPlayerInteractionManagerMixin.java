@@ -120,9 +120,9 @@ public abstract class ClientPlayerInteractionManagerMixin
 	}
 	
 	@Override
-	public ItemStack windowClick_THROW1(int slot)
+	public void windowClick_THROW1(int slot)
 	{
-		return clickSlot(0, slot, 0, SlotActionType.THROW, client.player);
+		clickSlot(0, slot, 0, SlotActionType.THROW, client.player);
 	}
 	
 	@Override
@@ -170,6 +170,6 @@ public abstract class ClientPlayerInteractionManagerMixin
 		World world_1, Hand hand_1);
 	
 	@Shadow
-	public abstract ItemStack clickSlot(int syncId, int slotId, int clickData,
+	public abstract void clickSlot(int syncId, int slotId, int clickData,
 		SlotActionType actionType, PlayerEntity playerEntity);
 }

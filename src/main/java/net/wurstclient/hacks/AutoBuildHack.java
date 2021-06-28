@@ -219,21 +219,26 @@ public final class AutoBuildHack extends Hack
 			BlockPos pos = itr.next();
 			BlockState state = BlockUtils.getState(pos);
 			
-			if(!state.getMaterial().isReplaceable()){
+			if(!state.getMaterial().isReplaceable())
+			{
 				itr.remove();
-				doubleCheck.put(pos, System.currentTimeMillis()+1000);
+				doubleCheck.put(pos, System.currentTimeMillis() + 1000);
 			}
 		}
-		for(Iterator<BlockPos> itr = doubleCheck.keySet().iterator(); itr.hasNext();)
+		for(Iterator<BlockPos> itr = doubleCheck.keySet().iterator(); itr
+			.hasNext();)
 		{
 			BlockPos pos = itr.next();
 			BlockState state = BlockUtils.getState(pos);
 			
-			if(state.getMaterial().isReplaceable()){
+			if(state.getMaterial().isReplaceable())
+			{
 				remainingBlocks.add(pos);
 				itr.remove();
-			} else {
-				if (doubleCheck.get(pos)<System.currentTimeMillis()) {
+			}else
+			{
+				if(doubleCheck.get(pos) < System.currentTimeMillis())
+				{
 					itr.remove();
 				}
 			}
@@ -295,10 +300,12 @@ public final class AutoBuildHack extends Hack
 				side.getOpposite(), hitVec);
 			MC.player.swingHand(Hand.MAIN_HAND);
 			IMC.setItemUseCooldown(4);
-//			if (MC.player.inventory.getMainHandStack().getItem() instanceof BlockItem && !MC.player.abilities.creativeMode) {
-//				int amount = MC.player.inventory.getMainHandStack().getCount();
-//				MC.player.inventory.getMainHandStack().setCount(Math.max(0, amount - 1));
-//			}
+			// if (MC.player.inventory.getMainHandStack().getItem() instanceof
+			// BlockItem && !MC.player.abilities.creativeMode) {
+			// int amount = MC.player.inventory.getMainHandStack().getCount();
+			// MC.player.inventory.getMainHandStack().setCount(Math.max(0,
+			// amount - 1));
+			// }
 			return true;
 		}
 		
@@ -386,8 +393,7 @@ public final class AutoBuildHack extends Hack
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glDisable(GL11.GL_CULL_FACE);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		RenderSystem.setShaderColor(0F, 1F, 1F, 0.5F);
+		RenderSystem.setShaderColor(0F, 0F, 0F, 0.5F);
 		
 		matrixStack.push();
 		RenderUtils.applyRegionalRenderOffset(matrixStack);
@@ -437,7 +443,7 @@ public final class AutoBuildHack extends Hack
 		RenderUtils.drawSolidBox(matrixStack);
 		GL11.glDepthMask(true);
 		
-		GL11.glColor4f(0F, 1F, 1F, 0.5F);
+		RenderSystem.setShaderColor(0F, 0F, 0F, 0.5F);
 		RenderUtils.drawOutlinedBox(matrixStack);
 	}
 	

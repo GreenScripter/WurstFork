@@ -5,11 +5,20 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.packet.s2c.play.EntityDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -67,12 +76,14 @@ public final class EnderEyeHack extends Hack
 	}
 	
 	@Override
-	public void onRender(MatrixStack stack, float partialTicks)
+	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
 		if(pos == null)
 			return;
 		
 		// GL settings
+		matrixStack.push();
+
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -82,8 +93,7 @@ public final class EnderEyeHack extends Hack
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		
-		GL11.glPushMatrix();
-		RenderUtils.applyRenderOffset(stack);
+		RenderUtils.applyRenderOffset(matrixStack);
 		
 		// generate rainbow color
 		float x = System.currentTimeMillis() % 2000 / 1000F;
@@ -92,39 +102,47 @@ public final class EnderEyeHack extends Hack
 			0.5F + 0.5F * MathHelper.sin((x + 4F / 3F) * (float)Math.PI);
 		float blue =
 			0.5F + 0.5F * MathHelper.sin((x + 8F / 3F) * (float)Math.PI);
+		RenderSystem.setShaderColor(red, green, blue, 0.5F);
 		
-		GL11.glColor4f(red, green, blue, 0.5F);
+		Matrix4f matrix = matrixStack.peek().getModel();
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		// tracer line
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			// set start position
-			Vec3d start = RotationUtils.getClientLookVec()
-				.add(RenderUtils.getCameraPos());
-			
-			// set end position
-			Vec3d end = Vec3d.ofCenter(pos);
-			
-			// draw line
-			GL11.glVertex3d(start.x, start.y, start.z);
-			GL11.glVertex3d(end.x, end.y, end.z);
-		}
-		GL11.glEnd();
+		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
+			VertexFormats.POSITION);
+		
+		// set start position
+		Vec3d start =
+			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
+		
+		// set end position
+		Vec3d end = Vec3d.ofCenter(pos);
+		
+		// draw line
+		bufferBuilder
+			.vertex(matrix, (float)start.x, (float)start.y, (float)start.z)
+			.next();
+		bufferBuilder.vertex(matrix, (float)end.x, (float)end.y, (float)end.z)
+			.next();
+		
+		bufferBuilder.end();
+		BufferRenderer.draw(bufferBuilder);
 		
 		// block box
 		{
-			GL11.glPushMatrix();
-			GL11.glTranslated(pos.getX(), pos.getY(), pos.getZ());
+			matrixStack.push();
+			matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
 			
-			RenderUtils.drawOutlinedBox(stack);
+			RenderUtils.drawOutlinedBox(matrixStack);
 			
-			GL11.glColor4f(red, green, blue, 0.25F);
-			RenderUtils.drawSolidBox(stack);
+			RenderSystem.setShaderColor(red, green, blue, 0.25F);
+			RenderUtils.drawSolidBox(matrixStack);
 			
-			GL11.glPopMatrix();
+			matrixStack.pop();
 		}
 		
-		GL11.glPopMatrix();
+		matrixStack.pop();
 		
 		// GL resets
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

@@ -7,7 +7,6 @@
  */
 package net.wurstclient.mixinterface;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,7 +24,7 @@ public interface IClientPlayerInteractionManager
 	
 	public void windowClick_THROW(int slot);
 	
-	public ItemStack windowClick_THROW1(int slot);
+	public void windowClick_THROW1(int slot);
 	
 	public void rightClickItem();
 	
