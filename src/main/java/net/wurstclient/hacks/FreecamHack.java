@@ -115,11 +115,11 @@ public final class FreecamHack extends Hack
 		for(KeyBinding binding : bindings)
 			binding.setPressed(((IKeyBinding)binding).isActallyPressed());
 		
-		playerBox = GL11.glGenLists(1);
-		GL11.glNewList(playerBox, GL11.GL_COMPILE);
-		Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
+//		playerBox = GL11.glGenLists(1);
+//		GL11.glNewList(playerBox, GL11.GL_COMPILE);
+//		Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
 //		RenderUtils.drawOutlinedBox(bb, GL11.);
-		GL11.glEndList();
+//		GL11.glEndList();
 		// MC.setCameraEntity(fakePlayer);
 		try
 		{
