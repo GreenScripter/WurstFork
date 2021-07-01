@@ -198,13 +198,14 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 		Set<String> names = new HashSet<>();
 		names.add(MC.player.getName().asString());
 		Matrix4f matrix = matrixStack.peek().getModel();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
-		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
-			VertexFormats.POSITION);
 		for(PlayerEntity e : players)
 		{
+			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+			RenderSystem.setShader(GameRenderer::getPositionShader);
+			
+			bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
+				VertexFormats.POSITION);
 			names.add(e.getName().asString());
 			Vec3d end = e.getBoundingBox().getCenter()
 				.subtract(new Vec3d(e.getX(), e.getY(), e.getZ())
@@ -223,6 +224,8 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 				(float)start.y, (float)start.z - regionZ).next();
 			bufferBuilder.vertex(matrix, (float)end.x - regionX, (float)end.y,
 				(float)end.z - regionZ).next();
+			bufferBuilder.end();
+			BufferRenderer.draw(bufferBuilder);
 		}
 		if(ConnectCmd.privateChat != null)
 		{
@@ -235,16 +238,25 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 					{
 						Vec3d end = ConnectCmd.privateChat.players.get(e);
 						
-						GL11.glColor4f(0, 1, 1, 0.5F);
+
+						BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+						RenderSystem.setShader(GameRenderer::getPositionShader);
 						
-						GL11.glVertex3d(start.x, start.y, start.z);
-						GL11.glVertex3d(end.x, end.y, end.z);
+						bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
+							VertexFormats.POSITION);
+						RenderSystem.setShaderColor(0, 1, 1, 0.5F);
+
+						bufferBuilder.vertex(matrix, (float)start.x - regionX,
+							(float)start.y, (float)start.z - regionZ).next();
+						bufferBuilder.vertex(matrix, (float)end.x - regionX, (float)end.y,
+							(float)end.z - regionZ).next();
+						bufferBuilder.end();
+						BufferRenderer.draw(bufferBuilder);
 					}
 				}
 			}
 		}
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		
 	}
 	
 	private enum Style
