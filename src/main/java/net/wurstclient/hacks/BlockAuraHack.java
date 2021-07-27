@@ -25,7 +25,6 @@ import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ShulkerBulletEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action;
@@ -45,14 +44,14 @@ import net.wurstclient.hack.Hack;
 import net.wurstclient.mixinterface.IPersistentProjectileEntity;
 import net.wurstclient.util.FakePlayerEntity;
 
-@SearchTags({"shieldaura"})
+@SearchTags({"shieldaura", "shield aura"})
 public final class BlockAuraHack extends Hack
 	implements UpdateListener, PacketOutputListener, PacketInputListener
 {
 	public BlockAuraHack()
 	{
 		super("ShieldAura",
-			"Triangulates the location of the end portal based on the directions of two thrown eyes of ender.");
+			"Automatically block nearby entities with a shield.");
 		setCategory(Category.RENDER);
 	}
 	
@@ -90,8 +89,12 @@ public final class BlockAuraHack extends Hack
 		
 		double rangeSq = Math.pow(10, 2);
 		Stream<Entity> stream = StreamSupport
-			.stream(world.getOtherEntities(player,
-				player.getBoundingBox().expand(6), null).spliterator(), true)
+			.stream(
+				world
+					.getOtherEntities(player, player.getBoundingBox().expand(6),
+						p -> true)
+					.spliterator(),
+				true)
 			.filter(e -> !e.isRemoved())
 			.filter(e -> (e instanceof LivingEntity
 				&& ((LivingEntity)e).getHealth() > 0)
@@ -163,7 +166,8 @@ public final class BlockAuraHack extends Hack
 		}
 		if(!MC.player.getItemCooldownManager().isCoolingDown(Items.SHIELD))
 		{
-			if(MC.player.getInventory().getStack(40).getItem().equals(Items.SHIELD))
+			if(MC.player.getInventory().getStack(40).getItem()
+				.equals(Items.SHIELD))
 			{
 				if(!wasBlocking)
 				{
