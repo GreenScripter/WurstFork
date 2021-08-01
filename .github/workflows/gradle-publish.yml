@@ -44,8 +44,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./build/libs/Wurst-Client-v7.15.3-MC1.17.jar
-          asset_name: Wurst-Client-v7.15.3-MC1.17-${{ steps.hash-shortner.outputs.HASH }}.jar
+          asset_path: ./build/libs/Wurst-Client-v7.15.3-MC1.17.1.jar
+          asset_name: Wurst-Client-v7.15.3-MC1.17.1-${{ steps.hash-shortner.outputs.HASH }}.jar
           asset_content_type: application/jar
       - uses: eregon/publish-release@v1
         env:
