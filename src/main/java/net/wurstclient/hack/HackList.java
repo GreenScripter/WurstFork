@@ -79,6 +79,7 @@ public final class HackList implements UpdateListener
 	public final ClickAuraHack clickAuraHack = new ClickAuraHack();
 	public final ClickGuiHack clickGuiHack = new ClickGuiHack();
 	public final ColoredBooksHack coloredBooksHack = new ColoredBooksHack();
+	public final CompassHack compassHack = new CompassHack();
 	public final CrashChestHack crashChestHack = new CrashChestHack();
 	public final CriticalsHack criticalsHack = new CriticalsHack();
 	public final DerpHack derpHack = new DerpHack();
