@@ -15,7 +15,7 @@ import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
-import net.minecraft.network.packet.s2c.play.EntityDestroyS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
@@ -83,7 +83,7 @@ public final class EnderEyeHack extends Hack
 		
 		// GL settings
 		matrixStack.push();
-
+		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -154,11 +154,11 @@ public final class EnderEyeHack extends Hack
 	@Override
 	public void onReceivedPacket(PacketInputEvent event)
 	{
-		if(event.getPacket() instanceof EntityDestroyS2CPacket)
+		if(event.getPacket() instanceof EntitiesDestroyS2CPacket)
 		{
-			EntityDestroyS2CPacket packet =
-				(EntityDestroyS2CPacket)event.getPacket();
-			int id = packet.getEntityId();
+			EntitiesDestroyS2CPacket packet =
+				(EntitiesDestroyS2CPacket)event.getPacket();
+			for(int id : packet.getEntityIds())
 			{
 				if(eyePaths.containsKey(id))
 				{
