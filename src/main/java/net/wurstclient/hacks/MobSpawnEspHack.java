@@ -354,7 +354,7 @@ public final class MobSpawnEspHack extends Hack
 			bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 				VertexFormats.POSITION_COLOR);
 			
-			new ArrayList<>(red).stream()
+			new ArrayList<>(red).stream().filter(pos -> pos != null)
 				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
 					pos.getZ() - regionZ))
 				.forEach(pos -> {
@@ -371,7 +371,7 @@ public final class MobSpawnEspHack extends Hack
 						.color(1, 0, 0, 0.5F).next();
 				});
 			
-			new ArrayList<>(yellow).stream()
+			new ArrayList<>(yellow).stream().filter(pos -> pos != null)
 				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
 					pos.getZ() - regionZ))
 				.forEach(pos -> {
