@@ -80,7 +80,7 @@ public final class VillagerCmd extends Command
 		
 		for(int i = 0; i < args.length; i += 2)
 		{
-			String goal = args[0];
+			String goal = args[i];
 			
 			boolean found = false;
 			for(String e : Enchantments.ALL_ENCHANTMENTS)
@@ -100,7 +100,7 @@ public final class VillagerCmd extends Command
 			}
 			try
 			{
-				int level = Integer.parseInt(args[1]);
+				int level = Integer.parseInt(args[i + 1]);
 				goals.add(goal);
 				levelGoal.put(goal, level);
 			}catch(Exception e)
