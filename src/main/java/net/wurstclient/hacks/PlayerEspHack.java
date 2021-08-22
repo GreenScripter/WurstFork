@@ -8,7 +8,9 @@
 package net.wurstclient.hacks;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,7 +66,13 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 	private final CheckboxSetting filterInvisible = new CheckboxSetting(
 		"Filter invisible", "Won't show invisible players.", false);
 	
+	private final CheckboxSetting showLeft = new CheckboxSetting("Show missing",
+		"Show the last seen location of players, \n"
+			+ "can be used to trap people who disconnected.",
+		false);
+	
 	private final ArrayList<PlayerEntity> players = new ArrayList<>();
+	private final HashMap<String, Vec3d> playersSeen = new HashMap<>();
 	
 	public PlayerEspHack()
 	{
@@ -76,6 +84,7 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 		addSetting(boxSize);
 		addSetting(filterSleeping);
 		addSetting(filterInvisible);
+		addSetting(showLeft);
 	}
 	
 	@Override
@@ -186,6 +195,45 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 			RenderUtils.drawOutlinedBox(bb, matrixStack);
 			
 			matrixStack.pop();
+			if(showLeft.isChecked())
+			{
+				playersSeen.put(e.getEntityName(), e.getPos());
+			}
+		}
+		if(showLeft.isChecked())
+		{
+			loop: for(Entry<String, Vec3d> player : playersSeen.entrySet())
+			{
+				for(PlayerEntity e : players)
+				{
+					if(e.getEntityName().equals(player.getKey()))
+					{
+						continue loop;
+					}
+				}
+				matrixStack.push();
+				
+				matrixStack.translate(player.getValue().x - regionX,
+					player.getValue().y, player.getValue().z - regionZ);
+				matrixStack.scale(0.6F + extraSize, 1.8F + extraSize,
+					0.6F + extraSize);
+				
+				// set color
+				if(WURST.getFriends().contains(player.getKey()))
+					RenderSystem.setShaderColor(0, 0, 0.5f, 0.5F);
+				else
+				{
+					RenderSystem.setShaderColor(0, 0, 0, 0.5F);
+				}
+				
+				Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
+				RenderUtils.drawSolidBox(bb, matrixStack);
+				
+				matrixStack.pop();
+			}
+		}else
+		{
+			playersSeen.clear();
 		}
 	}
 	
@@ -234,11 +282,14 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 						.get(e) == ConnectCmd.dimension)
 					{
 						Vec3d end = ConnectCmd.privateChat.players.get(e);
+						RenderSystem.setShaderColor(0, 1, 1, 0.5F);
 						
-						GL11.glColor4f(0, 1, 1, 0.5F);
-						
-						GL11.glVertex3d(start.x, start.y, start.z);
-						GL11.glVertex3d(end.x, end.y, end.z);
+						bufferBuilder
+							.vertex(matrix, (float)start.x - regionX,
+								(float)start.y, (float)start.z - regionZ)
+							.next();
+						bufferBuilder.vertex(matrix, (float)end.x - regionX,
+							(float)end.y, (float)end.z - regionZ).next();
 					}
 				}
 			}
