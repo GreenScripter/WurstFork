@@ -22,9 +22,10 @@ import net.wurstclient.settings.SliderSetting.ValueDisplay;
 public final class FlightHack extends Hack
 	implements UpdateListener, IsPlayerInWaterListener
 {
-
+	
 	public final SliderSetting speed =
 		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
+	
 	private final CheckboxSetting downLimit = new CheckboxSetting(
 		"Limit Downward Speed",
 		"Prevents the player from taking damage when flying down quickly with NoFall on.",
@@ -33,14 +34,17 @@ public final class FlightHack extends Hack
 		"Reposition for Bows",
 		"Modifies the flight pattern slightly so that arrows will shoot correctly.",
 		false);
-
+	public final SliderSetting decentRate = new SliderSetting("Decent Delay",
+		"Controls the rate of decent while flying.\nHelps prevent laggy servers from kicking you.",
+		40, 1, 40, 1, ValueDisplay.INTEGER);
+	
 	private int lastGoingUp = 10;
-
+	
 	public final CheckboxSetting anti_flykick = new CheckboxSetting(
 		"Anti Flykick", "Bypass the Fly check on Vanilla Servers.", false);
-
+	
 	private int fly_ticks = 0;
-
+	
 	public FlightHack()
 	{
 		super("Flight",
@@ -51,18 +55,19 @@ public final class FlightHack extends Hack
 		addSetting(downLimit);
 		addSetting(arrowFix);
 		addSetting(anti_flykick);
+		addSetting(decentRate);
 	}
-
+	
 	@Override
 	public void onEnable()
 	{
 		WURST.getHax().creativeFlightHack.setEnabled(false);
 		WURST.getHax().jetpackHack.setEnabled(false);
-
+		
 		EVENTS.add(UpdateListener.class, this);
 		EVENTS.add(IsPlayerInWaterListener.class, this);
 	}
-
+	
 	@Override
 	public void onDisable()
 	{
@@ -71,15 +76,15 @@ public final class FlightHack extends Hack
 		MC.options.keySneak
 			.setPressed(((IKeyBinding)MC.options.keySneak).isActallyPressed());
 	}
-
+	
 	@Override
 	public void onUpdate()
 	{
 		ClientPlayerEntity player = MC.player;
-
+		
 		player.getAbilities().flying = false;
 		player.flyingSpeed = speed.getValueF();
-
+		
 		player.setVelocity(0, 0, 0);
 		if(WURST.getHax().freecamHack.isEnabled())
 		{
@@ -123,25 +128,25 @@ public final class FlightHack extends Hack
 					}else
 					{
 						player.setVelocity(velocity.add(0, 0.01, 0));
-
+						
 					}
 				}
 			}
 		}
-		// If enabled, fly down 0.02 blocks every 2 seconds to prevent kicks
+		// If enabled, fly down 0.05 blocks every 2 seconds to prevent kicks
 		if(anti_flykick.isChecked())
 		{
 			fly_ticks--;
 			if(fly_ticks <= 0)
 			{
-				fly_ticks = 40;
+				fly_ticks = decentRate.getValueI();
 				if(velocity.y >= 0)
 					player.setVelocity(
 						velocity.subtract(0, velocity.y + 0.05, 0));
 			}
 		}
 	}
-
+	
 	@Override
 	public void onIsPlayerInWater(IsPlayerInWaterEvent event)
 	{
