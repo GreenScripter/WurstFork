@@ -10,6 +10,7 @@ package net.wurstclient.ai;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.lwjgl.opengl.GL11;
@@ -37,8 +38,8 @@ public class PathFinder
 		creativeFlying || wurst.getHax().flightHack.isEnabled();
 	private final boolean immuneToFallDamage =
 		invulnerable || wurst.getHax().noFallHack.isEnabled();
-	private final boolean noWaterSlowdown = false;
-	// TODO: wurst.getHax().noSlowdownHack.blockWaterSlowness();
+	private final boolean noWaterSlowdown =
+		wurst.getHax().antiWaterPushHack.isPreventingSlowdown();
 	private final boolean jesus = wurst.getHax().jesusHack.isEnabled();
 	private final boolean spider = wurst.getHax().spiderHack.isEnabled();
 	protected boolean fallingAllowed = true;
@@ -291,7 +292,8 @@ public class PathFinder
 		BlockPos horizontal2 = current.offset(direction2);
 		BlockPos next = horizontal1.offset(direction2);
 
-		if(isPassable(horizontal1) && isPassable(horizontal2)
+		if(isPassableWithoutMining(horizontal1)
+			&& isPassableWithoutMining(horizontal2)
 			&& checkHorizontalMovement(current, next))
 			return true;
 
@@ -300,15 +302,53 @@ public class PathFinder
 
 	protected boolean isPassable(BlockPos pos)
 	{
-		return canGoThrough(pos) && canGoThrough(pos.up())
-			&& canGoAbove(pos.down()) && (divingAllowed || BlockUtils
-				.getState(pos.up()).getMaterial() != Material.WATER);
+		if(!canGoThrough(pos) && !isMineable(pos))
+			return false;
+
+		BlockPos up = pos.up();
+		if(!canGoThrough(up) && !isMineable(up))
+			return false;
+
+		if(!canGoAbove(pos.down()))
+			return false;
+
+		if(!divingAllowed
+			&& BlockUtils.getState(up).getMaterial() == Material.WATER)
+			return false;
+
+		return true;
+	}
+
+	protected boolean isPassableWithoutMining(BlockPos pos)
+	{
+		if(!canGoThrough(pos))
+			return false;
+
+		BlockPos up = pos.up();
+		if(!canGoThrough(up))
+			return false;
+
+		if(!canGoAbove(pos.down()))
+			return false;
+
+		if(!divingAllowed
+			&& BlockUtils.getState(up).getMaterial() == Material.WATER)
+			return false;
+
+		return true;
+	}
+
+	protected boolean isMineable(BlockPos pos)
+	{
+		return false;
 	}
 
 	protected boolean canBeSolid(BlockPos pos)
 	{
-		Material material = BlockUtils.getState(pos).getMaterial();
-		Block block = BlockUtils.getBlock(pos);
+		BlockState state = BlockUtils.getState(pos);
+		Material material = state.getMaterial();
+		Block block = state.getBlock();
+
 		return material.blocksMovement()
 			&& !(block instanceof AbstractSignBlock)
 			|| block instanceof LadderBlock || jesus
@@ -462,11 +502,12 @@ public class PathFinder
 	private float getCost(BlockPos current, BlockPos next)
 	{
 		float[] costs = {0.5F, 0.5F};
-		BlockPos[] positions = new BlockPos[]{current, next};
+		BlockPos[] positions = {current, next};
 
 		for(int i = 0; i < positions.length; i++)
 		{
-			Material material = BlockUtils.getState(positions[i]).getMaterial();
+			BlockPos pos = positions[i];
+			Material material = BlockUtils.getState(pos).getMaterial();
 
 			// liquids
 			if(material == Material.WATER && !noWaterSlowdown)
@@ -475,9 +516,15 @@ public class PathFinder
 				costs[i] *= 4.539515393656079F;
 
 			// soul sand
-			if(!canFlyAt(positions[i]) && BlockUtils
-				.getBlock(positions[i].down()) instanceof SoulSandBlock)
+			if(!canFlyAt(pos)
+				&& BlockUtils.getBlock(pos.down()) instanceof SoulSandBlock)
 				costs[i] *= 2.5F;
+
+			// mining
+			if(isMineable(pos))
+				costs[i] *= 2F;
+			if(isMineable(pos.up()))
+				costs[i] *= 2F;
 		}
 
 		float cost = costs[0] + costs[1];
@@ -509,7 +556,7 @@ public class PathFinder
 
 	public int countProcessedBlocks()
 	{
-		return prevPosMap.keySet().size();
+		return prevPosMap.size();
 	}
 
 	public int getQueueSize()
@@ -641,35 +688,34 @@ public class PathFinder
 
 	public boolean isPathStillValid(int index)
 	{
-//		if(path.isEmpty())
-//			throw new IllegalStateException("Path is not formatted!");
-//
-//		// check player abilities
-//		if(invulnerable != WurstClient.MC.player.abilities.creativeMode
-//			|| flying != (creativeFlying
-//				|| wurst.getHax().flightHack.isEnabled())
-//			|| immuneToFallDamage != (invulnerable
-//				|| wurst.getHax().noFallHack.isEnabled())
-//			// TODO:
-//			// || noWaterSlowdown !=
-//			// wurst.getHax().noSlowdownHack.blockWaterSlowness()
-//			|| jesus != wurst.getHax().jesusHack.isEnabled()
-//			|| spider != wurst.getHax().spiderHack.isEnabled())
-//			return false;
-//
-//		// if index is zero, check if first pos is safe
-//		if(index == 0)
-//		{
-//			PathPos pos = path.get(0);
-//			if(!isPassable(pos) || !canFlyAt(pos) && !canGoThrough(pos.down())
-//				&& !canSafelyStandOn(pos.down()))
-//				return false;
-//		}
-//
-//		// check path
-//		for(int i = Math.max(1, index); i < path.size(); i++)
-//			if(!getNeighbors(path.get(i - 1)).contains(path.get(i)))
-//				return false;
+		if(path.isEmpty())
+			throw new IllegalStateException("Path is not formatted!");
+
+		// check player abilities
+		if(invulnerable != WurstClient.MC.player.getAbilities().creativeMode
+			|| flying != (creativeFlying
+				|| wurst.getHax().flightHack.isEnabled())
+			|| immuneToFallDamage != (invulnerable
+				|| wurst.getHax().noFallHack.isEnabled())
+			|| noWaterSlowdown != wurst.getHax().antiWaterPushHack
+				.isPreventingSlowdown()
+			|| jesus != wurst.getHax().jesusHack.isEnabled()
+			|| spider != wurst.getHax().spiderHack.isEnabled())
+			return false;
+
+		// if index is zero, check if first pos is safe
+		if(index == 0)
+		{
+			PathPos pos = path.get(0);
+			if(!isPassable(pos) || !canFlyAt(pos) && !canGoThrough(pos.down())
+				&& !canSafelyStandOn(pos.down()))
+				return false;
+		}
+
+		// check path
+		for(int i = Math.max(1, index); i < path.size(); i++)
+			if(!getNeighbors(path.get(i - 1)).contains(path.get(i)))
+				return false;
 
 		return true;
 	}
@@ -700,5 +746,10 @@ public class PathFinder
 	public void setDivingAllowed(boolean divingAllowed)
 	{
 		this.divingAllowed = divingAllowed;
+	}
+
+	public List<PathPos> getPath()
+	{
+		return Collections.unmodifiableList(path);
 	}
 }

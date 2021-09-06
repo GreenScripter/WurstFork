@@ -65,7 +65,7 @@ public final class NukerHack extends Hack
 {
 	private final SliderSetting range =
 		new SliderSetting("Range", 5, 1, 6, 0.05, ValueDisplay.DECIMAL);
-	
+
 	private final EnumSetting<Mode> mode = new EnumSetting<>("Mode",
 		"\u00a7lNormal\u00a7r mode simply breaks everything\n" + "around you.\n"
 			+ "\u00a7lID\u00a7r mode only breaks the selected block\n"
@@ -77,15 +77,15 @@ public final class NukerHack extends Hack
 			+ "\u00a7lSmash\u00a7r mode only breaks blocks that\n"
 			+ "can be destroyed instantly (e.g. tall grass).",
 		Mode.values(), Mode.NORMAL);
-	
+
 	private final BlockSetting id =
 		new BlockSetting("ID", "The type of block to break in ID mode.\n"
 			+ "air = won't break anything", "minecraft:air", true);
-	
+
 	private final CheckboxSetting lockId =
 		new CheckboxSetting("Lock ID", "Prevents changing the ID by clicking\n"
 			+ "on blocks or restarting Nuker.", false);
-	
+
 	private final BlockListSetting multiIdList = new BlockListSetting(
 		"MultiID List", "The types of blocks to break in MultiID mode.",
 		"minecraft:ancient_debris", "minecraft:bone_block", "minecraft:clay",
@@ -93,12 +93,12 @@ public final class NukerHack extends Hack
 		"minecraft:glowstone", "minecraft:gold_ore", "minecraft:iron_ore",
 		"minecraft:lapis_ore", "minecraft:nether_gold_ore",
 		"minecraft:nether_quartz_ore", "minecraft:redstone_ore");
-	
+
 	private final ArrayDeque<Set<BlockPos>> prevBlocks = new ArrayDeque<>();
 	private BlockPos currentBlock;
 	private float progress;
 	private float prevProgress;
-	
+
 	public NukerHack()
 	{
 		super("Nuker", "Automatically breaks blocks around you.");
@@ -109,13 +109,13 @@ public final class NukerHack extends Hack
 		addSetting(lockId);
 		addSetting(multiIdList);
 	}
-	
+
 	@Override
 	public String getRenderName()
 	{
 		return mode.getSelected().getRenderName(this);
 	}
-	
+
 	@Override
 	protected void onEnable()
 	{
@@ -124,51 +124,51 @@ public final class NukerHack extends Hack
 		WURST.getHax().nukerLegitHack.setEnabled(false);
 		WURST.getHax().speedNukerHack.setEnabled(false);
 		WURST.getHax().tunnellerHack.setEnabled(false);
-		
+
 		EVENTS.add(UpdateListener.class, this);
 		EVENTS.add(LeftClickListener.class, this);
 		EVENTS.add(RenderListener.class, this);
 	}
-	
+
 	@Override
 	protected void onDisable()
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(LeftClickListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
-		
+
 		if(currentBlock != null)
 		{
 			IMC.getInteractionManager().setBreakingBlock(true);
 			MC.interactionManager.cancelBlockBreaking();
 			currentBlock = null;
 		}
-		
+
 		prevBlocks.clear();
-		
+
 		if(!lockId.isChecked())
 			id.setBlock(Blocks.AIR);
 	}
-	
+
 	@Override
 	public void onUpdate()
 	{
 		// abort if using IDNuker without an ID being set
 		if(mode.getSelected() == Mode.ID && id.getBlock() == Blocks.AIR)
 			return;
-		
+
 		ClientPlayerEntity player = MC.player;
-		
+
 		currentBlock = null;
 		Vec3d eyesPos = RotationUtils.getEyesPos().subtract(0.5, 0.5, 0.5);
 		BlockPos eyesBlock = new BlockPos(RotationUtils.getEyesPos());
 		double rangeSq = Math.pow(range.getValue(), 2);
 		int blockRange = (int)Math.ceil(range.getValue());
-		
+
 		Vec3i rangeVec = new Vec3i(blockRange, blockRange, blockRange);
 		BlockPos min = eyesBlock.subtract(rangeVec);
 		BlockPos max = eyesBlock.add(rangeVec);
-		
+
 		ArrayList<BlockPos> blocks = BlockUtils.getAllInBox(min, max);
 		Stream<BlockPos> stream = blocks.parallelStream();
 		List<BlockPos> blocks2 = stream
@@ -184,21 +184,21 @@ public final class NukerHack extends Hack
 			for(Set<BlockPos> set : prevBlocks)
 				stream2 = stream2.filter(pos -> !set.contains(pos));
 			List<BlockPos> blocks3 = stream2.collect(Collectors.toList());
-			
+
 			prevBlocks.addLast(new HashSet<>(blocks3));
 			while(prevBlocks.size() > 5)
 				prevBlocks.removeFirst();
-			
+
 			if(!blocks3.isEmpty())
 				currentBlock = blocks3.get(0);
-			
+
 			MC.interactionManager.cancelBlockBreaking();
 			progress = 1;
 			prevProgress = 1;
 			BlockBreaker.breakBlocksWithPacketSpam(blocks3);
 			return;
 		}
-		
+
 		for(BlockPos pos : blocks2) {
 			if (mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")) {
 				placeBlockFromHotbar(pos);
@@ -212,25 +212,25 @@ public final class NukerHack extends Hack
 		if (mode.getSelected().equals(Mode.ID) && id.getBlockName().contains("lava")){
 			return;
 		}
-		
+
 		if(currentBlock == null)
 			MC.interactionManager.cancelBlockBreaking();
-		
+
 		if(currentBlock != null && BlockUtils.getHardness(currentBlock) < 1)
 		{
 			prevProgress = progress;
 			progress = IMC.getInteractionManager().getCurrentBreakingProgress();
-			
+
 			if(progress < prevProgress)
 				prevProgress = progress;
-			
+
 		}else
 		{
 			progress = 1;
 			prevProgress = 1;
 		}
 	}
-	
+
 	private void placeBlockFromHotbar(BlockPos pos) {
 		// search blocks in hotbar
 		int newSlot = -1;
@@ -238,66 +238,66 @@ public final class NukerHack extends Hack
 			// filter out non-block items
 			ItemStack stack = MC.player.getInventory().getStack(i);
 			if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
-			
-			
-			
+
+
+
 			// filter out non-solid blocks
 			Block block = Block.getBlockFromItem(stack.getItem());
-			
+
 			BlockState state = block.getDefaultState();
-			
+
 			if (state.getMaterial().equals(Material.SHULKER_BOX)) {
 				continue;
 			}
-			
+
 			if (!state.isFullCube(EmptyBlockView.INSTANCE, BlockPos.ORIGIN)) continue;
-			
+
 			// filter out blocks that would fall
 			if (block instanceof FallingBlock) continue;
-			
+
 			newSlot = i;
 			break;
 		}
-		
+
 		// check if any blocks were found
 		if (newSlot == -1) return;
-		
+
 		// set slot
 		int oldSlot = MC.player.getInventory().selectedSlot;
 		MC.player.getInventory().selectedSlot = newSlot;
 		placeBlock(pos);
-		
+
 		// reset slot
 		MC.player.getInventory().selectedSlot = oldSlot;
 	}
-	
+
 	private boolean placeBlock(BlockPos pos)
 	{
 		Vec3d eyesPos = new Vec3d(MC.player.getX(),
 			MC.player.getY() + MC.player.getEyeHeight(MC.player.getPose()),
 			MC.player.getZ());
-		
+
 		for(Direction side : Direction.values())
 		{
 			BlockPos neighbor = pos.offset(side);
 			Direction side2 = side.getOpposite();
-			
+
 			// check if side is visible (facing away from player)
 			if(eyesPos.squaredDistanceTo(Vec3d.ofCenter(pos)) >= eyesPos
 				.squaredDistanceTo(Vec3d.ofCenter(neighbor)))
 				continue;
-			
+
 			// check if neighbor can be right clicked
 			if(!BlockUtils.canBeClicked(neighbor))
 				continue;
-			
+
 			Vec3d hitVec = Vec3d.ofCenter(neighbor)
 				.add(Vec3d.of(side2.getVector()).multiply(0.5));
-			
+
 			// check if hitVec is within range (4.25 blocks)
 			if(eyesPos.squaredDistanceTo(hitVec) > 18.0625)
 				continue;
-			
+
 			// place block
 			Rotation rotation = RotationUtils.getNeededRotations(hitVec);
 			PlayerMoveC2SPacket.LookAndOnGround packet =
@@ -308,56 +308,56 @@ public final class NukerHack extends Hack
 				hitVec);
 			MC.player.swingHand(Hand.MAIN_HAND);
 			IMC.setItemUseCooldown(4);
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public void onLeftClick(LeftClickEvent event)
 	{
 		if(mode.getSelected() != Mode.ID)
 			return;
-		
+
 		if(lockId.isChecked())
 			return;
-		
+
 		if(MC.crosshairTarget == null
 			|| MC.crosshairTarget.getType() != HitResult.Type.BLOCK)
 			return;
-		
+
 		BlockHitResult blockHitResult = (BlockHitResult)MC.crosshairTarget;
 		BlockPos pos = new BlockPos(blockHitResult.getBlockPos());
 		id.setBlockName(BlockUtils.getName(pos));
 	}
-	
+
 	@Override
 	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
 		if(currentBlock == null)
 			return;
-		
+
 		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		
+
 		matrixStack.push();
 		RenderUtils.applyRegionalRenderOffset(matrixStack);
-		
+
 		BlockPos camPos = RenderUtils.getCameraBlockPos();
 		int regionX = (camPos.getX() >> 9) * 512;
 		int regionZ = (camPos.getZ() >> 9) * 512;
-		
+
 		Box box = new Box(BlockPos.ORIGIN);
 		float p = prevProgress + (progress - prevProgress) * partialTicks;
 		float red = p * 2F;
 		float green = 2 - red;
-		
+
 		matrixStack.translate(currentBlock.getX() - regionX,
 			currentBlock.getY(), currentBlock.getZ() - regionZ);
 		if(p < 1)
@@ -366,51 +366,51 @@ public final class NukerHack extends Hack
 			matrixStack.scale(p, p, p);
 			matrixStack.translate(-0.5, -0.5, -0.5);
 		}
-		
+
 		RenderSystem.setShader(GameRenderer::getPositionShader);
-		
+
 		RenderSystem.setShaderColor(red, green, 0, 0.25F);
 		RenderUtils.drawSolidBox(box, matrixStack);
-		
+
 		RenderSystem.setShaderColor(red, green, 0, 0.5F);
 		RenderUtils.drawOutlinedBox(box, matrixStack);
-		
+
 		matrixStack.pop();
-		
+
 		// GL resets
 		RenderSystem.setShaderColor(1, 1, 1, 1);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-		
+
 	}
-	
+
 	private enum Mode
 	{
-		NORMAL("Normal", n -> n.getName(), (n, p) -> true),
-		
+		NORMAL("Normal", NukerHack::getName, (n, p) -> true),
+
 		ID("ID",
 			n -> "IDNuker [" + n.id.getBlockName().replace("minecraft:", "")
 				+ "]",
 			(n, p) -> BlockUtils.getName(p).equals(n.id.getBlockName())),
-		
+
 		MULTI_ID("MultiID",
 			n -> "MultiIDNuker [" + n.multiIdList.getBlockNames().size()
 				+ (n.multiIdList.getBlockNames().size() == 1 ? " ID]"
 					: " IDs]"),
 			(n, p) -> n.multiIdList.getBlockNames()
 				.contains(BlockUtils.getName(p))),
-		
+
 		FLAT("Flat", n -> "FlatNuker",
 			(n, p) -> p.getY() >= MC.player.getPos().getY()),
-		
+
 		SMASH("Smash", n -> "SmashNuker",
 			(n, p) -> BlockUtils.getHardness(p) >= 1);
-		
+
 		private final String name;
 		private final Function<NukerHack, String> renderName;
 		private final BiPredicate<NukerHack, BlockPos> validator;
-		
+
 		private Mode(String name, Function<NukerHack, String> renderName,
 			BiPredicate<NukerHack, BlockPos> validator)
 		{
@@ -418,18 +418,18 @@ public final class NukerHack extends Hack
 			this.renderName = renderName;
 			this.validator = validator;
 		}
-		
+
 		@Override
 		public String toString()
 		{
 			return name;
 		}
-		
+
 		public String getRenderName(NukerHack n)
 		{
 			return renderName.apply(n);
 		}
-		
+
 		public Predicate<BlockPos> getValidator(NukerHack n)
 		{
 			return p -> validator.test(n, p);
