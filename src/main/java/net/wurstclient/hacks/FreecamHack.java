@@ -114,12 +114,12 @@ public final class FreecamHack extends Hack
 		
 		for(KeyBinding binding : bindings)
 			binding.setPressed(((IKeyBinding)binding).isActallyPressed());
-		
-//		playerBox = GL11.glGenLists(1);
-//		GL11.glNewList(playerBox, GL11.GL_COMPILE);
-//		Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
-//		RenderUtils.drawOutlinedBox(bb, GL11.);
-//		GL11.glEndList();
+			
+		// playerBox = GL11.glGenLists(1);
+		// GL11.glNewList(playerBox, GL11.GL_COMPILE);
+		// Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
+		// RenderUtils.drawOutlinedBox(bb, GL11.);
+		// GL11.glEndList();
 		// MC.setCameraEntity(fakePlayer);
 		try
 		{
@@ -227,7 +227,8 @@ public final class FreecamHack extends Hack
 		if(FreecamHack.partialTicks > partialTicks)
 		{
 			passed = (1 + partialTicks) - FreecamHack.partialTicks;
-		}if(!lockMovement.isChecked())
+		}
+		if(!lockMovement.isChecked())
 		{
 			if(MC.currentScreen == null)
 			{
@@ -276,12 +277,11 @@ public final class FreecamHack extends Hack
 					MC.options.keyRight.setPressed(false);
 				}
 			}
-			}
+		}
 		FreecamHack.partialTicks = partialTicks;
 		if(!tracer.isChecked())
 			return;
 		
-		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -293,17 +293,20 @@ public final class FreecamHack extends Hack
 		RenderSystem.setShaderColor(1, 1, 1, 0.5F);
 		
 		// box
-		GL11.glPushMatrix();
-		GL11.glTranslated(MC.player.getX(), MC.player.getY(), MC.player.getZ());
-		GL11.glScaled(MC.player.getWidth() + 0.1, MC.player.getHeight() + 0.1,
-			MC.player.getWidth() + 0.1);
-		GL11.glCallList(playerBox);
-		GL11.glPopMatrix();
-		
-		// line
 		Vec3d start =
 			RotationUtils.getCameraLookVec().add(RenderUtils.getCameraPos());
 		Vec3d end = MC.player.getBoundingBox().getCenter();
+		
+		matrixStack.push();
+		matrixStack.translate(MC.player.getX(), MC.player.getY(),
+			MC.player.getZ());
+		matrixStack.scale(MC.player.getWidth() + 0.1f,
+			MC.player.getHeight() + 0.1f, MC.player.getWidth() + 0.1f);
+		Box bb = new Box(-0.5, 0, -0.5, 0.5, 1, 0.5);
+		RenderUtils.drawOutlinedBox(bb, matrixStack);
+		matrixStack.pop();
+		
+		// line
 		
 		Matrix4f matrix = matrixStack.peek().getModel();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
