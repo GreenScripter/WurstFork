@@ -482,9 +482,10 @@ public final class NavigatorFeatureScreen extends NavigatorScreen
 		// buttons below scissor box
 		for(Drawable d : ((IScreen)(Object)this).getButtons())
 		{
-			if(!(d instanceof ClickableWidget button))
+			if(!(d instanceof ClickableWidget))
 				continue;
-			
+			ClickableWidget button = (ClickableWidget)d;
+
 			// positions
 			int x1 = button.x;
 			int x2 = x1 + button.getWidth();

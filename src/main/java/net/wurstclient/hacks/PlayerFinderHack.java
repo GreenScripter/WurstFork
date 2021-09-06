@@ -165,8 +165,9 @@ public final class PlayerFinderHack extends Hack
 		// newPos = effect.getSoundPos();
 		//
 		// }else
-		if(packet instanceof PlaySoundS2CPacket sound)
+		if(packet instanceof PlaySoundS2CPacket)
 		{
+			PlaySoundS2CPacket sound = (PlaySoundS2CPacket)packet;
 			newPos = new BlockPos(sound.getX(), sound.getY(), sound.getZ());
 			
 			// }else if(packet instanceof EntitySpawnGlobalS2CPacket)

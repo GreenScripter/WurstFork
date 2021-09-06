@@ -114,7 +114,7 @@ public final class KillauraLegitHack extends Hack
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
 		"Filter end crystals", "Won't attack end crystals.", false);
 	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
-			"Filter villager zombies", "Won't attack villager zombies.", false);
+		"Filter villager zombies", "Won't attack villager zombies.", false);
 	private Entity target;
 	
 	public KillauraLegitHack()
@@ -328,8 +328,11 @@ public final class KillauraLegitHack extends Hack
 		
 		Box box = new Box(BlockPos.ORIGIN);
 		float p = 1;
-		if(target instanceof LivingEntity le)
+		if(target instanceof LivingEntity)
+		{
+			LivingEntity le = (LivingEntity)target;
 			p = (le.getMaxHealth() - le.getHealth()) / le.getMaxHealth();
+		}
 		float red = p * 2F;
 		float green = 2 - red;
 		

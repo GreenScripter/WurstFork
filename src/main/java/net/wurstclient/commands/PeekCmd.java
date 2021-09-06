@@ -37,12 +37,10 @@ public final class PeekCmd extends Command implements RenderListener
 	public void onRender(MatrixStack matrixStack, float partialTicks)
 	{
 		ItemStack is = MC.player.getMainHandStack();
-		System.out.println(is);
-		System.out.println(is.getTag());
-		if(is.hasTag() && is.getTag().getKeys().contains("BlockEntityTag"))
+		if(is.hasNbt() && is.getNbt().getKeys().contains("BlockEntityTag"))
 		{
 			NbtList tag =
-				is.getTag().getCompound("BlockEntityTag").getList("Items", 10);
+				is.getNbt().getCompound("BlockEntityTag").getList("Items", 10);
 			SimpleInventory shulker = new SimpleInventory(27);
 			
 			for(int i = 0; i < tag.size(); i++)
@@ -56,7 +54,7 @@ public final class PeekCmd extends Command implements RenderListener
 					0, MC.player.getInventory(), shulker, 3),
 				MC.player.getInventory(), is.getName());
 			
-			MC.openScreen(screen);
+			MC.setScreen(screen);
 			
 		}
 		// ChatUtils.message("Showing inventory of " + "" + ".");

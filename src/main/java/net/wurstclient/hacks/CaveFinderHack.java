@@ -145,13 +145,16 @@ public final class CaveFinderHack extends Hack
 		Packet<?> packet = event.getPacket();
 		Chunk chunk;
 		
-		if(packet instanceof BlockUpdateS2CPacket change)
+		if(packet instanceof BlockUpdateS2CPacket)
 		{
+			BlockUpdateS2CPacket change = (BlockUpdateS2CPacket)packet;
 			BlockPos pos = change.getPos();
 			chunk = world.getChunk(pos);
 			
-		}else if(packet instanceof ChunkDeltaUpdateS2CPacket change)
+		}else if(packet instanceof ChunkDeltaUpdateS2CPacket)
 		{
+			ChunkDeltaUpdateS2CPacket change =
+				(ChunkDeltaUpdateS2CPacket)packet;
 			ArrayList<BlockPos> changedBlocks = new ArrayList<>();
 			change.visitUpdates((pos, state) -> changedBlocks.add(pos));
 			if(changedBlocks.isEmpty())
@@ -159,8 +162,9 @@ public final class CaveFinderHack extends Hack
 			
 			chunk = world.getChunk(changedBlocks.get(0));
 			
-		}else if(packet instanceof ChunkDataS2CPacket chunkData)
+		}else if(packet instanceof ChunkDataS2CPacket)
 		{
+			ChunkDataS2CPacket chunkData = (ChunkDataS2CPacket)packet;
 			chunk = world.getChunk(chunkData.getX(), chunkData.getZ());
 			
 		}else

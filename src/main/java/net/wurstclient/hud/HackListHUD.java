@@ -195,9 +195,9 @@ public final class HackListHUD implements UpdateListener
 		@Override
 		public boolean equals(Object obj)
 		{
-			if(!(obj instanceof HackListEntry other))
+			if(!(obj instanceof HackListEntry))
 				return false;
-			
+			HackListEntry other = (HackListEntry)obj;
 			return hack == other.hack;
 		}
 		

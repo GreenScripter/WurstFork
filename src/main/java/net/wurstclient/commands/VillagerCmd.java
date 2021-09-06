@@ -280,7 +280,7 @@ public final class VillagerCmd extends Command
 			}
 			if(stack != null)
 			{
-				NbtCompound tag = stack.getOrCreateTag();
+				NbtCompound tag = stack.getOrCreateNbt();
 				NbtList stored =
 					tag.getList("StoredEnchantments", NbtType.COMPOUND);
 				NbtCompound entry = stored.getCompound(0);

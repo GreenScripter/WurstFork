@@ -158,13 +158,13 @@ public class WurstOptionsScreen extends Screen
 	{
 		for(Drawable d : ((IScreen)this).getButtons())
 		{
-			if(!(d instanceof ClickableWidget button))
+			if(!(d instanceof ClickableWidget))
 				continue;
-			
+			ClickableWidget button = (ClickableWidget)d;
 			if(!button.isHovered()
-				|| !(button instanceof WurstOptionsButton woButton))
+				|| !(button instanceof WurstOptionsButton))
 				continue;
-			
+			WurstOptionsButton woButton = (WurstOptionsButton)button;
 			if(woButton.tooltip.isEmpty())
 				continue;
 			

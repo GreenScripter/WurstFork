@@ -55,11 +55,11 @@ public final class ColoredBooksHack extends Hack implements PacketOutputListener
 			ItemStack is = buff.readItemStack();
 			boolean signed = buff.readBoolean();
 			int v = buff.readVarInt();
-			is.getTag().put("title",
+			is.getNbt().put("title",
 				NbtString.of(
-					is.getTag().getString("title").replace("&&", temptag)
+					is.getNbt().getString("title").replace("&&", temptag)
 						.replace("&", "§").replace(temptag, "&")));
-			NbtList tag = is.getTag().getList("pages", 8);
+			NbtList tag = is.getNbt().getList("pages", 8);
 			List<String> pages = new ArrayList<>();
 			for(NbtElement t : tag)
 			{
