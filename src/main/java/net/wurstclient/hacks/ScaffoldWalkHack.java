@@ -13,7 +13,9 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -22,6 +24,8 @@ import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
+import net.wurstclient.mixinterface.IKeyBinding;
+import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.util.BlockUtils;
 import net.wurstclient.util.RotationUtils;
 import net.wurstclient.util.RotationUtils.Rotation;
@@ -30,10 +34,18 @@ import net.wurstclient.util.RotationUtils.Rotation;
 	"auto bridge", "tower"})
 public final class ScaffoldWalkHack extends Hack implements UpdateListener
 {
+	
+	private final CheckboxSetting airplace = new CheckboxSetting("Place in air",
+		"Allow placing blocks in midair.", false);
+	private final CheckboxSetting sneakDown = new CheckboxSetting("Sneak Down",
+		"Sneak while scaffolding to place the blocks one layer lower.", false);
+	
 	public ScaffoldWalkHack()
 	{
 		super("ScaffoldWalk", "Automatically places blocks below your feet.");
 		setCategory(Category.BLOCKS);
+		addSetting(airplace);
+		addSetting(sneakDown);
 	}
 	
 	@Override
@@ -52,6 +64,11 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 	public void onUpdate()
 	{
 		BlockPos belowPlayer = new BlockPos(MC.player.getPos()).down();
+		if(sneakDown.isChecked()
+			&& ((IKeyBinding)MC.options.keySneak).isActallyPressed())
+		{
+			belowPlayer = belowPlayer.down();
+		}
 		
 		// check if block is already placed
 		if(!BlockUtils.getState(belowPlayer).getMaterial().isReplaceable())
@@ -66,14 +83,13 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 			if(stack.isEmpty() || !(stack.getItem() instanceof BlockItem))
 				continue;
 			
-			if (stack.getItem().getTranslationKey().contains("shulker")){
+			if(stack.getItem().getTranslationKey().contains("shulker"))
+			{
 				continue;
 			}
 			
 			// filter out non-solid blocks
 			Block block = Block.getBlockFromItem(stack.getItem());
-			
-		
 			
 			BlockState state = block.getDefaultState();
 			
@@ -91,13 +107,21 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 		
 		// check if any blocks were found
 		if(newSlot == -1)
+		{
+			if(sneakDown.isChecked())
+				MC.options.keySneak.setPressed(
+					((IKeyBinding)MC.options.keySneak).isActallyPressed());
 			return;
+		}
 		
 		// set slot
 		int oldSlot = MC.player.getInventory().selectedSlot;
 		MC.player.getInventory().selectedSlot = newSlot;
 		
-		placeBlock(belowPlayer);
+		if(placeBlock(belowPlayer))
+		{
+			MC.options.keySneak.setPressed(false);
+		}
 		
 		// reset slot
 		MC.player.getInventory().selectedSlot = oldSlot;
@@ -143,7 +167,18 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 			
 			return true;
 		}
-		
+		if(airplace.isChecked())
+		{
+			Direction side = Direction.DOWN;
+			ActionResult result = MC.interactionManager.interactBlock(MC.player,
+				MC.world, Hand.MAIN_HAND,
+				new BlockHitResult(new Vec3d(0, 0, 0), side, pos, false));
+			MC.player.swingHand(Hand.MAIN_HAND);
+			if(result.isAccepted())
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 }
