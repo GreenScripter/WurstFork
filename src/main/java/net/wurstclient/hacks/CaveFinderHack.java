@@ -180,7 +180,7 @@ public final class CaveFinderHack extends Hack
 		{
 			ChunkDataS2CPacket chunkData = (ChunkDataS2CPacket)packet;
 			chunk = world.getChunk(chunkData.getX(), chunkData.getZ());
-		else
+		}else
 			return;
 		
 		chunksToUpdate.add(chunk);
