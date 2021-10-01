@@ -7,6 +7,7 @@
  */
 package net.wurstclient.hacks;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +50,7 @@ import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.util.FakePlayerEntity;
+import net.wurstclient.settings.ColorSetting;
 import net.wurstclient.util.RenderUtils;
 
 @SearchTags({"ArrowTrajectories", "ArrowPrediction", "aim assist",
@@ -67,6 +69,8 @@ public final class TrajectoriesHack extends Hack
 		"Depth test other players",
 		"If the trajectories of other player's items\nshould be on top of blocks.",
 		true);
+	private final ColorSetting color =
+		new ColorSetting("Color", "Color of the trajectory.", Color.GREEN);
 	
 	public TrajectoriesHack()
 	{
@@ -76,6 +80,7 @@ public final class TrajectoriesHack extends Hack
 		addSetting(showSelf);
 		addSetting(showOthers);
 		addSetting(othersDepth);
+		addSetting(color);
 	}
 	
 	private final ArrayList<PlayerEntity> players = new ArrayList<>();
@@ -174,7 +179,8 @@ public final class TrajectoriesHack extends Hack
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP,
 			VertexFormats.POSITION);
-		RenderSystem.setShaderColor(0, 1, 0, 0.75F);
+		float[] colorF = color.getColorF();
+		RenderSystem.setShaderColor(colorF[0], colorF[1], colorF[2], 0.75F);
 		
 		for(Vec3d point : path)
 			bufferBuilder
@@ -191,14 +197,15 @@ public final class TrajectoriesHack extends Hack
 		double renderX = end.x - camPos.x;
 		double renderY = end.y - camPos.y;
 		double renderZ = end.z - camPos.z;
+		float[] colorF = color.getColorF();
 		
 		matrixStack.push();
 		matrixStack.translate(renderX - 0.5, renderY - 0.5, renderZ - 0.5);
 		
-		RenderSystem.setShaderColor(0, 1, 0, 0.25F);
+		RenderSystem.setShaderColor(colorF[0], colorF[1], colorF[2], 0.25F);
 		RenderUtils.drawSolidBox(matrixStack);
 		
-		RenderSystem.setShaderColor(0, 1, 0, 0.75F);
+		RenderSystem.setShaderColor(colorF[0], colorF[1], colorF[2], 0.75F);
 		RenderUtils.drawOutlinedBox(matrixStack);
 		
 		matrixStack.pop();

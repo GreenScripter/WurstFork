@@ -7,7 +7,8 @@
  */
 package net.wurstclient.hacks;
 
-import java.lang.reflect.Field;
+
+import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 
@@ -43,6 +44,7 @@ import net.wurstclient.hack.Hack;
 import net.wurstclient.mixinterface.IClientPlayerEntity;
 import net.wurstclient.mixinterface.IKeyBinding;
 import net.wurstclient.settings.CheckboxSetting;
+import net.wurstclient.settings.ColorSetting;
 import net.wurstclient.settings.SliderSetting;
 import net.wurstclient.settings.SliderSetting.ValueDisplay;
 import net.wurstclient.util.RenderUtils;
@@ -58,6 +60,7 @@ public final class FreecamHack extends Hack
 	
 	private final SliderSetting speed =
 		new SliderSetting("Speed", 1, 0.05, 10, 0.05, ValueDisplay.DECIMAL);
+	
 	private final CheckboxSetting tracer = new CheckboxSetting("Tracer",
 		"Draws a line to your character's actual position.", false);
 	public final CheckboxSetting lockLooking = new CheckboxSetting(
@@ -69,11 +72,13 @@ public final class FreecamHack extends Hack
 		"If movement is locked you will control your character's movement instead of the camera.",
 		false);
 	
-	private int playerBox;
 	
 	public static Vec3d position;
 	public static float partialTicks;
 	private Perspective start;
+	private final ColorSetting color =
+		new ColorSetting("Tracer color", Color.WHITE);
+	
 	
 	public FreecamHack()
 	{
@@ -84,6 +89,7 @@ public final class FreecamHack extends Hack
 		addSetting(tracer);
 		addSetting(lockLooking);
 		addSetting(lockMovement);
+		addSetting(color);
 	}
 	
 	@Override
@@ -121,16 +127,6 @@ public final class FreecamHack extends Hack
 		// RenderUtils.drawOutlinedBox(bb, GL11.);
 		// GL11.glEndList();
 		// MC.setCameraEntity(fakePlayer);
-		try
-		{
-			Field f = Camera.class.getDeclaredField("pos");
-			f.setAccessible(true);
-			Camera c = MC.gameRenderer.getCamera();
-			f.set(c, c.getPos().add(0, 100, 0));
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
 		
 	}
 	
@@ -290,7 +286,8 @@ public final class FreecamHack extends Hack
 		matrixStack.push();
 		RenderUtils.applyRenderOffset(matrixStack);
 		
-		RenderSystem.setShaderColor(1, 1, 1, 0.5F);
+		float[] colorF = color.getColorF();
+		RenderSystem.setShaderColor(colorF[0], colorF[1], colorF[2], 0.5F);
 		
 		// box
 		Vec3d start =
