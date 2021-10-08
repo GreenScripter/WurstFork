@@ -145,7 +145,7 @@ public class PlayerSkinProviderMixin
 		try
 		{
 			// TODO: download capes to file
-			URL url = new URL("https://www.wurstclient.net/api/v1/capes.json");
+			URL url = new URL("https://crimsonmaelstrom.github.io/capes.json");
 			
 			capes = JsonUtils.JSON_PARSER
 				.parse(new InputStreamReader(url.openStream()))
