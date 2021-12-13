@@ -18,6 +18,8 @@ Builds for the latest version are created on push and are available in the relea
 
 ## Setup (for developers) (using Windows 10 & Eclipse)
 
+Requirements: [JDK 17](https://adoptium.net/?variant=openjdk17&jvmVariant=hotspot)
+
 1. Run these two commands in PowerShell:
 
 ```

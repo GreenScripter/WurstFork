@@ -169,19 +169,7 @@ public final class PlayerFinderHack extends Hack
 		{
 			PlaySoundS2CPacket sound = (PlaySoundS2CPacket)packet;
 			newPos = new BlockPos(sound.getX(), sound.getY(), sound.getZ());
-			
-			// }else if(packet instanceof EntitySpawnGlobalS2CPacket)
-			// {
-			// EntitySpawnGlobalS2CPacket lightning =
-			// (EntitySpawnGlobalS2CPacket)packet;
-			// newPos = new BlockPos(lightning.getX() / 32D,
-			// lightning.getY() / 32D, lightning.getZ() / 32D);
-			
-			// It seems that EntitySpawnGlobalS2CPacket has been deleted from
-			// the game. Further testing is needed to figure out if PlayerFinder
-			// can still work using only PlaySoundS2CPacket.
 		}
-		
 		if(newPos == null)
 			return;
 		

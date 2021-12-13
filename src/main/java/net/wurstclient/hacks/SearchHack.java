@@ -175,7 +175,6 @@ public final class SearchHack extends Hack
 		{
 			ChunkDataS2CPacket chunkData = (ChunkDataS2CPacket)packet;
 			chunk = world.getChunk(chunkData.getX(), chunkData.getZ());
-			
 		}else
 			return;
 		

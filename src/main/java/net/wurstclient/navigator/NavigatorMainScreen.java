@@ -62,9 +62,13 @@ public final class NavigatorMainScreen extends NavigatorScreen
 	@Override
 	protected void onResize()
 	{
+		ClickGui gui = WurstClient.INSTANCE.getGui();
+		int txtColor = gui.getTxtColor();
+		
 		TextRenderer tr = WurstClient.MC.textRenderer;
 		searchBar =
 			new TextFieldWidget(tr, 0, 32, 200, 20, new LiteralText(""));
+		searchBar.setEditableColor(txtColor);
 		searchBar.setDrawsBackground(false);
 		searchBar.setMaxLength(128);
 		
@@ -241,6 +245,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 		ClickGui gui = WurstClient.INSTANCE.getGui();
 		float[] bgColor = gui.getBgColor();
 		float[] acColor = gui.getAcColor();
+		int txtColor = gui.getTxtColor();
 		
 		boolean clickTimerRunning = clickTimer != -1;
 		tooltip = null;
@@ -248,8 +253,8 @@ public final class NavigatorMainScreen extends NavigatorScreen
 		// search bar
 		if(!clickTimerRunning)
 		{
-			WurstClient.MC.textRenderer.draw(matrixStack, "Search: ",
-				middleX - 150, 32, 0xffffff);
+			WurstClient.MC.textRenderer.drawWithShadow(matrixStack, "Search: ",
+				middleX - 150, 32, txtColor);
 			searchBar.render(matrixStack, mouseX, mouseY, partialTicks);
 			GL11.glEnable(GL11.GL_BLEND);
 		}
@@ -333,7 +338,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 			// text
 			for(int i = 0; i < lines.length; i++)
 				fr.draw(matrixStack, lines[i], xt1 + 2,
-					yt1 + 1 + i * fr.fontHeight, 0xffffff);
+					yt1 + 1 + i * fr.fontHeight, txtColor);
 		}
 	}
 	
@@ -342,6 +347,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 	{
 		ClickGui gui = WurstClient.INSTANCE.getGui();
 		float[] bgColor = gui.getBgColor();
+		int txtColor = gui.getTxtColor();
 		float opacity = gui.getOpacity();
 		boolean clickTimerRunning = clickTimer != -1;
 		
@@ -475,9 +481,10 @@ public final class NavigatorMainScreen extends NavigatorScreen
 		// text
 		if(!clickTimerRunning)
 		{
+			RenderSystem.setShader(GameRenderer::getPositionShader);
 			String buttonText = feature.getName();
 			client.textRenderer.draw(matrixStack, buttonText, area.x + 4,
-				area.y + 4, 0xffffff);
+				area.y + 4, txtColor);
 			GL11.glEnable(GL11.GL_BLEND);
 		}
 	}
