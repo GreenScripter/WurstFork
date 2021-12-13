@@ -24,7 +24,7 @@ public final class NoFallHack extends Hack implements UpdateListener
 	
 	public NoFallHack()
 	{
-		super("NoFall", "Protects you from fall damage.");
+		super("NoFall");
 		setCategory(Category.MOVEMENT);
 		addSetting(speedLimit);
 	}

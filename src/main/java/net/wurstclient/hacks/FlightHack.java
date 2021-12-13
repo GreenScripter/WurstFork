@@ -47,9 +47,7 @@ public final class FlightHack extends Hack
 	
 	public FlightHack()
 	{
-		super("Flight",
-			"Allows you to you fly.\n\n" + "\u00a7c\u00a7lWARNING:\u00a7r"
-				+ " You will take fall damage if you don't use NoFall.");
+		super("Flight");
 		setCategory(Category.MOVEMENT);
 		addSetting(speed);
 		addSetting(downLimit);
@@ -83,7 +81,7 @@ public final class FlightHack extends Hack
 		ClientPlayerEntity player = MC.player;
 		
 		player.getAbilities().flying = false;
-		player.flyingSpeed = speed.getValueF();
+		player.airStrafingSpeed = speed.getValueF();
 		
 		player.setVelocity(0, 0, 0);
 		if(WURST.getHax().freecamHack.isEnabled())
@@ -105,7 +103,7 @@ public final class FlightHack extends Hack
 			{
 				lastGoingUp = 0;
 				player.setVelocity(velocity.add(0, speed.getValue(), 0));
-				player.flyingSpeed = (float)Math.min(speed.getValueF(),
+				player.airStrafingSpeed = (float)Math.min(speed.getValueF(),
 					10 - player.getVelocity().y);
 			}else if(((IKeyBinding)MC.options.keySneak).isActallyPressed())
 			{
@@ -115,7 +113,7 @@ public final class FlightHack extends Hack
 						0, (downLimit.isChecked()
 							? Math.min(3, speed.getValue()) : speed.getValue()),
 						0));
-				player.flyingSpeed = (float)Math.min(speed.getValueF(),
+				player.airStrafingSpeed = (float)Math.min(speed.getValueF(),
 					10 + player.getVelocity().y);
 			}else
 			{

@@ -141,10 +141,8 @@ public final class NavigatorMainScreen extends NavigatorScreen
 		
 		// left click
 		if(button == 0)
-		{
 			leftClick(hoveredFeature);
-		}
-		
+			
 		// right click
 		// if(button == 1)
 		// {
@@ -303,7 +301,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 			int yt1 = mouseY + th - 2 <= sh ? mouseY - 4 : mouseY - th - 4;
 			int yt2 = yt1 + th + 2;
 			
-			Matrix4f matrix = matrixStack.peek().getModel();
+			Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 			RenderSystem.setShader(GameRenderer::getPositionShader);
 			
@@ -406,7 +404,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 				renderAsHovered ? opacity * 1.5F : opacity);
 		
 		// tooltip
-		String tt = feature.getDescription();
+		String tt = feature.getWrappedDescription(200);
 		// if(feature.isBlocked())
 		// {
 		// if(tt == null)
@@ -423,7 +421,7 @@ public final class NavigatorMainScreen extends NavigatorScreen
 		drawBox(matrixStack, area.x, area.y, area.x + area.width,
 			area.y + area.height);
 		
-		Matrix4f matrix = matrixStack.peek().getModel();
+		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		

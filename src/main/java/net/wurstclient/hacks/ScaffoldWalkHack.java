@@ -42,7 +42,7 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 	
 	public ScaffoldWalkHack()
 	{
-		super("ScaffoldWalk", "Automatically places blocks below your feet.");
+		super("ScaffoldWalk");
 		setCategory(Category.BLOCKS);
 		addSetting(airplace);
 		addSetting(sneakDown);

@@ -7,13 +7,7 @@
  */
 package net.wurstclient.hacks;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -74,10 +68,7 @@ public final class MobSpawnEspHack extends Hack
 	
 	public MobSpawnEspHack()
 	{
-		super("MobSpawnESP",
-			"Highlights areas where mobs can spawn.\n" + "\u00a7eyellow\u00a7r"
-				+ " - mobs can spawn at night\n" + "\u00a7cred\u00a7r"
-				+ " - mobs can always spawn");
+		super("MobSpawnESP");
 		setCategory(Category.RENDER);
 		addSetting(drawDistance);
 		addSetting(loadingSpeed);
@@ -213,7 +204,6 @@ public final class MobSpawnEspHack extends Hack
 		{
 			ChunkDataS2CPacket chunkData = (ChunkDataS2CPacket)packet;
 			chunk = world.getChunk(chunkData.getX(), chunkData.getZ());
-			
 		}else
 			return;
 		
@@ -258,7 +248,7 @@ public final class MobSpawnEspHack extends Hack
 			matrixStack.push();
 			RenderUtils.applyRegionalRenderOffset(matrixStack, scanner.chunk);
 			
-			Matrix4f viewMatrix = matrixStack.peek().getModel();
+			Matrix4f viewMatrix = matrixStack.peek().getPositionMatrix();
 			Matrix4f projMatrix = RenderSystem.getProjectionMatrix();
 			Shader shader = RenderSystem.getShader();
 			scanner.vertexBuffer.setShader(viewMatrix, projMatrix, shader);
@@ -326,7 +316,7 @@ public final class MobSpawnEspHack extends Hack
 				return;
 			
 			red.addAll(blocks.stream()
-				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 8)
+				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 1)
 				.filter(pos -> world.getLightLevel(LightType.SKY, pos) < 8)
 				.collect(Collectors.toList()));
 			
@@ -334,7 +324,7 @@ public final class MobSpawnEspHack extends Hack
 				return;
 			
 			yellow.addAll(blocks.stream().filter(pos -> !red.contains(pos))
-				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 8)
+				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 1)
 				.collect(Collectors.toList()));
 			doneScanning = true;
 		}
@@ -353,7 +343,7 @@ public final class MobSpawnEspHack extends Hack
 			bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 				VertexFormats.POSITION_COLOR);
 			
-			new ArrayList<>(red).stream().filter(pos -> pos != null)
+			new ArrayList<>(red).stream().filter(Objects::nonNull)
 				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
 					pos.getZ() - regionZ))
 				.forEach(pos -> {
@@ -370,7 +360,7 @@ public final class MobSpawnEspHack extends Hack
 						.color(1, 0, 0, 0.5F).next();
 				});
 			
-			new ArrayList<>(yellow).stream().filter(pos -> pos != null)
+			new ArrayList<>(yellow).stream().filter(Objects::nonNull)
 				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
 					pos.getZ() - regionZ))
 				.forEach(pos -> {

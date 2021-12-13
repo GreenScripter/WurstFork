@@ -69,8 +69,7 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 	
 	public PlayerEspHack()
 	{
-		super("PlayerESP", "Highlights nearby players.\n"
-			+ "ESP boxes of friends will appear in blue.");
+		super("PlayerESP");
 		setCategory(Category.RENDER);
 		
 		addSetting(style);
@@ -200,7 +199,7 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 		
 		Set<String> names = new HashSet<>();
 		names.add(MC.player.getName().asString());
-		Matrix4f matrix = matrixStack.peek().getModel();
+		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,

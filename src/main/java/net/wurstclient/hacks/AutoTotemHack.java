@@ -34,8 +34,7 @@ public final class AutoTotemHack extends Hack implements UpdateListener
 	
 	public AutoTotemHack()
 	{
-		super("AutoTotem",
-			"Automatically moves totems of undying to your off-hand.");
+		super("AutoTotem");
 		setCategory(Category.COMBAT);
 		addSetting(showCounter);
 		addSetting(threshold);

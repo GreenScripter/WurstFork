@@ -74,7 +74,7 @@ public final class CompassHack extends Hack
 		
 		RenderSystem.setShaderColor(0, 1, 1, 0.5F);
 		
-		Matrix4f matrix = matrixStack.peek().getModel();
+		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		

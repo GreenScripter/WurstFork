@@ -74,8 +74,7 @@ public final class TrajectoriesHack extends Hack
 	
 	public TrajectoriesHack()
 	{
-		super("Trajectories",
-			"Predicts the flight path of arrows and throwable items.");
+		super("Trajectories");
 		setCategory(Category.RENDER);
 		addSetting(showSelf);
 		addSetting(showOthers);
@@ -173,7 +172,7 @@ public final class TrajectoriesHack extends Hack
 	private void drawLine(MatrixStack matrixStack, ArrayList<Vec3d> path,
 		Vec3d camPos)
 	{
-		Matrix4f matrix = matrixStack.peek().getModel();
+		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		

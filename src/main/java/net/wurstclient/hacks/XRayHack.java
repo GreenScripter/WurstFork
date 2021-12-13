@@ -76,7 +76,7 @@ public final class XRayHack extends Hack implements UpdateListener,
 	
 	public XRayHack()
 	{
-		super("X-Ray", "Allows you to see ores through walls.");
+		super("X-Ray");
 		setCategory(Category.RENDER);
 		addSetting(legitMode);
 		addSetting(ores);
