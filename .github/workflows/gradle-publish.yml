@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt' # See 'Supported distributions' for available options
-          java-version: '16'
+          java-version: '17'
       - name: Build with Gradle
         run: ./gradlew build
       - name: Hash Shortner
