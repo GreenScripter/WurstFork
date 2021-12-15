@@ -11,42 +11,34 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
-import net.wurstclient.events.PacketInputListener;
 import net.wurstclient.events.RenderListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.util.RenderUtils;
 import net.wurstclient.util.RotationUtils;
 
 @SearchTags({"compass hack", "tracer"})
-public final class CompassHack extends Hack
-	implements PacketInputListener, RenderListener
+public final class CompassHack extends Hack implements RenderListener
 {
 	public CompassHack()
 	{
-		super("CompassHack",
-			"Draws a line to the current compass target.");
+		super("CompassHack", "Draws a line to the current compass target.");
 		setCategory(Category.RENDER);
 	}
-	
 	
 	@Override
 	protected void onEnable()
 	{
-		EVENTS.add(PacketInputListener.class, this);
 		EVENTS.add(RenderListener.class, this);
 	}
 	
 	@Override
 	protected void onDisable()
 	{
-		EVENTS.remove(PacketInputListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
 		
 	}
@@ -60,7 +52,7 @@ public final class CompassHack extends Hack
 			return;
 		// GL settings
 		matrixStack.push();
-
+		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -119,17 +111,6 @@ public final class CompassHack extends Hack
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-	}
-	
-	@Override
-	public void onReceivedPacket(PacketInputEvent event)
-	{
-		if(event.getPacket() instanceof net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket)
-		{
-			PlayerSpawnPositionS2CPacket packet =
-				(PlayerSpawnPositionS2CPacket)event.getPacket();
-			
-		}
 	}
 	
 }

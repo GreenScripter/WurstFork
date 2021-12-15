@@ -38,7 +38,6 @@ import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
 import net.wurstclient.events.LeftClickListener;
 import net.wurstclient.events.RightClickListener;
-import net.wurstclient.events.RightClickListener.RightClickEvent;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.settings.CheckboxSetting;

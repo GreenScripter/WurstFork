@@ -34,7 +34,6 @@ public final class SingleSlabHack extends Hack implements RightClickListener
 			
 			for(int var3 = 0; var3 < var2; ++var3)
 			{
-				Hand hand = var1[var3];
 				if(MC.crosshairTarget != null)
 				{
 					switch(MC.crosshairTarget.getType())

@@ -11,20 +11,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 
-import org.lwjgl.opengl.GL11;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CobwebBlock;
+import net.minecraft.block.FenceBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.LadderBlock;
+import net.minecraft.block.Material;
+import net.minecraft.block.PressurePlateBlock;
+import net.minecraft.block.SlimeBlock;
+import net.minecraft.block.SoulSandBlock;
+import net.minecraft.block.TripwireBlock;
+import net.minecraft.block.VineBlock;
+import net.minecraft.block.WallBlock;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.wurstclient.WurstClient;
 import net.wurstclient.util.BlockUtils;
 import net.wurstclient.util.ChatUtils;
-import net.wurstclient.util.RenderUtils;
 
 public class PathFinder
 {
@@ -93,7 +100,7 @@ public class PathFinder
 			PathPos start = new PathPos(WurstClient.MC.player.getBlockPos());
 			path.add(0, current);
 
-			int mode = 0;
+//			int mode = 0;
 
 			while (!checkDone()) {
 

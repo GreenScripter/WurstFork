@@ -57,6 +57,7 @@ public abstract class EntityMixin implements Nameable, CommandOutput
 				
 				double d = dy * 0.15D;
 				double e = dx * 0.15D;
+				@SuppressWarnings("resource")
 				Camera c =
 					MinecraftClient.getInstance().gameRenderer.getCamera();
 				((ICamera)c).setPitch(MathHelper

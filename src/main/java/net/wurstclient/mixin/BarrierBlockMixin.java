@@ -41,6 +41,7 @@ public abstract class BarrierBlockMixin extends Block
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isSideInvisible(BlockState state, BlockState stateFrom,

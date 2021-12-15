@@ -130,6 +130,7 @@ public abstract class GameRendererMixin
 			ci.cancel();
 	}
 
+	@SuppressWarnings("resource")
 	@Inject(at = {@At("HEAD")},
 			method = {
 				"getFov(Lnet/minecraft/client/render/Camera;FZ)D"},
