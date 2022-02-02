@@ -105,6 +105,7 @@ class TargetBlock
 	private int tickTimes;
 	private boolean hasTried;
 	private int stuckTicksCounter;
+	public Block type = Blocks.BEDROCK;
 	
 	public TargetBlock(BlockPos pos, ClientWorld world)
 	{
@@ -276,7 +277,7 @@ class TargetBlock
 				this.status = Status.FAILED;
 				Messager.actionBar("Failed to place redstone torch.");
 			}
-		}else if(!this.world.getBlockState(this.blockPos).isOf(Blocks.BEDROCK)
+		}else if(!this.world.getBlockState(this.blockPos).isOf(type)
 			&& this.world.getBlockState(this.pistonBlockPos)
 				.isOf(Blocks.PISTON))
 		{
@@ -299,7 +300,7 @@ class TargetBlock
 			&& CheckingEnvironment
 				.findNearbyRedstoneTorch(this.world, this.pistonBlockPos)
 				.size() != 0
-			&& this.world.getBlockState(this.blockPos).isOf(Blocks.BEDROCK))
+			&& this.world.getBlockState(this.blockPos).isOf(type))
 		{
 			this.status = Status.UNEXTENDED_WITH_POWER_SOURCE;
 		}else if(this.hasTried
@@ -317,7 +318,7 @@ class TargetBlock
 			&& CheckingEnvironment
 				.findNearbyRedstoneTorch(this.world, this.pistonBlockPos)
 				.size() != 0
-			&& this.world.getBlockState(this.blockPos).isOf(Blocks.BEDROCK))
+			&& this.world.getBlockState(this.blockPos).isOf(type))
 		{
 			this.status = Status.STUCK;
 			this.hasTried = false;
@@ -331,7 +332,7 @@ class TargetBlock
 			&& CheckingEnvironment
 				.findNearbyRedstoneTorch(this.world, this.pistonBlockPos)
 				.size() == 0
-			&& this.world.getBlockState(this.blockPos).isOf(Blocks.BEDROCK))
+			&& this.world.getBlockState(this.blockPos).isOf(type))
 		{
 			this.status = Status.UNEXTENDED_WITHOUT_POWER_SOURCE;
 		}else if(CheckingEnvironment.has2BlocksOfPlaceToPlacePiston(world,
@@ -673,7 +674,18 @@ class BreakingFlowController
 	{
 		@SuppressWarnings("resource")
 		ClientWorld world = MinecraftClient.getInstance().world;
-		if(world.getBlockState(pos).isOf(Blocks.BEDROCK))
+		if(world.getBlockState(pos).isOf(Blocks.BEDROCK)
+			|| world.getBlockState(pos).isOf(Blocks.BARRIER)
+			|| world.getBlockState(pos).isOf(Blocks.END_PORTAL_FRAME)
+			|| world.getBlockState(pos).isOf(Blocks.END_PORTAL)
+			|| world.getBlockState(pos).isOf(Blocks.END_GATEWAY)
+			|| world.getBlockState(pos).isOf(Blocks.END_PORTAL)
+			|| world.getBlockState(pos).isOf(Blocks.COMMAND_BLOCK)
+			|| world.getBlockState(pos).isOf(Blocks.REPEATING_COMMAND_BLOCK)
+			|| world.getBlockState(pos).isOf(Blocks.CHAIN_COMMAND_BLOCK)
+			|| world.getBlockState(pos).isOf(Blocks.LIGHT)
+			|| world.getBlockState(pos).isOf(Blocks.STRUCTURE_BLOCK)
+			|| world.getBlockState(pos).isOf(Blocks.JIGSAW))
 		{
 			String haveEnoughItems = InventoryManager.warningMessage();
 			if(haveEnoughItems != null)
@@ -685,6 +697,7 @@ class BreakingFlowController
 			if(shouldAddNewTargetBlock(pos))
 			{
 				TargetBlock targetBlock = new TargetBlock(pos, world);
+				targetBlock.type = world.getBlockState(pos).getBlock();
 				cachedTargetBlockList.add(targetBlock);
 			}
 		}else
@@ -755,21 +768,6 @@ class BreakingFlowController
 			}
 		}
 		return true;
-	}
-	
-	public static void switchOnOff()
-	{
-		if(working)
-		{
-			Messager.rawchat("bedrockminer.toggle.off");
-			
-			working = false;
-		}else
-		{
-			Messager.rawchat("bedrockminer.toggle.on");
-			
-			working = true;
-		}
 	}
 	
 }
