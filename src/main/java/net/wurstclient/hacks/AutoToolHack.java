@@ -126,7 +126,7 @@ public final class AutoToolHack extends Hack
 			if(!isDamageable(heldItem))
 				return;
 			
-			if(repairMode && isTooDamaged(heldItem))
+			if(repairMode && isToolDamaged(heldItem))
 			{
 				selectFallbackSlot();
 				return;
@@ -165,7 +165,7 @@ public final class AutoToolHack extends Hack
 			if(!useSwords && stack.getItem() instanceof SwordItem)
 				continue;
 			
-			if(repairMode && isTooDamaged(stack))
+			if(repairMode && isToolDamaged(stack))
 				continue;
 			
 			bestSpeed = speed;
@@ -195,7 +195,7 @@ public final class AutoToolHack extends Hack
 		return !stack.isEmpty() && stack.getItem().isDamageable();
 	}
 	
-	private boolean isTooDamaged(ItemStack stack)
+	private boolean isToolDamaged(ItemStack stack)
 	{
 		return stack.getMaxDamage() - stack.getDamage() <= repairThreshold.getValueI();
 	}
