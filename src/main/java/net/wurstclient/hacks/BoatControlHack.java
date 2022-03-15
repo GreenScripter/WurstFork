@@ -10,11 +10,8 @@ package net.wurstclient.hacks;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
-import net.wurstclient.SearchTags;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
-import net.wurstclient.settings.SliderSetting;
-import net.wurstclient.settings.SliderSetting.ValueDisplay;
 import net.wurstclient.util.RotationUtils;
 
 public final class BoatControlHack extends Hack implements UpdateListener
@@ -50,8 +47,8 @@ public final class BoatControlHack extends Hack implements UpdateListener
 		double speed = vehicle.getVelocity().multiply(1, 0, 1).length();
 		Vec3d result = RotationUtils.getClientLookVec().multiply(1, 0, 1).normalize().multiply(speed);
 		vehicle.setVelocity(result.x, vehicle.getVelocity().y, result.z);
-		MC.options.keyLeft.setPressed(false);
-		MC.options.keyRight.setPressed(false);
+		MC.options.leftKey.setPressed(false);
+		MC.options.rightKey.setPressed(false);
 		
 	}
 }

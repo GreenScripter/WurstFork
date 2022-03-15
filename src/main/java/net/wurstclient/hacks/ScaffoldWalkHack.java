@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -65,7 +65,7 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 	{
 		BlockPos belowPlayer = new BlockPos(MC.player.getPos()).down();
 		if(sneakDown.isChecked()
-			&& ((IKeyBinding)MC.options.keySneak).isActallyPressed())
+			&& ((IKeyBinding)MC.options.sneakKey).isActallyPressed())
 		{
 			belowPlayer = belowPlayer.down();
 		}
@@ -109,8 +109,8 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 		if(newSlot == -1)
 		{
 			if(sneakDown.isChecked())
-				MC.options.keySneak.setPressed(
-					((IKeyBinding)MC.options.keySneak).isActallyPressed());
+				MC.options.sneakKey.setPressed(
+					((IKeyBinding)MC.options.sneakKey).isActallyPressed());
 			return;
 		}
 		
@@ -120,7 +120,7 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 		
 		if(placeBlock(belowPlayer))
 		{
-			MC.options.keySneak.setPressed(false);
+			MC.options.sneakKey.setPressed(false);
 		}
 		
 		// reset slot

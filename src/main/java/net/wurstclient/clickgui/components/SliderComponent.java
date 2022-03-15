@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -101,7 +101,8 @@ public final class SliderComponent extends Component
 			setTooltip();
 		else if(hSlider && !dragging)
 			GUI.setTooltip(
-				"\u00a7e[ctrl]\u00a7r+\u00a7e[left-click]\u00a7r for precise input");
+				"\u00a7e[ctrl]\u00a7r+\u00a7e[left-click]\u00a7r for precise input\n"
+					+ "\u00a7e[right-click]\u00a7r to reset");
 		
 		if(renderAsDisabled)
 		{

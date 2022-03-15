@@ -60,6 +60,7 @@
     "ShulkerBoxScreenMixin",
     "SignEditScreenMixin",
     "SlimeBlockMixin",
+    "SodiumBlockOcclusionCacheMixin",
     "StatsScreenMixin",
     "StatusEffectInstanceMixin",
     "SwordItemMixin",

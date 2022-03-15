@@ -32,13 +32,13 @@ public final class AutoPlaceHack extends Hack implements UpdateListener
 	public void onDisable()
 	{
 		EVENTS.remove(UpdateListener.class, this);
-		MC.options.keyUse.setPressed(((IKeyBinding) MC.options.keyUse).isActallyPressed());
+		MC.options.useKey.setPressed(((IKeyBinding) MC.options.useKey).isActallyPressed());
 	}
 	
 	@Override
 	public void onUpdate()
 	{
-		MC.options.keyUse.setPressed(true);
+		MC.options.useKey.setPressed(true);
 
 	}
 }
