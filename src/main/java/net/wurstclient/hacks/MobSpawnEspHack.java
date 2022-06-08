@@ -38,6 +38,7 @@ import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.Chunk;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
+import net.wurstclient.WurstClient;
 import net.wurstclient.events.PacketInputListener;
 import net.wurstclient.events.RenderListener;
 import net.wurstclient.events.UpdateListener;
@@ -62,6 +63,10 @@ public final class MobSpawnEspHack extends Hack
 	
 	private final CheckboxSetting depthTest =
 		new CheckboxSetting("Depth test", true);
+	private final CheckboxSetting boxRestrict =
+		new CheckboxSetting("Box Restrict", false);
+	private final CheckboxSetting beacons =
+		new CheckboxSetting("Beacons", false);
 	
 	private final HashMap<Chunk, ChunkScanner> scanners = new HashMap<>();
 	private ExecutorService pool;
@@ -73,6 +78,8 @@ public final class MobSpawnEspHack extends Hack
 		addSetting(drawDistance);
 		addSetting(loadingSpeed);
 		addSetting(depthTest);
+		addSetting(boxRestrict);
+		addSetting(beacons);
 	}
 	
 	@Override
@@ -228,7 +235,7 @@ public final class MobSpawnEspHack extends Hack
 	{
 		// Avoid inconsistent GL state if setting changed mid-onRender
 		boolean depthTest = this.depthTest.isChecked();
-		
+
 		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -318,6 +325,14 @@ public final class MobSpawnEspHack extends Hack
 			red.addAll(blocks.stream()
 				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 1)
 				.filter(pos -> world.getLightLevel(LightType.SKY, pos) < 8)
+				.filter(pos -> !WurstClient.INSTANCE
+					.getHax().mobSpawnEspHack.boxRestrict.isChecked()
+					|| (SpeedNukerHack.box.maxX >= pos.getX()
+						&& SpeedNukerHack.box.minX <= pos.getX()
+						&& SpeedNukerHack.box.maxY >= pos.getY()
+						&& SpeedNukerHack.box.minY <= pos.getY()
+						&& SpeedNukerHack.box.maxZ >= pos.getZ()
+						&& SpeedNukerHack.box.minZ <= pos.getZ()))
 				.collect(Collectors.toList()));
 			
 			if(Thread.interrupted())
@@ -325,6 +340,14 @@ public final class MobSpawnEspHack extends Hack
 			
 			yellow.addAll(blocks.stream().filter(pos -> !red.contains(pos))
 				.filter(pos -> world.getLightLevel(LightType.BLOCK, pos) < 1)
+				.filter(pos -> !WurstClient.INSTANCE
+					.getHax().mobSpawnEspHack.boxRestrict.isChecked()
+					|| (SpeedNukerHack.box.maxX >= pos.getX()
+						&& SpeedNukerHack.box.minX <= pos.getX()
+						&& SpeedNukerHack.box.maxY >= pos.getY()
+						&& SpeedNukerHack.box.minY <= pos.getY()
+						&& SpeedNukerHack.box.maxZ >= pos.getZ()
+						&& SpeedNukerHack.box.minZ <= pos.getZ()))
 				.collect(Collectors.toList()));
 			doneScanning = true;
 		}
@@ -349,15 +372,24 @@ public final class MobSpawnEspHack extends Hack
 				.forEach(pos -> {
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ())
-						.color(1, 0, 0, 0.5F).next();
+						.color(1, 0, 0, 1f).next();
 					bufferBuilder.vertex(pos.getX() + 1, pos.getY() + 0.01,
-						pos.getZ() + 1).color(1, 0, 0, 0.5F).next();
+						pos.getZ() + 1).color(1, 0, 0, 1f).next();
 					bufferBuilder
 						.vertex(pos.getX() + 1, pos.getY() + 0.01, pos.getZ())
-						.color(1, 0, 0, 0.5F).next();
+						.color(1, 0, 0, 1f).next();
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ() + 1)
-						.color(1, 0, 0, 0.5F).next();
+						.color(1, 0, 0, 1f).next();
+					
+					if(WurstClient.INSTANCE.getHax().mobSpawnEspHack.beacons
+						.isChecked())
+					{
+						bufferBuilder.vertex(pos.getX() + 0.5, pos.getY() - 400,
+							pos.getZ() + 0.5).color(1, 0, 0, 1f).next();
+						bufferBuilder.vertex(pos.getX() + 0.5, pos.getY() + 400,
+							pos.getZ() + 0.5).color(1, 0, 0, 1f).next();
+					}
 				});
 			
 			new ArrayList<>(yellow).stream().filter(Objects::nonNull)
@@ -366,15 +398,23 @@ public final class MobSpawnEspHack extends Hack
 				.forEach(pos -> {
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ())
-						.color(1, 1, 0, 0.5F).next();
+						.color(1, 1, 0, 1f).next();
 					bufferBuilder.vertex(pos.getX() + 1, pos.getY() + 0.01,
-						pos.getZ() + 1).color(1, 1, 0, 0.5F).next();
+						pos.getZ() + 1).color(1, 1, 0, 1f).next();
 					bufferBuilder
 						.vertex(pos.getX() + 1, pos.getY() + 0.01, pos.getZ())
-						.color(1, 1, 0, 0.5F).next();
+						.color(1, 1, 0, 1f).next();
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ() + 1)
-						.color(1, 1, 0, 0.5F).next();
+						.color(1, 1, 0, 1f).next();
+					if(WurstClient.INSTANCE.getHax().mobSpawnEspHack.beacons
+						.isChecked())
+					{
+						bufferBuilder.vertex(pos.getX() + 0.5, pos.getY() - 400,
+							pos.getZ() + 0.5).color(1, 1, 0, 1f).next();
+						bufferBuilder.vertex(pos.getX() + 0.5, pos.getY() + 400,
+							pos.getZ() + 0.5).color(1, 1, 0, 1f).next();
+					}
 				});
 			
 			bufferBuilder.end();
