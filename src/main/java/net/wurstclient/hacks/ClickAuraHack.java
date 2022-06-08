@@ -40,6 +40,7 @@ import net.wurstclient.events.LeftClickListener;
 import net.wurstclient.events.RightClickListener;
 import net.wurstclient.events.UpdateListener;
 import net.wurstclient.hack.Hack;
+import net.wurstclient.settings.AttackSpeedSliderSetting;
 import net.wurstclient.settings.CheckboxSetting;
 import net.wurstclient.settings.EnumSetting;
 import net.wurstclient.settings.SliderSetting;
@@ -55,6 +56,9 @@ public final class ClickAuraHack extends Hack
 	private final SliderSetting range =
 		new SliderSetting("Range", 5, 1, 10, 0.05, ValueDisplay.DECIMAL);
 	
+	private final AttackSpeedSliderSetting speed =
+		new AttackSpeedSliderSetting();
+	
 	private final EnumSetting<Priority> priority = new EnumSetting<>("Priority",
 		"Determines which entity will be attacked first.\n"
 			+ "\u00a7lDistance\u00a7r - Attacks the closest entity.\n"
@@ -63,7 +67,7 @@ public final class ClickAuraHack extends Hack
 			+ "\u00a7lHealth\u00a7r - Attacks the weakest entity.",
 		Priority.values(), Priority.ANGLE);
 	
-	public final SliderSetting fov =
+	private final SliderSetting fov =
 		new SliderSetting("FOV", 360, 30, 360, 10, ValueDisplay.DEGREES);
 	
 	private final CheckboxSetting filterPlayers = new CheckboxSetting(
@@ -74,8 +78,7 @@ public final class ClickAuraHack extends Hack
 		new SliderSetting("Filter flying",
 			"Won't attack players that\n" + "are at least the given\n"
 				+ "distance above ground.",
-			0, 0, 2, 0.05,
-			v -> v == 0 ? "off" : ValueDisplay.DECIMAL.getValueString(v));
+			0, 0, 2, 0.05, ValueDisplay.DECIMAL.withLabel(0, "off"));
 	
 	private final CheckboxSetting filterMonsters = new CheckboxSetting(
 		"Filter monsters", "Won't attack zombies, creepers, etc.", false);
@@ -109,11 +112,12 @@ public final class ClickAuraHack extends Hack
 	private final CheckboxSetting filterStands = new CheckboxSetting(
 		"Filter armor stands", "Won't attack armor stands.", false);
 	private final CheckboxSetting filterCrystals = new CheckboxSetting(
-			"Filter end crystals", "Won't attack end crystals.", false);
+		"Filter end crystals", "Won't attack end crystals.", false);
 	private final CheckboxSetting filterVillageZombies = new CheckboxSetting(
-			"Filter villager zombies", "Won't attack villager zombies.", false);
+		"Filter villager zombies", "Won't attack villager zombies.", false);
 	private final CheckboxSetting rightClick = new CheckboxSetting(
-			"Use Interact", "Will interact with the closest entity rather than attacking.", false);
+		"Use Interact",
+		"Will interact with the closest entity rather than attacking.", false);
 	
 	public ClickAuraHack()
 	{
@@ -121,6 +125,7 @@ public final class ClickAuraHack extends Hack
 		
 		setCategory(Category.COMBAT);
 		addSetting(range);
+		addSetting(speed);
 		addSetting(priority);
 		addSetting(fov);
 		addSetting(filterPlayers);
@@ -155,6 +160,7 @@ public final class ClickAuraHack extends Hack
 		WURST.getHax().triggerBotHack.setEnabled(false);
 		WURST.getHax().tpAuraHack.setEnabled(false);
 		
+		speed.resetTimer();
 		EVENTS.add(UpdateListener.class, this);
 		EVENTS.add(RightClickListener.class, this);
 		EVENTS.add(LeftClickListener.class, this);
@@ -167,14 +173,17 @@ public final class ClickAuraHack extends Hack
 		EVENTS.remove(RightClickListener.class, this);
 		EVENTS.remove(LeftClickListener.class, this);
 	}
+	
 	long lastinteract = System.currentTimeMillis();
+	
 	@Override
 	public void onUpdate()
 	{
 		if(!MC.options.attackKey.isPressed())
 			return;
 		
-		if(MC.player.getAttackCooldownProgress(0) < 1)
+		speed.updateTimer();
+		if(!speed.isTimeToAttack())
 			return;
 		
 		attack();
@@ -184,20 +193,21 @@ public final class ClickAuraHack extends Hack
 	{
 		interact();
 	}
-
-	public void onLeftClick(LeftClickEvent event) {		attack();
-}
+	
+	public void onLeftClick(LeftClickEvent event)
+	{
+		attack();
+	}
+	
 	private void attack()
 	{
-		if (rightClick.isChecked()){
+		if(rightClick.isChecked())
+		{
 			return;
 		}
 		// set entity
 		ClientPlayerEntity player = MC.player;
 		ClientWorld world = MC.world;
-		
-		if(player.getAttackCooldownProgress(0) < 1)
-			return;
 		
 		double rangeSq = Math.pow(range.getValue(), 2);
 		Stream<Entity> stream =
@@ -205,7 +215,7 @@ public final class ClickAuraHack extends Hack
 				.filter(e -> !e.isRemoved())
 				.filter(e -> e instanceof LivingEntity
 					&& ((LivingEntity)e).getHealth() > 0
-					|| e instanceof EndCrystalEntity)
+					|| (e instanceof EndCrystalEntity))
 				.filter(e -> player.squaredDistanceTo(e) <= rangeSq)
 				.filter(e -> e != player)
 				.filter(e -> !(e instanceof FakePlayerEntity))
@@ -298,11 +308,18 @@ public final class ClickAuraHack extends Hack
 		WURST.getHax().criticalsHack.doCritical();
 		MC.interactionManager.attackEntity(player, target);
 		player.swingHand(Hand.MAIN_HAND);
-	}private void interact()
-	{if (!rightClick.isChecked()){
-		return;
+		speed.resetTimer();
+		
 	}
-		if (System.currentTimeMillis()-lastinteract<10){
+	
+	private void interact()
+	{
+		if(!rightClick.isChecked())
+		{
+			return;
+		}
+		if(System.currentTimeMillis() - lastinteract < 10)
+		{
 			return;
 		}
 		lastinteract = System.currentTimeMillis();
@@ -397,8 +414,9 @@ public final class ClickAuraHack extends Hack
 		// face entity
 		Rotation rotation = RotationUtils
 			.getNeededRotations(target.getBoundingBox().getCenter());
-		PlayerMoveC2SPacket.LookAndOnGround packet = new PlayerMoveC2SPacket.LookAndOnGround(
-			rotation.getYaw(), rotation.getPitch(), MC.player.isOnGround());
+		PlayerMoveC2SPacket.LookAndOnGround packet =
+			new PlayerMoveC2SPacket.LookAndOnGround(rotation.getYaw(),
+				rotation.getPitch(), MC.player.isOnGround());
 		MC.player.networkHandler.sendPacket(packet);
 		
 		// attack entity
@@ -433,5 +451,5 @@ public final class ClickAuraHack extends Hack
 			return name;
 		}
 	}
-
+	
 }
