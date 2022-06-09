@@ -34,6 +34,9 @@ public class BackgroundRendererMixin
 		if(effect == StatusEffects.BLINDNESS
 			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
 			return false;
+		if(effect == StatusEffects.DARKNESS
+			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
+			return false;
 		
 		return entity.hasStatusEffect(effect);
 	}
@@ -47,6 +50,9 @@ public class BackgroundRendererMixin
 		StatusEffect effect)
 	{
 		if(effect == StatusEffects.BLINDNESS
+			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
+			return false;
+		if(effect == StatusEffects.DARKNESS
 			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
 			return false;
 		
