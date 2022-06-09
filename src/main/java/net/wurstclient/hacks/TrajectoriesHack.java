@@ -18,7 +18,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
@@ -40,6 +39,7 @@ import net.minecraft.item.SnowballItem;
 import net.minecraft.item.SplashPotionItem;
 import net.minecraft.item.TridentItem;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
@@ -106,10 +106,11 @@ public final class TrajectoriesHack extends Hack
 		players.clear();
 		if(showOthers.isChecked())
 		{
-			Stream<AbstractClientPlayerEntity> stream = world.getPlayers()
-				.parallelStream().filter(e -> !e.isRemoved() && e.getHealth() > 0)
-				.filter(e -> !(e instanceof FakePlayerEntity))
-				.filter(e -> Math.abs(e.getY() - MC.player.getY()) <= 1e6);
+			Stream<AbstractClientPlayerEntity> stream =
+				world.getPlayers().parallelStream()
+					.filter(e -> !e.isRemoved() && e.getHealth() > 0)
+					.filter(e -> !(e instanceof FakePlayerEntity))
+					.filter(e -> Math.abs(e.getY() - MC.player.getY()) <= 1e6);
 			
 			players.addAll(stream.collect(Collectors.toList()));
 		}else
@@ -172,8 +173,11 @@ public final class TrajectoriesHack extends Hack
 	private void drawLine(MatrixStack matrixStack, ArrayList<Vec3d> path,
 		Vec3d camPos)
 	{
+		int regionX = ((int)camPos.getX() >> 9) * 512;
+		int regionZ = ((int)camPos.getZ() >> 9) * 512;
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP,
@@ -184,11 +188,10 @@ public final class TrajectoriesHack extends Hack
 		for(Vec3d point : path)
 			bufferBuilder
 				.vertex(matrix, (float)(point.x - camPos.x),
-					(float)(point.y - camPos.y), (float)(point.z - camPos.z))
+					(float)(point.y - camPos.y), (float)(point.z - camPos.z-regionZ))
 				.next();
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	private void drawEndOfLine(MatrixStack matrixStack, Vec3d end, Vec3d camPos)

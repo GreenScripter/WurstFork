@@ -213,8 +213,8 @@ public final class VillagerCmd extends Command
 			MC.player.networkHandler.sendPacket(packet);
 			
 			// place block
-			MC.interactionManager.interactBlock(MC.player, MC.world,
-				Hand.OFF_HAND, new BlockHitResult(hitVec, side, pos, false));
+			MC.interactionManager.interactBlock(MC.player, Hand.OFF_HAND,
+				new BlockHitResult(hitVec, side, pos, false));
 			MC.player.swingHand(Hand.MAIN_HAND);
 			IMC.setItemUseCooldown(4);
 			

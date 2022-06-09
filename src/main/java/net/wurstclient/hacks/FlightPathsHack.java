@@ -119,6 +119,7 @@ public final class FlightPathsHack extends Hack
 		GL11.glDisable(GL11.GL_LIGHTING);
 		
 		RenderUtils.applyCameraRotationOnly();
+//		RenderUtils.applyRegionalRenderOffset(matrixStack);
 		for(ProjectileEntity player : projectiles)
 		{
 			ArrayList<Vec3d> path = getPath(partialTicks, player);
@@ -145,8 +146,11 @@ public final class FlightPathsHack extends Hack
 	private void drawLine(MatrixStack matrixStack, ArrayList<Vec3d> path,
 		Vec3d camPos)
 	{
+		
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP,
@@ -163,10 +167,9 @@ public final class FlightPathsHack extends Hack
 			bufferBuilder
 				.vertex(matrix, (float)(point.x - camPos.x),
 					(float)(point.y - camPos.y), (float)(point.z - camPos.z))
-				.next();
+				.color(1, pathHitsUs ? 0 : 1, 0, 0.75F).next();
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	private void drawEndOfLine(MatrixStack matrixStack, Vec3d end, Vec3d camPos)

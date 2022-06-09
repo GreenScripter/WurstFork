@@ -9,7 +9,7 @@ package net.wurstclient.util;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.wurstclient.WurstClient;
 
@@ -41,31 +41,19 @@ public enum ChatUtils
 			return;
 		
 		ChatHud chatHud = MC.inGameHud.getChatHud();
-		LiteralText prefix = new LiteralText(WURST_PREFIX);
-		try
-		{
-			chatHud.addMessage(prefix.append(component));
-		}catch(Exception e)
-		{
-			try
-			{
-				chatHud.addMessage(prefix.append(component));
-			}catch(Exception e2)
-			{
-				e2.printStackTrace();
-			}
-		}
+		MutableText prefix = Text.literal(WURST_PREFIX);
+		chatHud.addMessage(prefix.append(component));
 	}
 	
 	public static void message(String message)
 	{
-		component(new LiteralText(message));
+		component(Text.literal(message));
 	}
 	
 	public static void rawMessage(String message)
 	{
 		ChatHud chatHud = MC.inGameHud.getChatHud();
-		chatHud.addMessage(new LiteralText(message));
+		chatHud.addMessage(Text.literal(message));
 		
 	}
 	

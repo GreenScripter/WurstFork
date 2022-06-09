@@ -13,7 +13,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -22,6 +22,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
@@ -71,6 +72,20 @@ public enum RenderUtils
 			regionZ - camPos.z);
 	}
 	
+	public static void unapplyRegionalRenderOffset(MatrixStack matrixStack)
+	{
+		applyCameraRotationOnly();
+		
+		Vec3d camPos = getCameraPos();
+		BlockPos blockPos = getCameraBlockPos();
+		
+		int regionX = (blockPos.getX() >> 9) * 512;
+		int regionZ = (blockPos.getZ() >> 9) * 512;
+		
+		matrixStack.translate(-regionX + camPos.x, camPos.y,
+			-regionZ + camPos.z);
+	}
+	
 	public static void applyRegionalRenderOffset(MatrixStack matrixStack,
 		Chunk chunk)
 	{
@@ -83,6 +98,48 @@ public enum RenderUtils
 		
 		matrixStack.translate(regionX - camPos.x, -camPos.y,
 			regionZ - camPos.z);
+	}
+	
+	public static void unapplyRegionalRenderOffset(MatrixStack matrixStack,
+		Chunk chunk)
+	{
+		applyCameraRotationOnly();
+		
+		Vec3d camPos = getCameraPos();
+		
+		int regionX = (chunk.getPos().getStartX() >> 9) * 512;
+		int regionZ = (chunk.getPos().getStartZ() >> 9) * 512;
+		
+		matrixStack.translate(-regionX + camPos.x, camPos.y,
+			-regionZ + camPos.z);
+	}
+	
+	public static void applyRegionalRenderOffset(MatrixStack matrixStack,
+		ChunkPos chunk)
+	{
+		applyCameraRotationOnly();
+		
+		Vec3d camPos = getCameraPos();
+		
+		int regionX = (chunk.getStartX() >> 9) * 512;
+		int regionZ = (chunk.getStartZ() >> 9) * 512;
+		
+		matrixStack.translate(regionX - camPos.x, -camPos.y,
+			regionZ - camPos.z);
+	}
+	
+	public static void unapplyRegionalRenderOffset(MatrixStack matrixStack,
+		ChunkPos chunk)
+	{
+		applyCameraRotationOnly();
+		
+		Vec3d camPos = getCameraPos();
+		
+		int regionX = (chunk.getStartX() >> 9) * 512;
+		int regionZ = (chunk.getStartZ() >> 9) * 512;
+		
+		matrixStack.translate(-regionX + camPos.x, camPos.y,
+			-regionZ + camPos.z);
 	}
 	
 	public static void applyCameraRotationOnly()
@@ -134,7 +191,8 @@ public enum RenderUtils
 	public static void drawSolidBox(Box bb, MatrixStack matrixStack)
 	{
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.QUADS,
@@ -216,20 +274,22 @@ public enum RenderUtils
 		bufferBuilder
 			.vertex(matrix, (float)bb.minX, (float)bb.maxY, (float)bb.minZ)
 			.next();
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	public static void drawSolidBox(Box bb, VertexBuffer vertexBuffer)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.QUADS,
 			VertexFormats.POSITION);
 		drawSolidBox(bb, bufferBuilder);
-		bufferBuilder.end();
+		BuiltBuffer buffer = bufferBuilder.end();
 		
-		vertexBuffer.upload(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(buffer);
+		VertexBuffer.unbind();
 	}
 	
 	public static void drawSolidBox(Box bb, BufferBuilder bufferBuilder)
@@ -273,7 +333,8 @@ public enum RenderUtils
 	public static void drawOutlinedBox(Box bb, MatrixStack matrixStack)
 	{
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
@@ -361,20 +422,22 @@ public enum RenderUtils
 		bufferBuilder
 			.vertex(matrix, (float)bb.minX, (float)bb.maxY, (float)bb.minZ)
 			.next();
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	public static void drawOutlinedBox(Box bb, VertexBuffer vertexBuffer)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
 		drawOutlinedBox(bb, bufferBuilder);
-		bufferBuilder.end();
+		BuiltBuffer buffer = bufferBuilder.end();
 		
-		vertexBuffer.upload(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(buffer);
+		VertexBuffer.unbind();
 	}
 	
 	public static void drawOutlinedBox(Box bb, BufferBuilder bufferBuilder)
@@ -419,7 +482,8 @@ public enum RenderUtils
 	public static void drawCrossBox(Box bb, MatrixStack matrixStack)
 	{
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
@@ -506,20 +570,22 @@ public enum RenderUtils
 		bufferBuilder
 			.vertex(matrix, (float)bb.minX, (float)bb.minY, (float)bb.minZ)
 			.next();
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	public static void drawCrossBox(Box bb, VertexBuffer vertexBuffer)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
 		drawCrossBox(bb, bufferBuilder);
-		bufferBuilder.end();
+		BuiltBuffer buffer = bufferBuilder.end();
 		
-		vertexBuffer.upload(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(buffer);
+		VertexBuffer.unbind();
 	}
 	
 	public static void drawCrossBox(Box bb, BufferBuilder bufferBuilder)
@@ -564,7 +630,8 @@ public enum RenderUtils
 	public static void drawNode(Box bb, MatrixStack matrixStack)
 	{
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
 		double midX = (bb.minX + bb.maxX) / 2;
@@ -634,20 +701,22 @@ public enum RenderUtils
 		bufferBuilder.vertex(matrix, (float)midX, (float)midY, (float)bb.maxZ)
 			.next();
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	public static void drawNode(Box bb, VertexBuffer vertexBuffer)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
 		drawNode(bb, bufferBuilder);
-		bufferBuilder.end();
+		BuiltBuffer buffer = bufferBuilder.end();
 		
-		vertexBuffer.upload(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(buffer);
+		VertexBuffer.unbind();
 	}
 	
 	public static void drawNode(Box bb, BufferBuilder bufferBuilder)
@@ -697,7 +766,8 @@ public enum RenderUtils
 	{
 		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
 		
@@ -763,21 +833,23 @@ public enum RenderUtils
 		
 		matrixStack.pop();
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 	}
 	
 	public static void drawArrow(Vec3d from, Vec3d to,
 		VertexBuffer vertexBuffer)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
+		
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION);
-		
 		drawArrow(from, to, bufferBuilder);
+		BuiltBuffer buffer = bufferBuilder.end();
 		
-		bufferBuilder.end();
-		vertexBuffer.upload(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(buffer);
+		VertexBuffer.unbind();
 	}
 	
 	public static void drawArrow(Vec3d from, Vec3d to,

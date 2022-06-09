@@ -18,7 +18,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.Tessellator;
@@ -145,6 +144,8 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		
 		// GL resets
 		RenderSystem.setShaderColor(1, 1, 1, 1);
+//		RenderUtils.unapplyRegionalRenderOffset(matrixStack);
+
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
@@ -171,16 +172,18 @@ public final class MobEspHack extends Hack implements UpdateListener,
 			float f = MC.player.distanceTo(e) / 20F;
 			if(e instanceof RaiderEntity)
 			{
-				RenderSystem.setShaderColor(1f, 0f, 1f, 0.25F);
+				RenderSystem.setShaderColor(1f, 0f, 1f, 0.50F);
 			}else
 			{
-				RenderSystem.setShaderColor(2 - f, f, 0, 0.25F);
+				RenderSystem.setShaderColor(2 - f, f, 0, 0.50F);
 			}
 			
 			Shader shader = RenderSystem.getShader();
 			Matrix4f matrix4f = RenderSystem.getProjectionMatrix();
-			mobBox.setShader(matrixStack.peek().getPositionMatrix(), matrix4f,
+			mobBox.bind();
+			mobBox.draw(matrixStack.peek().getPositionMatrix(), matrix4f,
 				shader);
+			VertexBuffer.unbind();
 			
 			matrixStack.pop();
 		}
@@ -195,7 +198,8 @@ public final class MobEspHack extends Hack implements UpdateListener,
 		
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION_COLOR);
 		
@@ -216,15 +220,14 @@ public final class MobEspHack extends Hack implements UpdateListener,
 			
 			bufferBuilder
 				.vertex(matrix, (float)start.x, (float)start.y, (float)start.z)
-				.color(r, g, 0, 0.5F).next();
+				.color(r, g, 0, 1F).next();
 			
 			bufferBuilder
 				.vertex(matrix, (float)end.x, (float)end.y, (float)end.z)
-				.color(r, g, 0, 0.5F).next();
+				.color(r, g, 0, 1F).next();
 		}
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
+		tessellator.draw();
 		
 	}
 	

@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -69,16 +68,14 @@ public abstract class GameRendererMixin
 		EventManager.fire(event);
 	}
 	
-	@Redirect(
-		at = @At(value = "FIELD",
-			target = "Lnet/minecraft/client/option/GameOptions;fov:D",
-			opcode = Opcodes.GETFIELD,
-			ordinal = 0),
-		method = {"getFov(Lnet/minecraft/client/render/Camera;FZ)D"})
-	private double getFov(GameOptions options)
+	@Inject(at = @At(value = "RETURN", ordinal = 1),
+		method = {"getFov(Lnet/minecraft/client/render/Camera;FZ)D"},
+		cancellable = true)
+	private void onGetFov(Camera camera, float tickDelta, boolean changingFov,
+		CallbackInfoReturnable<Double> cir)
 	{
-		return WurstClient.INSTANCE.getOtfs().zoomOtf
-			.changeFovBasedOnZoom(options.fov);
+		cir.setReturnValue(WurstClient.INSTANCE.getOtfs().zoomOtf
+			.changeFovBasedOnZoom(cir.getReturnValueD()));
 	}
 	
 	@Inject(at = {@At(value = "INVOKE",
@@ -129,14 +126,17 @@ public abstract class GameRendererMixin
 		if(WurstClient.INSTANCE.getHax().noHurtcamHack.isEnabled())
 			ci.cancel();
 	}
-
+	
 	@SuppressWarnings("resource")
 	@Inject(at = {@At("HEAD")},
-			method = {
-				"getFov(Lnet/minecraft/client/render/Camera;FZ)D"},
-			cancellable = true)
-	private void getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> ci) {
-		if (WurstClient.INSTANCE.getHax().freecamHack.isEnabled()) ci.setReturnValue(MinecraftClient.getInstance().options.fov);
+		method = {"getFov(Lnet/minecraft/client/render/Camera;FZ)D"},
+		cancellable = true)
+	private void getFov(Camera camera, float tickDelta, boolean changingFov,
+		CallbackInfoReturnable<Double> ci)
+	{
+		if(WurstClient.INSTANCE.getHax().freecamHack.isEnabled())
+			ci.setReturnValue((double)MinecraftClient.getInstance().options
+				.getFov().getValue());
 	}
 	
 	@Shadow

@@ -209,7 +209,7 @@ public final class ConnectCmd extends Command implements UpdateListener {
 	}
 	
 	public static int dimension(DimensionType type) {
-		if (type.isPiglinSafe() || type.isUltrawarm()) {
+		if (type.piglinSafe() || type.ultrawarm()) {
 			return 2;
 		}
 		if (type.hasFixedTime()) {

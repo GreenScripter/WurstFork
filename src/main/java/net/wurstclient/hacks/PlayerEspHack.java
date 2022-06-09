@@ -19,7 +19,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
@@ -198,10 +197,11 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 		RenderSystem.setShaderColor(1, 1, 1, 1);
 		
 		Set<String> names = new HashSet<>();
-		names.add(MC.player.getName().asString());
+		names.add(MC.player.getName().getString());
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 			VertexFormats.POSITION_COLOR);
 		
@@ -209,7 +209,7 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 		{
 			Vec3d interpolationOffset = new Vec3d(e.getX(), e.getY(), e.getZ())
 				.subtract(e.prevX, e.prevY, e.prevZ).multiply(1 - partialTicks);
-			names.add(e.getName().asString());
+			names.add(e.getName().getString());
 			Vec3d end = e.getBoundingBox().getCenter()
 				.subtract(interpolationOffset).subtract(regionX, 0, regionZ);
 			
@@ -238,8 +238,6 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 				.color(r, g, b, 0.5F).next();
 		}
 		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
 		if(ConnectCmd.privateChat != null)
 		{
 			synchronized(ConnectCmd.privateChat.players)
@@ -251,27 +249,21 @@ public final class PlayerEspHack extends Hack implements UpdateListener,
 					{
 						Vec3d end = ConnectCmd.privateChat.players.get(e);
 						
-						BufferBuilder bufferBuilder2 =
-							Tessellator.getInstance().getBuffer();
 						RenderSystem.setShader(GameRenderer::getPositionShader);
 						
-						bufferBuilder2.begin(VertexFormat.DrawMode.DEBUG_LINES,
-							VertexFormats.POSITION);
-						RenderSystem.setShaderColor(0, 1, 1, 0.5F);
-						
-						bufferBuilder2
-							.vertex(matrix, (float)start.x - regionX,
-								(float)start.y, (float)start.z - regionZ)
-							.next();
-						bufferBuilder2.vertex(matrix, (float)end.x - regionX,
-							(float)end.y, (float)end.z - regionZ).next();
-						bufferBuilder2.end();
-						BufferRenderer.draw(bufferBuilder2);
+						bufferBuilder
+						.vertex(matrix, (float)start.x, (float)start.y, (float)start.z)
+						.color(0, 1, 1, 0.5F).next();
+					
+					bufferBuilder
+						.vertex(matrix, (float)end.x, (float)end.y, (float)end.z)
+						.color(0, 1, 1, 0.5F).next();
 					}
 				}
 			}
 		}
 		
+		tessellator.draw();
 	}
 	
 	private enum Style

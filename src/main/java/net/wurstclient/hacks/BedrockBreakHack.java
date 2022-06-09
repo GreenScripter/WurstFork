@@ -9,7 +9,6 @@ package net.wurstclient.hacks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.UUID;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -28,12 +27,9 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
-import net.minecraft.network.MessageType;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.tag.FluidTags;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -357,16 +353,15 @@ class Messager
 	public static void actionBar(String message)
 	{
 		MinecraftClient minecraftClient = MinecraftClient.getInstance();
-		minecraftClient.inGameHud.setOverlayMessage(new LiteralText(message),
+		minecraftClient.inGameHud.setOverlayMessage(Text.literal(message),
 			false);
 	}
 	
 	public static void rawchat(String message)
 	{
 		MinecraftClient minecraftClient = MinecraftClient.getInstance();
-		Text text = new LiteralText(message);
-		minecraftClient.inGameHud.addChatMessage(MessageType.SYSTEM, text,
-			UUID.randomUUID());
+		Text text = Text.literal(message);
+		minecraftClient.inGameHud.getChatHud().addMessage(text);
 	}
 }
 
@@ -753,16 +748,16 @@ class BreakingFlowController
 	private static boolean blockInPlayerRange(BlockPos blockPos,
 		PlayerEntity player, float range)
 	{
-		return(blockPos.getSquaredDistance(player.getPos().add(0.5, 0.5, 0.5)) <= range
-			* range);
+		return(blockPos.getSquaredDistance(
+			player.getPos().add(0.5, 0.5, 0.5)) <= range * range);
 	}
 	
 	private static boolean shouldAddNewTargetBlock(BlockPos pos)
 	{
 		for(int i = 0; i < cachedTargetBlockList.size(); i++)
 		{
-			if(cachedTargetBlockList.get(i).getBlockPos().getSquaredDistance(
-				pos.getX(), pos.getY(), pos.getZ()) == 0)
+			if(cachedTargetBlockList.get(i).getBlockPos()
+				.getSquaredDistance(pos.getX(), pos.getY(), pos.getZ()) == 0)
 			{
 				return false;
 			}
@@ -812,9 +807,11 @@ class BlockPlacer
 	{
 		ClientPlayerEntity player = minecraftClient.player;
 		ItemStack itemStack = player.getStackInHand(Hand.MAIN_HAND);
-		
-		minecraftClient.getNetworkHandler().sendPacket(
-			new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult));
+		((IClientPlayerInteractionManager)minecraftClient.interactionManager).sendPlayerInteractBlockPacket(Hand.MAIN_HAND, hitResult);
+		// ((IClientPlayNetworkHandler)minecraftClient.getNetworkHandler())
+		// .sendSequencePacket(WurstClient.MC.world,
+		// i -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult,
+		// i));
 		
 		if(!itemStack.isEmpty() && !player.getItemCooldownManager()
 			.isCoolingDown(itemStack.getItem()))

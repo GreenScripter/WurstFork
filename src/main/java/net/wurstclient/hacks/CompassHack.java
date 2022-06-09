@@ -1,21 +1,27 @@
 package net.wurstclient.hacks;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.wurstclient.Category;
 import net.wurstclient.SearchTags;
+import net.wurstclient.commands.ConnectCmd;
 import net.wurstclient.events.RenderListener;
 import net.wurstclient.hack.Hack;
 import net.wurstclient.util.RenderUtils;
@@ -50,67 +56,57 @@ public final class CompassHack extends Hack implements RenderListener
 		BlockPos pos = MC.world.getSpawnPos();
 		if(pos == null)
 			return;
-		// GL settings
-		matrixStack.push();
-		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		GL11.glLineWidth(2);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL11.GL_LIGHTING);
+		RenderUtils.applyRegionalRenderOffset(matrixStack);
+		RenderSystem.setShaderColor(1, 1, 1, 0.5f);
 		
-		RenderUtils.applyRenderOffset(matrixStack);
-		
-		RenderSystem.setShaderColor(0, 1, 1, 0.5F);
+		BlockPos camPos = RenderUtils.getCameraBlockPos();
+		int regionX = (camPos.getX() >> 9) * 512;
+		int regionZ = (camPos.getZ() >> 9) * 512;
+//		System.out.println(regionX + ", " + regionZ);
+		Vec3d start = RotationUtils.getClientLookVec()
+			.add(RenderUtils.getCameraPos()).subtract(regionX, 0, regionZ);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.setShaderColor(1, 1, 1, 1);
 		
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-		RenderSystem.setShader(GameRenderer::getPositionShader);
 		
-		// tracer line
+		Tessellator tessellator = RenderSystem.renderThreadTesselator();
+		BufferBuilder bufferBuilder = tessellator.getBuffer();
 		bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
-			VertexFormats.POSITION);
+			VertexFormats.POSITION_COLOR);
 		
-		// set start position
-		Vec3d start =
-			RotationUtils.getClientLookVec().add(RenderUtils.getCameraPos());
-		
-		// set end position
-		Vec3d end = Vec3d.ofCenter(pos);
-		
-		// draw line
-		bufferBuilder
-			.vertex(matrix, (float)start.x, (float)start.y, (float)start.z)
-			.next();
-		bufferBuilder.vertex(matrix, (float)end.x, (float)end.y, (float)end.z)
-			.next();
-		
-		bufferBuilder.end();
-		BufferRenderer.draw(bufferBuilder);
-		
-		// block box
 		{
-			matrixStack.push();
-			matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
+			Vec3d end =
+				new Vec3d(0.5, 0.5, 0.5).add(pos.getX(), pos.getY(), pos.getZ())
+					.subtract(regionX, 0, regionZ);
 			
-			RenderUtils.drawOutlinedBox(matrixStack);
+			float r, g, b;
 			
-			RenderSystem.setShaderColor(0, 1, 1, 0.5F);
-			RenderUtils.drawSolidBox(matrixStack);
+			r = 0;
+			g = 1;
+			b = 1;
 			
-			matrixStack.pop();
+			bufferBuilder
+				.vertex(matrix, (float)start.x, (float)start.y, (float)start.z)
+				.color(r, g, b, 0.5F).next();
+			
+			bufferBuilder
+				.vertex(matrix, (float)end.x, (float)end.y, (float)end.z)
+				.color(r, g, b, 0.5F).next();
 		}
 		
-		matrixStack.pop();
-		
-		// GL resets
+		tessellator.draw();
+		RenderSystem.setShaderColor(1, 1, 1, 1);
+		RenderUtils.unapplyRegionalRenderOffset(matrixStack);
+
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+		
 	}
 	
 }

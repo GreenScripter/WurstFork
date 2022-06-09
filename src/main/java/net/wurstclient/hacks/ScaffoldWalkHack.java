@@ -170,9 +170,9 @@ public final class ScaffoldWalkHack extends Hack implements UpdateListener
 		if(airplace.isChecked())
 		{
 			Direction side = Direction.DOWN;
-			ActionResult result = MC.interactionManager.interactBlock(MC.player,
-				MC.world, Hand.MAIN_HAND,
-				new BlockHitResult(new Vec3d(0, 0, 0), side, pos, false));
+			ActionResult result =
+				MC.interactionManager.interactBlock(MC.player, Hand.MAIN_HAND,
+					new BlockHitResult(new Vec3d(0, 0, 0), side, pos, false));
 			MC.player.swingHand(Hand.MAIN_HAND);
 			if(result.isAccepted())
 			{

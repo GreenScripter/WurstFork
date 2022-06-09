@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.BackgroundRenderer.FogType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
@@ -40,7 +41,7 @@ public class BackgroundRendererMixin
 	@Redirect(at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z",
 		ordinal = 1),
-		method = "applyFog(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/BackgroundRenderer$FogType;FZ)V",
+		method = "applyFog(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/BackgroundRenderer$FogType;FZF)V",
 		require = 0)
 	private static boolean hasStatusEffectApplyFog(LivingEntity entity,
 		StatusEffect effect)
@@ -52,8 +53,14 @@ public class BackgroundRendererMixin
 		return entity.hasStatusEffect(effect);
 	}
 	
-	@Inject(at = { @At("HEAD") }, method = { "applyFog(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/BackgroundRenderer$FogType;FZ)V" }, cancellable = true)
-	private static void changeLookDirection(Camera c, BackgroundRenderer.FogType ft, float f, boolean b, CallbackInfo ci) {
-		if (WurstClient.INSTANCE.getHax().noFogHack.isEnabled()) ci.cancel();
+	@Inject(at = {@At("HEAD")},
+		method = {
+			"applyFog(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/BackgroundRenderer$FogType;FZF)V"},
+		cancellable = true)
+	private static void applyFog(Camera camera, FogType fogType,
+		float viewDistance, boolean thickFog, float tickDelta, CallbackInfo ci)
+	{
+		if(WurstClient.INSTANCE.getHax().noFogHack.isEnabled())
+			ci.cancel();
 	}
 }

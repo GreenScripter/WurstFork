@@ -20,6 +20,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.Tessellator;
@@ -236,7 +237,7 @@ public final class MobSpawnEspHack extends Hack
 	{
 		// Avoid inconsistent GL state if setting changed mid-onRender
 		boolean depthTest = this.depthTest.isChecked();
-
+		
 		// GL settings
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -259,7 +260,11 @@ public final class MobSpawnEspHack extends Hack
 			Matrix4f viewMatrix = matrixStack.peek().getPositionMatrix();
 			Matrix4f projMatrix = RenderSystem.getProjectionMatrix();
 			Shader shader = RenderSystem.getShader();
-			scanner.vertexBuffer.setShader(viewMatrix, projMatrix, shader);
+			scanner.vertexBuffer.bind();
+			scanner.vertexBuffer.draw(viewMatrix, projMatrix, shader);
+			VertexBuffer.unbind();
+			RenderUtils.unapplyRegionalRenderOffset(matrixStack, scanner.chunk);
+
 			
 			matrixStack.pop();
 		}
@@ -357,19 +362,21 @@ public final class MobSpawnEspHack extends Hack
 		{
 			int regionX = (chunk.getPos().getStartX() >> 9) * 512;
 			int regionZ = (chunk.getPos().getStartZ() >> 9) * 512;
+			int regionY = 0;//-91;
 			
 			if(vertexBuffer != null)
 				vertexBuffer.close();
 			
 			vertexBuffer = new VertexBuffer();
-			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+			Tessellator tessellator = RenderSystem.renderThreadTesselator();
+			BufferBuilder bufferBuilder = tessellator.getBuffer();
 			
 			bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES,
 				VertexFormats.POSITION_COLOR);
 			
 			new ArrayList<>(red).stream().filter(Objects::nonNull)
-				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
-					pos.getZ() - regionZ))
+				.map(pos -> new BlockPos(pos.getX() - regionX,
+					pos.getY() - regionY, pos.getZ() - regionZ))
 				.forEach(pos -> {
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ())
@@ -394,8 +401,8 @@ public final class MobSpawnEspHack extends Hack
 				});
 			
 			new ArrayList<>(yellow).stream().filter(Objects::nonNull)
-				.map(pos -> new BlockPos(pos.getX() - regionX, pos.getY(),
-					pos.getZ() - regionZ))
+				.map(pos -> new BlockPos(pos.getX() - regionX,
+					pos.getY() - regionY, pos.getZ() - regionZ))
 				.forEach(pos -> {
 					bufferBuilder
 						.vertex(pos.getX(), pos.getY() + 0.01, pos.getZ())
@@ -418,8 +425,10 @@ public final class MobSpawnEspHack extends Hack
 					}
 				});
 			
-			bufferBuilder.end();
-			vertexBuffer.upload(bufferBuilder);
+			BuiltBuffer buffer = bufferBuilder.end();
+			vertexBuffer.bind();
+			vertexBuffer.upload(buffer);
+			VertexBuffer.unbind();
 			
 			doneCompiling = true;
 		}
