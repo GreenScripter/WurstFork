@@ -47,12 +47,16 @@ public final class VClipCmd extends Command
 			switch(args[0].toLowerCase())
 			{
 				case "above":
+				case "up":
+				case "ascend":
 				blockStream = BlockUtils.getAllInBoxStream(
 					player.getBlockPos().up(2), player.getBlockPos().up(10));
 				above = true;
 				break;
 				
 				case "below":
+				case "down":
+				case "descend":
 				blockStream = BlockUtils.getAllInBoxStream(
 					player.getBlockPos().down(10), player.getBlockPos().down());
 				above = false;
