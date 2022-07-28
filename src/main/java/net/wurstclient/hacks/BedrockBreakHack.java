@@ -120,7 +120,7 @@ class TargetBlock
 			if(slimeBlockPos != null)
 			{
 				BlockPlacer.simpleBlockPlacement(slimeBlockPos,
-					Blocks.SLIME_BLOCK);
+					Blocks.NETHERRACK);
 				redstoneTorchBlockPos = slimeBlockPos.up();
 			}else
 			{
@@ -266,7 +266,7 @@ class TargetBlock
 			if(slimeBlockPos != null)
 			{
 				BlockPlacer.simpleBlockPlacement(slimeBlockPos,
-					Blocks.SLIME_BLOCK);
+					Blocks.NETHERRACK);
 				redstoneTorchBlockPos = slimeBlockPos.up();
 			}else
 			{
@@ -517,9 +517,9 @@ class InventoryManager
 			return "You must have a redstone torch.";
 		}
 		
-		if(InventoryManager.getInventoryItemCount(Blocks.SLIME_BLOCK) < 1)
+		if(InventoryManager.getInventoryItemCount(Blocks.NETHERRACK) < 1)
 		{
-			return "You must have a slime block.";
+			return "You must have a netherrack block.";
 		}
 		
 		if(!InventoryManager.canInstantlyMinePiston())
