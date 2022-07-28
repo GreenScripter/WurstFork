@@ -56,12 +56,13 @@ public final class VillagerCmd extends Command
 	{
 		super("villager",
 			"Automatically manipulate Librarians to get specific enchantments.",
-			".villager <enchantment> <level>");
+			".villager [max cost] <enchantment> <level>");
 	}
 	
 	Set<String> goals = new HashSet<>();
 	Map<String, Integer> levelGoal = new HashMap<>();
 	private BlockPos currentBlock;
+	private int maxCost = Integer.MAX_VALUE;
 	
 	boolean waiting = false;
 	boolean waitForNone = false;
@@ -74,10 +75,19 @@ public final class VillagerCmd extends Command
 		waiting = false;
 		goals.clear();
 		levelGoal.clear();
-		if(args.length < 2 || args.length % 2 == 1)
+		maxCost = Integer.MAX_VALUE;
+		if(args.length < 2)
 			throw new CmdSyntaxError();
-		
-		for(int i = 0; i < args.length; i += 2)
+		int start = 0;
+		try
+		{
+			int cost = Integer.parseInt(args[0]);
+			start = 1;
+			maxCost = cost;
+		}catch(Exception e)
+		{
+		}
+		for(int i = start; i < args.length; i += 2)
 		{
 			String goal = args[i];
 			
@@ -274,7 +284,10 @@ public final class VillagerCmd extends Command
 			{
 				if(o.getSellItem().getItem() instanceof EnchantedBookItem)
 				{
-					stack = o.getSellItem();
+					if(o.getOriginalFirstBuyItem().getCount() < maxCost)
+					{
+						stack = o.getSellItem();
+					}
 				}
 			}
 			if(stack != null)
