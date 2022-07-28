@@ -247,7 +247,8 @@ public final class MultiAuraHack extends Hack implements UpdateListener
 			stream = stream.filter(e -> !e.isInvisible());
 		
 		if(filterNamed.isChecked())
-			stream = stream.filter(e -> !e.hasCustomName());
+			stream = stream
+				.filter(e -> (!e.hasCustomName() || e instanceof PlayerEntity));
 		
 		if(filterStands.isChecked())
 			stream = stream.filter(e -> !(e instanceof ArmorStandEntity));
