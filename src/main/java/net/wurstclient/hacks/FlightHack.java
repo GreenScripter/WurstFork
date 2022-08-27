@@ -71,8 +71,8 @@ public final class FlightHack extends Hack
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(IsPlayerInWaterListener.class, this);
-		MC.options.keySneak
-			.setPressed(((IKeyBinding)MC.options.keySneak).isActallyPressed());
+		MC.options.sneakKey
+			.setPressed(((IKeyBinding)MC.options.sneakKey).isActallyPressed());
 	}
 	
 	@Override
@@ -93,21 +93,21 @@ public final class FlightHack extends Hack
 		if(MC.currentScreen == null)
 		{
 			// Allow shifing in air
-			if(MC.options.keyJump.isPressed()
-				&& ((IKeyBinding)MC.options.keySneak).isActallyPressed())
+			if(MC.options.jumpKey.isPressed()
+				&& ((IKeyBinding)MC.options.sneakKey).isActallyPressed())
 			{
-				MC.options.keySneak.setPressed(true);
+				MC.options.sneakKey.setPressed(true);
 				return;
 			}
-			if(MC.options.keyJump.isPressed())
+			if(MC.options.jumpKey.isPressed())
 			{
 				lastGoingUp = 0;
 				player.setVelocity(velocity.add(0, speed.getValue(), 0));
 				player.airStrafingSpeed = (float)Math.min(speed.getValueF(),
 					10 - player.getVelocity().y);
-			}else if(((IKeyBinding)MC.options.keySneak).isActallyPressed())
+			}else if(((IKeyBinding)MC.options.sneakKey).isActallyPressed())
 			{
-				MC.options.keySneak.setPressed(false);
+				MC.options.sneakKey.setPressed(false);
 				player
 					.setVelocity(velocity.subtract(
 						0, (downLimit.isChecked()

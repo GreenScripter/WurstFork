@@ -50,7 +50,7 @@ public final class AutoDodgeHack extends Hack implements UpdateListener
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		
-		KeyBinding forwardKey = MC.options.keyForward;
+		KeyBinding forwardKey = MC.options.forwardKey;
 		forwardKey.setPressed(((IKeyBinding)forwardKey).isActallyPressed());
 	}
 	

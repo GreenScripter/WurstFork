@@ -44,7 +44,7 @@ public final class JetpackHack extends Hack implements UpdateListener
 			//don't move when using freecam
 			return;
 		}
-		if(MC.options.keyJump.isPressed())
+		if(MC.options.jumpKey.isPressed())
 			MC.player.jump();
 	}
 }

@@ -761,7 +761,7 @@ class BreakingFlowController
 	{
 		for(int i = 0; i < cachedTargetBlockList.size(); i++)
 		{
-			if(cachedTargetBlockList.get(i).getBlockPos().getSquaredDistance(
+			if(cachedTargetBlockList.get(i).getBlockPos().getSquaredDistanceFromCenter(
 				pos.getX(), pos.getY(), pos.getZ(), false) == 0)
 			{
 				return false;

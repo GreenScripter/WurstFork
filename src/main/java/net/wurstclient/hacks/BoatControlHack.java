@@ -50,8 +50,8 @@ public final class BoatControlHack extends Hack implements UpdateListener
 		double speed = vehicle.getVelocity().multiply(1, 0, 1).length();
 		Vec3d result = RotationUtils.getClientLookVec().multiply(1, 0, 1).normalize().multiply(speed);
 		vehicle.setVelocity(result.x, vehicle.getVelocity().y, result.z);
-		MC.options.keyLeft.setPressed(false);
-		MC.options.keyRight.setPressed(false);
+		MC.options.leftKey.setPressed(false);
+		MC.options.rightKey.setPressed(false);
 		
 	}
 }
