@@ -37,7 +37,7 @@ import net.wurstclient.util.RotationUtils.Rotation;
 
 @SearchTags({"click aura", "ClickAimbot", "click aimbot"})
 public final class ClickAuraHack extends Hack
-	implements UpdateListener, RightClickListener, LeftClickListener
+	implements UpdateListener, LeftClickListener
 {
 	private final SliderSetting range =
 		new SliderSetting("Range", 5, 1, 10, 0.05, ValueDisplay.DECIMAL);
@@ -89,7 +89,6 @@ public final class ClickAuraHack extends Hack
 		
 		speed.resetTimer();
 		EVENTS.add(UpdateListener.class, this);
-		EVENTS.add(RightClickListener.class, this);
 		EVENTS.add(LeftClickListener.class, this);
 	}
 	
@@ -97,7 +96,6 @@ public final class ClickAuraHack extends Hack
 	public void onDisable()
 	{
 		EVENTS.remove(UpdateListener.class, this);
-		EVENTS.remove(RightClickListener.class, this);
 		EVENTS.remove(LeftClickListener.class, this);
 	}
 	
@@ -123,7 +121,8 @@ public final class ClickAuraHack extends Hack
 	
 	private void attack()
 	{
-		if (rightClick.isChecked()){
+		if(rightClick.isChecked())
+		{
 			return;
 		}
 		// set entity

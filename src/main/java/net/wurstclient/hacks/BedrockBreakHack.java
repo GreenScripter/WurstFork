@@ -753,7 +753,7 @@ class BreakingFlowController
 	private static boolean blockInPlayerRange(BlockPos blockPos,
 		PlayerEntity player, float range)
 	{
-		return(blockPos.getSquaredDistance(player.getPos(), true) <= range
+		return(blockPos.getSquaredDistance(player.getPos()) <= range
 			* range);
 	}
 	
@@ -762,7 +762,7 @@ class BreakingFlowController
 		for(int i = 0; i < cachedTargetBlockList.size(); i++)
 		{
 			if(cachedTargetBlockList.get(i).getBlockPos().getSquaredDistanceFromCenter(
-				pos.getX(), pos.getY(), pos.getZ(), false) == 0)
+				pos.getX(), pos.getY(), pos.getZ()) == 0)
 			{
 				return false;
 			}

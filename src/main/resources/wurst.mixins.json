@@ -24,7 +24,6 @@
     "ClientPlayNetworkHandlerMixin",
     "ContainerScreen54Mixin",
     "CustomPayloadC2SPacketAccessor",
-    "FluidBlockMixin",
     "FluidRendererMixin",
     "FrustumMixin",
     "DeathScreenMixin",
@@ -58,11 +57,8 @@
     "ServerListMixin",
     "ShulkerBoxScreenMixin",
     "SignEditScreenMixin",
-<<<<<<< HEAD
     "SlimeBlockMixin",
-=======
     "SodiumBlockOcclusionCacheMixin",
->>>>>>> 49fa8f11d64c2a6947ffc80b3c3b6f9f51af791b
     "StatsScreenMixin",
     "StatusEffectInstanceMixin",
     "SwordItemMixin",
