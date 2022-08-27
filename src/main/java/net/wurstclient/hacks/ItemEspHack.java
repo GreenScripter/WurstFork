@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -46,10 +46,8 @@ public final class ItemEspHack extends Hack implements UpdateListener,
 		new EnumSetting<>("Style", Style.values(), Style.BOXES);
 	
 	private final EnumSetting<BoxSize> boxSize = new EnumSetting<>("Box size",
-		"\u00a7lAccurate\u00a7r mode shows the exact\n"
-			+ "hitbox of each item.\n"
-			+ "\u00a7lFancy\u00a7r mode shows larger boxes\n"
-			+ "that look better.",
+		"\u00a7lAccurate\u00a7r mode shows the exact hitbox of each item.\n"
+			+ "\u00a7lFancy\u00a7r mode shows larger boxes that look better.",
 		BoxSize.values(), BoxSize.FANCY);
 	
 	private final ColorSetting color =

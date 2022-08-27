@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -24,8 +24,7 @@ public final class SneakHack extends Hack
 	implements PreMotionListener, PostMotionListener
 {
 	private final EnumSetting<SneakMode> mode = new EnumSetting<>("Mode",
-		"\u00a7lPacket\u00a7r mode makes it look like you're\n"
-			+ "sneaking without slowing you down.\n"
+		"\u00a7lPacket\u00a7r mode makes it look like you're sneaking without slowing you down.\n"
 			+ "\u00a7lLegit\u00a7r mode actually makes you sneak.",
 		SneakMode.values(), SneakMode.LEGIT);
 	

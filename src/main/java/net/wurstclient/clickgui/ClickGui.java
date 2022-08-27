@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -42,6 +42,7 @@ import net.wurstclient.WurstClient;
 import net.wurstclient.clickgui.components.FeatureButton;
 import net.wurstclient.hacks.ClickGuiHack;
 import net.wurstclient.settings.Setting;
+import net.wurstclient.util.RenderUtils;
 import net.wurstclient.util.json.JsonUtils;
 
 public final class ClickGui
@@ -613,13 +614,8 @@ public final class ClickGui
 		txtColor = clickGui.getTextColor();
 		
 		if(WurstClient.INSTANCE.getHax().rainbowUiHack.isEnabled())
-		{
-			float x = System.currentTimeMillis() % 2000 / 1000F;
-			acColor[0] = 0.5F + 0.5F * (float)Math.sin(x * Math.PI);
-			acColor[1] = 0.5F + 0.5F * (float)Math.sin((x + 4F / 3F) * Math.PI);
-			acColor[2] = 0.5F + 0.5F * (float)Math.sin((x + 8F / 3F) * Math.PI);
-			
-		}else
+			acColor = RenderUtils.getRainbowColor();
+		else
 			acColor = clickGui.getAccentColor();
 	}
 	
@@ -803,6 +799,9 @@ public final class ClickGui
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 		}
 		
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		
 		// window outline
 		RenderSystem.setShaderColor(acColor[0], acColor[1], acColor[2], 0.5F);
 		
@@ -832,7 +831,6 @@ public final class ClickGui
 		int y4 = y1 + 2;
 		int y5 = y3 - 2;
 		boolean hoveringY = mouseY >= y4 && mouseY < y5;
-		
 		if(window.isClosable())
 		{
 			x3 -= 11;

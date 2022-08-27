@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -26,10 +26,8 @@ public final class FastBreakHack extends Hack
 	implements UpdateListener, BlockBreakingProgressListener
 {
 	private final CheckboxSetting legitMode = new CheckboxSetting("Legit mode",
-		"Only removes the delay between breaking blocks,\n"
-			+ "without speeding up the breaking process itself.\n\n"
-			+ "This is slower, but usually bypasses anti-cheat\n"
-			+ "plugins. Use it if regular FastBreak is not\n" + "working.",
+		"Only removes the delay between breaking blocks, without speeding up the breaking process itself.\n\n"
+			+ "This is slower, but usually bypasses anti-cheat plugins. Use it if regular FastBreak is not working.",
 		false);
 	
 	public FastBreakHack()

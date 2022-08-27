@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -23,11 +23,11 @@ import net.wurstclient.util.MathUtils;
 public final class ZoomOtf extends OtherFeature implements MouseScrollListener
 {
 	private final SliderSetting level = new SliderSetting("Zoom level", 3, 1,
-		50, 0.1, v -> ValueDisplay.DECIMAL.getValueString(v) + "x");
+		50, 0.1, ValueDisplay.DECIMAL.withSuffix("x"));
 	
 	private final CheckboxSetting scroll = new CheckboxSetting(
-		"Use mouse wheel", "If enabled, you can use the mouse wheel\n"
-			+ "while zooming to zoom in even further.",
+		"Use mouse wheel",
+		"If enabled, you can use the mouse wheel while zooming to zoom in even further.",
 		true);
 	
 	private Double currentLevel;

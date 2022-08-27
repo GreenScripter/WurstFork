@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -61,9 +61,9 @@ public final class SpeedNukerHack extends Hack
 		new BlockSetting("ID", "The type of block to break in ID mode.\n"
 			+ "air = won't break anything", "minecraft:air", true);
 	
-	private final CheckboxSetting lockId =
-		new CheckboxSetting("Lock ID", "Prevents changing the ID by clicking\n"
-			+ "on blocks or restarting Nuker.", false);
+	private final CheckboxSetting lockId = new CheckboxSetting("Lock ID",
+		"Prevents changing the ID by clicking on blocks or restarting Nuker.",
+		false);
 	
 	private final BlockListSetting multiIdList = new BlockListSetting(
 		"MultiID List", "The types of blocks to break in MultiID mode.",

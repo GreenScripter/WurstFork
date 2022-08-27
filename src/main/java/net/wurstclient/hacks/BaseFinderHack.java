@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -44,8 +44,8 @@ public final class BaseFinderHack extends Hack
 {
 	private final BlockListSetting naturalBlocks = new BlockListSetting(
 		"Natural Blocks",
-		"These blocks will be considered\n" + "part of natural generation.\n\n"
-			+ "They will NOT be highlighted\n" + "as player bases.",
+		"These blocks will be considered part of natural generation.\n\n"
+			+ "They will NOT be highlighted as player bases.",
 		"minecraft:acacia_leaves", "minecraft:acacia_log", "minecraft:air",
 		"minecraft:allium", "minecraft:amethyst_block",
 		"minecraft:amethyst_cluster", "minecraft:andesite",
@@ -88,7 +88,7 @@ public final class BaseFinderHack extends Hack
 		"minecraft:vine", "minecraft:water", "minecraft:white_tulip");
 	
 	private final ColorSetting color = new ColorSetting("Color",
-		"Man-made blocks will be\n" + "highlighted in this color.", Color.RED);
+		"Man-made blocks will be highlighted in this color.", Color.RED);
 	
 	private ArrayList<String> blockNames;
 	

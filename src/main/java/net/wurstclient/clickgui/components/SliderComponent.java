@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -101,7 +101,8 @@ public final class SliderComponent extends Component
 			setTooltip();
 		else if(hSlider && !dragging)
 			GUI.setTooltip(
-				"\u00a7e[ctrl]\u00a7r+\u00a7e[left-click]\u00a7r for precise input");
+				"\u00a7e[ctrl]\u00a7r+\u00a7e[left-click]\u00a7r for precise input\n"
+					+ "\u00a7e[right-click]\u00a7r to reset");
 		
 		if(renderAsDisabled)
 		{
@@ -267,8 +268,7 @@ public final class SliderComponent extends Component
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 		
-		double percentage = (setting.getValue() - setting.getMinimum())
-			/ (setting.getMaximum() - setting.getMinimum());
+		double percentage = setting.getPercentage();
 		float xk1 = x1 + (x2 - x1 - 8) * (float)percentage;
 		float xk2 = xk1 + 8;
 		float yk1 = y3 + 1.5F;
@@ -279,8 +279,8 @@ public final class SliderComponent extends Component
 			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 0.75F);
 		else
 		{
-			float f = (float)(2 * percentage);
-			RenderSystem.setShaderColor(f, 2 - f, 0, hSlider ? 1 : 0.75F);
+			float[] c = setting.getKnobColor();
+			RenderSystem.setShaderColor(c[0], c[1], c[2], hSlider ? 1 : 0.75F);
 		}
 		bufferBuilder.begin(VertexFormat.DrawMode.QUADS,
 			VertexFormats.POSITION);

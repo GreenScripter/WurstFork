@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -22,6 +22,7 @@ public final class OtfList
 	public final DisableOtf disableOtf = new DisableOtf();
 	public final HackListOtf hackListOtf = new HackListOtf();
 	public final LastServerOtf lastServerOtf = new LastServerOtf();
+	public final NoTelemetryOtf noTelemetryOtf = new NoTelemetryOtf();
 	public final ReconnectOtf reconnectOtf = new ReconnectOtf();
 	public final ServerFinderOtf serverFinderOtf = new ServerFinderOtf();
 	public final TabGuiOtf tabGuiOtf = new TabGuiOtf();

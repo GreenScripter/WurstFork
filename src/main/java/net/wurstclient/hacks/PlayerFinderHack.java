@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -21,7 +21,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.wurstclient.Category;
@@ -93,15 +92,8 @@ public final class PlayerFinderHack extends Hack
 		matrixStack.push();
 		RenderUtils.applyRenderOffset(matrixStack);
 		
-		// generate rainbow color
-		float x = System.currentTimeMillis() % 2000 / 1000F;
-		float red = 0.5F + 0.5F * MathHelper.sin(x * (float)Math.PI);
-		float green =
-			0.5F + 0.5F * MathHelper.sin((x + 4F / 3F) * (float)Math.PI);
-		float blue =
-			0.5F + 0.5F * MathHelper.sin((x + 8F / 3F) * (float)Math.PI);
-		
-		RenderSystem.setShaderColor(red, green, blue, 0.5F);
+		float[] rainbow = RenderUtils.getRainbowColor();
+		RenderSystem.setShaderColor(rainbow[0], rainbow[1], rainbow[2], 0.5F);
 		
 		Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
@@ -135,7 +127,8 @@ public final class PlayerFinderHack extends Hack
 			
 			RenderUtils.drawOutlinedBox(matrixStack);
 			
-			RenderSystem.setShaderColor(red, green, blue, 0.25F);
+			RenderSystem.setShaderColor(rainbow[0], rainbow[1], rainbow[2],
+				0.25F);
 			RenderUtils.drawSolidBox(matrixStack);
 			
 			matrixStack.pop();

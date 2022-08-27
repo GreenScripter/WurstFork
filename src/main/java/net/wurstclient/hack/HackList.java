@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -38,6 +38,7 @@ public final class HackList implements UpdateListener
 	public final AntiSpamHack antiSpamHack = new AntiSpamHack();
 	public final AntiWaterPushHack antiWaterPushHack = new AntiWaterPushHack();
 	public final AntiWobbleHack antiWobbleHack = new AntiWobbleHack();
+	public final ArrowDmgHack arrowDmgHack = new ArrowDmgHack();
 	public final AutoArmorHack autoArmorHack = new AutoArmorHack();
 	public final AutoBuildHack autoBuildHack = new AutoBuildHack();
 	public final AutoCraftHack autoCraftHack = new AutoCraftHack();
@@ -133,6 +134,7 @@ public final class HackList implements UpdateListener
 	public final NavigatorHack navigatorHack = new NavigatorHack();
 	public final NoBackgroundHack noBackgroundHack = new NoBackgroundHack();
 	public final NoClipHack noClipHack = new NoClipHack();
+	public final NocomCrashHack nocomCrashHack = new NocomCrashHack();
 	public final NoFallHack noFallHack = new NoFallHack();
 	public final NoFireOverlayHack noFireOverlayHack = new NoFireOverlayHack();
 	public final NoHurtcamHack noHurtcamHack = new NoHurtcamHack();

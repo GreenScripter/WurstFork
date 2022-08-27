@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -28,8 +28,8 @@ public final class VanillaSpoofOtf extends OtherFeature
 	
 	public VanillaSpoofOtf()
 	{
-		super("VanillaSpoof", "Bypasses anti-Fabric plugins by\n"
-			+ "pretending to be a vanilla client.");
+		super("VanillaSpoof",
+			"Bypasses anti-Fabric plugins by pretending to be a vanilla client.");
 		addSetting(spoof);
 		
 		EVENTS.add(ConnectionPacketOutputListener.class, this);

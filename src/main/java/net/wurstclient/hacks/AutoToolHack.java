@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021 Wurst-Imperium and contributors.
+ * Copyright (c) 2014-2022 Wurst-Imperium and contributors.
  *
  * This source code is subject to the terms of the GNU General Public
  * License, version 3. If a copy of the GPL was not distributed with this
@@ -30,13 +30,11 @@ public final class AutoToolHack extends Hack
 	implements BlockBreakingProgressListener, UpdateListener
 {
 	private final CheckboxSetting useSwords = new CheckboxSetting("Use swords",
-		"Uses swords to break leaves,\n" + "cobwebs, etc.", false);
+		"Uses swords to break leaves, cobwebs, etc.", false);
 	
-	private final CheckboxSetting useHands =
-		new CheckboxSetting(
-			"Use hands", "Uses an empty hand or a\n"
-				+ "non-damageable item when\n" + "no applicable tool is found.",
-			true);
+	private final CheckboxSetting useHands = new CheckboxSetting("Use hands",
+		"Uses an empty hand or a non-damageable item when no applicable tool is found.",
+		true);
 	
 	private final CheckboxSetting repairMode = new CheckboxSetting(
 		"Repair mode", "Won't use tools that are about to break.", false);
@@ -44,8 +42,8 @@ public final class AutoToolHack extends Hack
 			new SliderSetting("Repair threshold", 4, 1, 200, 1, ValueDisplay.INTEGER);
 	
 	private final CheckboxSetting switchBack = new CheckboxSetting(
-		"Switch back", "After using a tool, automatically switches\n"
-			+ "back to the previously selected slot.",
+		"Switch back",
+		"After using a tool, automatically switches back to the previously selected slot.",
 		true);
 	
 	private int prevSelectedSlot;
