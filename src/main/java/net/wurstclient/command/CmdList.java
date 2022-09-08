@@ -67,6 +67,7 @@ public final class CmdList
 	public final SetSliderCmd setSliderCmd = new SetSliderCmd();
 	public final SettingsCmd settingsCmd = new SettingsCmd();
 	public final TacoCmd tacoCmd = new TacoCmd();
+	public final TargetCmd targetCmd = new TargetCmd();
 	public final TCmd tCmd = new TCmd();
 	public final TooManyHaxCmd tooManyHaxCmd = new TooManyHaxCmd();
 	public final TpCmd tpCmd = new TpCmd();
