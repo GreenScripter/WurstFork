@@ -36,7 +36,7 @@ import net.wurstclient.util.ChatUtils;
 public class PathFinder
 {
 	private final WurstClient wurst = WurstClient.INSTANCE;
-
+	
 	private final boolean invulnerable =
 		WurstClient.MC.player.getAbilities().creativeMode;
 	private final boolean creativeFlying =
@@ -51,23 +51,23 @@ public class PathFinder
 	private final boolean spider = wurst.getHax().spiderHack.isEnabled();
 	protected boolean fallingAllowed = true;
 	protected boolean divingAllowed = true;
-
+	
 	private final PathPos start;
 	protected PathPos current;
 	private final BlockPos goal;
-
+	
 	private final HashMap<PathPos, Float> costMap = new HashMap<>();
 	protected final HashMap<PathPos, PathPos> prevPosMap = new HashMap<>();
 	private final PathQueue queue = new PathQueue();
-
+	
 	protected int thinkSpeed = 1024;
 	protected int thinkTime = 200;
 	private int iterations;
-
+	
 	protected boolean done;
 	protected boolean failed;
 	private final ArrayList<PathPos> path = new ArrayList<>();
-
+	
 	public PathFinder(BlockPos goal)
 	{
 		if(WurstClient.MC.player.isOnGround())
@@ -77,87 +77,106 @@ public class PathFinder
 		else
 			start = new PathPos(new BlockPos(WurstClient.MC.player.getPos()));
 		this.goal = goal;
-
+		
 		costMap.put(start, 0F);
 		queue.add(start, getHeuristic(start));
 	}
-
+	
 	public PathFinder(PathFinder pathFinder)
 	{
 		this(pathFinder.goal);
 		thinkSpeed = pathFinder.thinkSpeed;
 		thinkTime = pathFinder.thinkTime;
 	}
-
+	
 	public void think()
 	{
 		if(done)
 			throw new IllegalStateException("Path was already found!");
-
-
-		if (flying) {
+		
+		if(flying)
+		{
 			current = new PathPos(WurstClient.MC.player.getBlockPos());
 			PathPos start = new PathPos(WurstClient.MC.player.getBlockPos());
 			path.add(0, current);
-
-//			int mode = 0;
-
-			while (!checkDone()) {
-
-				if (current.getY() < goal.getY()) {
-					current = new PathPos(current.add(0, 1, 0));
-					if (!isPassable(current)) {
-						failed = true;
-						return;
-					}
-				} else if (current.getY() > goal.getY()) {
-					current = new PathPos(current.add(0, -1, 0));
-					if (!isPassable(current)) {
-						failed = true;
-						return;
-					}
-				}//else {path.add(0, new PathPos(goal));return;}
-				else {
-//					if (mode == 0) {
-//						if (current.getX() == goal.getX()) mode = 1;
-//
-//						if (current.getX() < goal.getX()) current = new PathPos(current.add(1, 0, 0));
-//						if (current.getX() > goal.getX()) current = new PathPos(current.add(-1, 0, 0));
-//					} else if (mode == 1) {
-//						if (Math.abs(goal.getZ() - current.getZ()) > 400) {
-//							for (int i = 0; i < 400; i++) {
-//								if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
-//								if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
-//								path.add(0, current);
-//							}
-//							mode = 2;
-//						} else {
-//							if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
-//							if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
-//						}
-//					} else if (mode == 2) {
-//						if (current.getX() == start.getX()) mode = 3;
-//
-//						if (current.getX() < start.getX()) current = new PathPos(current.add(1, 0, 0));
-//						if (current.getX() > start.getX()) current = new PathPos(current.add(-1, 0, 0));
-//					} else if (mode == 3) {
-//						for (int i = 0; i < Math.min(400, Math.abs(goal.getZ() - current.getZ())); i++) {
-//							if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
-//							if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
-//							path.add(0, current);
-//						}
-//						mode = 0;
-//					}
-
-					if (current.getX() < goal.getX()) current = new PathPos(current.add(1, 0, 0));
-					if (current.getX() > goal.getX()) current = new PathPos(current.add(-1, 0, 0));
-
-					if (current.getZ() < goal.getZ()) current = new PathPos(current.add(0, 0, 1));
-				 if (current.getZ() > goal.getZ()) current = new PathPos(current.add(0, 0, -1));
-				}
+			
+			// int mode = 0;
+			
+			while(!checkDone())
+			{
+				
+				// if (current.getY() < goal.getY()) {
+				// current = new PathPos(current.add(0, 1, 0));
+				// if (!isPassable(current)) {
+				// failed = true;
+				// return;
+				// }
+				// } else if (current.getY() > goal.getY()) {
+				// current = new PathPos(current.add(0, -1, 0));
+				// if (!isPassable(current)) {
+				// failed = true;
+				// return;
+				// }
+				// }//else {path.add(0, new PathPos(goal));return;}
+				// else {
+				// if (mode == 0) {
+				// if (current.getX() == goal.getX()) mode = 1;
+				//
+				// if (current.getX() < goal.getX()) current = new
+				// PathPos(current.add(1, 0, 0));
+				// if (current.getX() > goal.getX()) current = new
+				// PathPos(current.add(-1, 0, 0));
+				// } else if (mode == 1) {
+				// if (Math.abs(goal.getZ() - current.getZ()) > 400) {
+				// for (int i = 0; i < 400; i++) {
+				// if (current.getZ() < goal.getZ()) current = new
+				// PathPos(current.add(0, 0, 1));
+				// if (current.getZ() > goal.getZ()) current = new
+				// PathPos(current.add(0, 0, -1));
+				// path.add(0, current);
+				// }
+				// mode = 2;
+				// } else {
+				// if (current.getZ() < goal.getZ()) current = new
+				// PathPos(current.add(0, 0, 1));
+				// if (current.getZ() > goal.getZ()) current = new
+				// PathPos(current.add(0, 0, -1));
+				// }
+				// } else if (mode == 2) {
+				// if (current.getX() == start.getX()) mode = 3;
+				//
+				// if (current.getX() < start.getX()) current = new
+				// PathPos(current.add(1, 0, 0));
+				// if (current.getX() > start.getX()) current = new
+				// PathPos(current.add(-1, 0, 0));
+				// } else if (mode == 3) {
+				// for (int i = 0; i < Math.min(400, Math.abs(goal.getZ() -
+				// current.getZ())); i++) {
+				// if (current.getZ() < goal.getZ()) current = new
+				// PathPos(current.add(0, 0, 1));
+				// if (current.getZ() > goal.getZ()) current = new
+				// PathPos(current.add(0, 0, -1));
+				// path.add(0, current);
+				// }
+				// mode = 0;
+				// }
+				
+				if(current.getX() < goal.getX())
+					current = new PathPos(current.add(1, 0, 0));
+				if(current.getX() > goal.getX())
+					current = new PathPos(current.add(-1, 0, 0));
+				
+				if(current.getZ() < goal.getZ())
+					current = new PathPos(current.add(0, 0, 1));
+				if(current.getZ() > goal.getZ())
+					current = new PathPos(current.add(0, 0, -1));
+				// }
 				path.add(0, current);
 			}
-			ChatUtils.message("Target: " + goal.getX() + " " + goal.getY() + " " + goal.getZ() + " Distance: " + (int)Math.round(Math.sqrt(goal.getSquaredDistance(start))));
+			done = true;
+			ChatUtils.message("Target: " + goal.getX() + " " + goal.getY() + " "
+				+ goal.getZ() + " Distance: "
+				+ (int)Math.round(Math.sqrt(goal.getSquaredDistance(start))));
 			return;
 		}
 		int i = 0;
@@ -165,11 +184,11 @@ public class PathFinder
 		{
 			// get next position from queue
 			current = queue.poll();
-
+			
 			// check if path is found
 			if(checkDone())
 				return;
-
+			
 			// add neighbors to queue
 			for(PathPos next : getNeighbors(current))
 			{
@@ -177,7 +196,7 @@ public class PathFinder
 				float newCost = costMap.get(current) + getCost(current, next);
 				if(costMap.containsKey(next) && costMap.get(next) <= newCost)
 					continue;
-
+				
 				// add to queue
 				costMap.put(next, newCost);
 				prevPosMap.put(next, current);
@@ -186,45 +205,45 @@ public class PathFinder
 		}
 		iterations += i;
 	}
-
+	
 	protected boolean checkDone()
 	{
 		return done = goal.equals(current);
 	}
-
+	
 	private boolean checkFailed()
 	{
 		return failed = queue.isEmpty() || iterations >= thinkSpeed * thinkTime;
 	}
-
+	
 	private ArrayList<PathPos> getNeighbors(PathPos pos)
 	{
 		ArrayList<PathPos> neighbors = new ArrayList<>();
-
+		
 		// abort if too far away
 		if(Math.abs(start.getX() - pos.getX()) > 256
 			|| Math.abs(start.getZ() - pos.getZ()) > 256)
 			return neighbors;
-
+		
 		// get all neighbors
 		BlockPos north = pos.north();
 		BlockPos east = pos.east();
 		BlockPos south = pos.south();
 		BlockPos west = pos.west();
-
+		
 		BlockPos northEast = north.east();
 		BlockPos southEast = south.east();
 		BlockPos southWest = south.west();
 		BlockPos northWest = north.west();
-
+		
 		BlockPos up = pos.up();
 		BlockPos down = pos.down();
-
+		
 		// flying
 		boolean flying = canFlyAt(pos);
 		// walking
 		boolean onGround = canBeSolid(down);
-
+		
 		// player can move sideways if flying, standing on the ground, jumping,
 		// or inside of a block that allows sideways movement (ladders, webs,
 		// etc.)
@@ -234,36 +253,36 @@ public class PathFinder
 			// north
 			if(checkHorizontalMovement(pos, north))
 				neighbors.add(new PathPos(north));
-
+			
 			// east
 			if(checkHorizontalMovement(pos, east))
 				neighbors.add(new PathPos(east));
-
+			
 			// south
 			if(checkHorizontalMovement(pos, south))
 				neighbors.add(new PathPos(south));
-
+			
 			// west
 			if(checkHorizontalMovement(pos, west))
 				neighbors.add(new PathPos(west));
-
+			
 			// north-east
 			if(checkDiagonalMovement(pos, Direction.NORTH, Direction.EAST))
 				neighbors.add(new PathPos(northEast));
-
+			
 			// south-east
 			if(checkDiagonalMovement(pos, Direction.SOUTH, Direction.EAST))
 				neighbors.add(new PathPos(southEast));
-
+			
 			// south-west
 			if(checkDiagonalMovement(pos, Direction.SOUTH, Direction.WEST))
 				neighbors.add(new PathPos(southWest));
-
+			
 			// north-west
 			if(checkDiagonalMovement(pos, Direction.NORTH, Direction.WEST))
 				neighbors.add(new PathPos(northWest));
 		}
-
+		
 		// up
 		if(pos.getY() < WurstClient.MC.world.getTopY() && canGoThrough(up.up())
 			&& (flying || onGround || canClimbUpAt(pos))
@@ -273,90 +292,90 @@ public class PathFinder
 			&& (divingAllowed || BlockUtils.getState(up.up())
 				.getMaterial() != Material.WATER))
 			neighbors.add(new PathPos(up, onGround));
-
+		
 		// down
 		if(pos.getY() > WurstClient.MC.world.getBottomY() && canGoThrough(down)
 			&& canGoAbove(down.down()) && (flying || canFallBelow(pos))
 			&& (divingAllowed
 				|| BlockUtils.getState(pos).getMaterial() != Material.WATER))
 			neighbors.add(new PathPos(down));
-
+		
 		return neighbors;
 	}
-
+	
 	private boolean checkHorizontalMovement(BlockPos current, BlockPos next)
 	{
 		if(isPassable(next) && (canFlyAt(current) || canGoThrough(next.down())
 			|| canSafelyStandOn(next.down())))
 			return true;
-
+		
 		return false;
 	}
-
+	
 	private boolean checkDiagonalMovement(BlockPos current,
 		Direction direction1, Direction direction2)
 	{
 		BlockPos horizontal1 = current.offset(direction1);
 		BlockPos horizontal2 = current.offset(direction2);
 		BlockPos next = horizontal1.offset(direction2);
-
+		
 		if(isPassableWithoutMining(horizontal1)
 			&& isPassableWithoutMining(horizontal2)
 			&& checkHorizontalMovement(current, next))
 			return true;
-
+		
 		return false;
 	}
-
+	
 	protected boolean isPassable(BlockPos pos)
 	{
 		if(!canGoThrough(pos) && !isMineable(pos))
 			return false;
-
+		
 		BlockPos up = pos.up();
 		if(!canGoThrough(up) && !isMineable(up))
 			return false;
-
+		
 		if(!canGoAbove(pos.down()))
 			return false;
-
+		
 		if(!divingAllowed
 			&& BlockUtils.getState(up).getMaterial() == Material.WATER)
 			return false;
-
+		
 		return true;
 	}
-
+	
 	protected boolean isPassableWithoutMining(BlockPos pos)
 	{
 		if(!canGoThrough(pos))
 			return false;
-
+		
 		BlockPos up = pos.up();
 		if(!canGoThrough(up))
 			return false;
-
+		
 		if(!canGoAbove(pos.down()))
 			return false;
-
+		
 		if(!divingAllowed
 			&& BlockUtils.getState(up).getMaterial() == Material.WATER)
 			return false;
-
+		
 		return true;
 	}
-
+	
 	protected boolean isMineable(BlockPos pos)
 	{
 		return false;
 	}
-
+	
 	protected boolean canBeSolid(BlockPos pos)
 	{
 		BlockState state = BlockUtils.getState(pos);
 		Material material = state.getMaterial();
 		Block block = state.getBlock();
-
+		
 		return material.blocksMovement()
 			&& !(block instanceof AbstractSignBlock)
 			|| block instanceof LadderBlock || jesus
@@ -371,26 +390,26 @@ public class PathFinder
 		// used with no replacement.
 		if(!WurstClient.MC.world.isChunkLoaded(pos))
 			return false;
-
+		
 		// check if solid
 		Material material = BlockUtils.getState(pos).getMaterial();
 		Block block = BlockUtils.getBlock(pos);
 		if(material.blocksMovement() && !(block instanceof AbstractSignBlock))
 			return false;
-
+		
 		// check if trapped
 		if(block instanceof TripwireBlock
 			|| block instanceof PressurePlateBlock)
 			return false;
-
+		
 		// check if safe
 		if(!invulnerable
 			&& (material == Material.LAVA || material == Material.FIRE))
 			return false;
-
+		
 		return true;
 	}
-
+	
 	private boolean canGoAbove(BlockPos pos)
 	{
 		// check for fences, etc.
@@ -398,44 +417,44 @@ public class PathFinder
 		if(block instanceof FenceBlock || block instanceof WallBlock
 			|| block instanceof FenceGateBlock)
 			return false;
-
+		
 		return true;
 	}
-
+	
 	private boolean canSafelyStandOn(BlockPos pos)
 	{
 		// check if solid
 		Material material = BlockUtils.getState(pos).getMaterial();
 		if(!canBeSolid(pos))
 			return false;
-
+		
 		// check if safe
 		if(!invulnerable
 			&& (material == Material.CACTUS || material == Material.LAVA))
 			return false;
-
+		
 		return true;
 	}
-
+	
 	private boolean canFallBelow(PathPos pos)
 	{
 		// check if player can keep falling
 		BlockPos down2 = pos.down(2);
 		if(fallingAllowed && canGoThrough(down2))
 			return true;
-
+		
 		// check if player can stand below
 		if(!canSafelyStandOn(down2))
 			return false;
-
+		
 		// check if fall damage is off
 		if(immuneToFallDamage && fallingAllowed)
 			return true;
-
+		
 		// check if fall ends with slime block
 		if(BlockUtils.getBlock(down2) instanceof SlimeBlock && fallingAllowed)
 			return true;
-
+		
 		// check fall damage
 		BlockPos prevPos = pos;
 		for(int i = 0; i <= (fallingAllowed ? 3 : 1); i++)
@@ -445,12 +464,12 @@ public class PathFinder
 			// it cannot be prevented
 			if(prevPos == null)
 				return true;
-
+				
 			// check if point is not part of this fall, meaning that the fall is
 			// too short to cause any damage
 			if(!pos.up(i).equals(prevPos))
 				return true;
-
+			
 			// check if block resets fall damage
 			Block prevBlock = BlockUtils.getBlock(prevPos);
 			BlockState prevState = BlockUtils.getState(prevPos);
@@ -459,19 +478,19 @@ public class PathFinder
 				|| prevBlock instanceof VineBlock
 				|| prevBlock instanceof CobwebBlock)
 				return true;
-
+			
 			prevPos = prevPosMap.get(prevPos);
 		}
-
+		
 		return false;
 	}
-
+	
 	private boolean canFlyAt(BlockPos pos)
 	{
 		return flying || !noWaterSlowdown
 			&& BlockUtils.getState(pos).getMaterial() == Material.WATER;
 	}
-
+	
 	private boolean canClimbUpAt(BlockPos pos)
 	{
 		// check if this block works for climbing
@@ -479,7 +498,7 @@ public class PathFinder
 		if(!spider && !(block instanceof LadderBlock)
 			&& !(block instanceof VineBlock))
 			return false;
-
+		
 		// check if any adjacent block is solid
 		BlockPos up = pos.up();
 		if(!canBeSolid(pos.north()) && !canBeSolid(pos.east())
@@ -487,10 +506,10 @@ public class PathFinder
 			&& !canBeSolid(up.north()) && !canBeSolid(up.east())
 			&& !canBeSolid(up.south()) && !canBeSolid(up.west()))
 			return false;
-
+		
 		return true;
 	}
-
+	
 	private boolean canMoveSidewaysInMidairAt(BlockPos pos)
 	{
 		// check feet
@@ -500,53 +519,53 @@ public class PathFinder
 			|| blockFeet instanceof VineBlock
 			|| blockFeet instanceof CobwebBlock)
 			return true;
-
+		
 		// check head
 		Block blockHead = BlockUtils.getBlock(pos.up());
 		if(BlockUtils.getState(pos.up()).getMaterial().isLiquid()
 			|| blockHead instanceof CobwebBlock)
 			return true;
-
+		
 		return false;
 	}
-
+	
 	private float getCost(BlockPos current, BlockPos next)
 	{
 		float[] costs = {0.5F, 0.5F};
 		BlockPos[] positions = {current, next};
-
+		
 		for(int i = 0; i < positions.length; i++)
 		{
 			BlockPos pos = positions[i];
 			Material material = BlockUtils.getState(pos).getMaterial();
-
+			
 			// liquids
 			if(material == Material.WATER && !noWaterSlowdown)
 				costs[i] *= 1.3164437838225804F;
 			else if(material == Material.LAVA)
 				costs[i] *= 4.539515393656079F;
-
+			
 			// soul sand
 			if(!canFlyAt(pos)
 				&& BlockUtils.getBlock(pos.down()) instanceof SoulSandBlock)
 				costs[i] *= 2.5F;
-
+			
 			// mining
 			if(isMineable(pos))
 				costs[i] *= 2F;
 			if(isMineable(pos.up()))
 				costs[i] *= 2F;
 		}
-
+		
 		float cost = costs[0] + costs[1];
-
+		
 		// diagonal movement
 		if(current.getX() != next.getX() && current.getZ() != next.getZ())
 			cost *= 1.4142135623730951F;
-
+		
 		return cost;
 	}
-
+	
 	private float getHeuristic(BlockPos pos)
 	{
 		float dx = Math.abs(pos.getX() - goal.getX());
@@ -554,49 +573,49 @@ public class PathFinder
 		float dz = Math.abs(pos.getZ() - goal.getZ());
 		return 1.001F * (dx + dy + dz - 0.5857864376269049F * Math.min(dx, dz));
 	}
-
+	
 	public PathPos getCurrentPos()
 	{
 		return current;
 	}
-
+	
 	public BlockPos getGoal()
 	{
 		return goal;
 	}
-
+	
 	public int countProcessedBlocks()
 	{
 		return prevPosMap.size();
 	}
-
+	
 	public int getQueueSize()
 	{
 		return queue.size();
 	}
-
+	
 	public float getCost(BlockPos pos)
 	{
 		return costMap.get(pos);
 	}
-
+	
 	public boolean isDone()
 	{
 		return done;
 	}
-
+	
 	public boolean isFailed()
 	{
 		return failed;
 	}
-
+	
 	public ArrayList<PathPos> formatPath()
 	{
 		if(!done && !failed)
 			throw new IllegalStateException("No path found!");
-//		if(!path.isEmpty())
-//			throw new IllegalStateException("Path was already formatted!");
-
+		// if(!path.isEmpty())
+		// throw new IllegalStateException("Path was already formatted!");
+		
 		// get last position
 		PathPos pos;
 		if(!failed)
@@ -609,99 +628,100 @@ public class PathFinder
 					&& (canFlyAt(next) || canBeSolid(next.down())))
 					pos = next;
 		}
-
+		
 		// get positions
 		while(pos != null)
 		{
 			path.add(pos);
 			pos = prevPosMap.get(pos);
 		}
-
+		
 		// reverse path
 		Collections.reverse(path);
-
+		
 		return path;
 	}
-
+	
 	public void renderPath(MatrixStack matrixStack, boolean debugMode,
 		boolean depthTest)
 	{
-//		// GL settings
-//		GL11.glEnable(GL11.GL_BLEND);
-//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//		GL11.glDisable(GL11.GL_CULL_FACE);
-//		GL11.glDisable(GL11.GL_TEXTURE_2D);
-//		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-//		if(!depthTest)
-//			GL11.glDisable(GL11.GL_DEPTH_TEST);
-//		GL11.glDisable(GL11.GL_LIGHTING);
-//		GL11.glDepthMask(false);
-//
-//		GL11.glPushMatrix();
-//		RenderUtils.applyRenderOffset();
-//		GL11.glTranslated(0.5, 0.5, 0.5);
-//
-//		if(debugMode)
-//		{
-//			int renderedThings = 0;
-//
-//			// queue (yellow)
-//			GL11.glLineWidth(2);
-//			GL11.glColor4f(1, 1, 0, 0.75F);
-//			for(PathPos element : queue.toArray())
-//			{
-//				if(renderedThings >= 5000)
-//					break;
-//
-//				PathRenderer.renderNode(element);
-//				renderedThings++;
-//			}
-//
-//			// processed (red)
-//			GL11.glLineWidth(2);
-//			for(Entry<PathPos, PathPos> entry : prevPosMap.entrySet())
-//			{
-//				if(renderedThings >= 5000)
-//					break;
-//
-//				if(entry.getKey().isJumping())
-//					GL11.glColor4f(1, 0, 1, 0.75F);
-//				else
-//					GL11.glColor4f(1, 0, 0, 0.75F);
-//
-//				PathRenderer.renderArrow(entry.getValue(), entry.getKey());
-//				renderedThings++;
-//			}
-//		}
-//
-//		// path (blue)
-//		if(debugMode)
-//		{
-//			GL11.glLineWidth(4);
-//			GL11.glColor4f(0, 0, 1, 0.75F);
-//		}else
-//		{
-//			GL11.glLineWidth(2);
-//			GL11.glColor4f(0, 1, 0, 0.75F);
-//		}
-//		for(int i = 0; i < path.size() - 1; i++)
-//			PathRenderer.renderArrow(path.get(i), path.get(i + 1));
-//
-//		GL11.glPopMatrix();
-//
-//		// GL resets
-//		GL11.glDisable(GL11.GL_BLEND);
-//		GL11.glEnable(GL11.GL_TEXTURE_2D);
-//		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-//		GL11.glEnable(GL11.GL_DEPTH_TEST);
-//		GL11.glDepthMask(true);
+		// // GL settings
+		// GL11.glEnable(GL11.GL_BLEND);
+		// GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		// GL11.glDisable(GL11.GL_CULL_FACE);
+		// GL11.glDisable(GL11.GL_TEXTURE_2D);
+		// GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		// if(!depthTest)
+		// GL11.glDisable(GL11.GL_DEPTH_TEST);
+		// GL11.glDisable(GL11.GL_LIGHTING);
+		// GL11.glDepthMask(false);
+		//
+		// GL11.glPushMatrix();
+		// RenderUtils.applyRenderOffset();
+		// GL11.glTranslated(0.5, 0.5, 0.5);
+		//
+		// if(debugMode)
+		// {
+		// int renderedThings = 0;
+		//
+		// // queue (yellow)
+		// GL11.glLineWidth(2);
+		// GL11.glColor4f(1, 1, 0, 0.75F);
+		// for(PathPos element : queue.toArray())
+		// {
+		// if(renderedThings >= 5000)
+		// break;
+		//
+		// PathRenderer.renderNode(element);
+		// renderedThings++;
+		// }
+		//
+		// // processed (red)
+		// GL11.glLineWidth(2);
+		// for(Entry<PathPos, PathPos> entry : prevPosMap.entrySet())
+		// {
+		// if(renderedThings >= 5000)
+		// break;
+		//
+		// if(entry.getKey().isJumping())
+		// GL11.glColor4f(1, 0, 1, 0.75F);
+		// else
+		// GL11.glColor4f(1, 0, 0, 0.75F);
+		//
+		// PathRenderer.renderArrow(entry.getValue(), entry.getKey());
+		// renderedThings++;
+		// }
+		// }
+		//
+		// // path (blue)
+		// if(debugMode)
+		// {
+		// GL11.glLineWidth(4);
+		// GL11.glColor4f(0, 0, 1, 0.75F);
+		// }else
+		// {
+		// GL11.glLineWidth(2);
+		// GL11.glColor4f(0, 1, 0, 0.75F);
+		// }
+		// for(int i = 0; i < path.size() - 1; i++)
+		// PathRenderer.renderArrow(path.get(i), path.get(i + 1));
+		//
+		// GL11.glPopMatrix();
+		//
+		// // GL resets
+		// GL11.glDisable(GL11.GL_BLEND);
+		// GL11.glEnable(GL11.GL_TEXTURE_2D);
+		// GL11.glDisable(GL11.GL_LINE_SMOOTH);
+		// GL11.glEnable(GL11.GL_DEPTH_TEST);
+		// GL11.glDepthMask(true);
 	}
-
+	
 	public boolean isPathStillValid(int index)
 	{
 		if(path.isEmpty())
 			throw new IllegalStateException("Path is not formatted!");
-
+		if(flying)
+			return true;
 		// check player abilities
 		if(invulnerable != WurstClient.MC.player.getAbilities().creativeMode
 			|| flying != (creativeFlying
@@ -713,7 +733,7 @@ public class PathFinder
 			|| jesus != wurst.getHax().jesusHack.isEnabled()
 			|| spider != wurst.getHax().spiderHack.isEnabled())
 			return false;
-
+		
 		// if index is zero, check if first pos is safe
 		if(index == 0)
 		{
@@ -722,43 +742,43 @@ public class PathFinder
 				&& !canSafelyStandOn(pos.down()))
 				return false;
 		}
-
+		
 		// check path
 		for(int i = Math.max(1, index); i < path.size(); i++)
 			if(!getNeighbors(path.get(i - 1)).contains(path.get(i)))
 				return false;
-
+			
 		return true;
 	}
-
+	
 	public PathProcessor getProcessor()
 	{
 		if(flying)
 			return new FlyPathProcessor(path, creativeFlying);
-
+		
 		return new WalkPathProcessor(path);
 	}
-
+	
 	public void setThinkSpeed(int thinkSpeed)
 	{
 		this.thinkSpeed = thinkSpeed;
 	}
-
+	
 	public void setThinkTime(int thinkTime)
 	{
 		this.thinkTime = thinkTime;
 	}
-
+	
 	public void setFallingAllowed(boolean fallingAllowed)
 	{
 		this.fallingAllowed = fallingAllowed;
 	}
-
+	
 	public void setDivingAllowed(boolean divingAllowed)
 	{
 		this.divingAllowed = divingAllowed;
 	}
-
+	
 	public List<PathPos> getPath()
 	{
 		return Collections.unmodifiableList(path);

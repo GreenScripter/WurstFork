@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
+import net.wurstclient.WurstClient;
 import net.wurstclient.ai.PathFinder;
 import net.wurstclient.ai.PathProcessor;
 import net.wurstclient.command.CmdError;
@@ -77,80 +78,107 @@ public final class GoToCmd extends Command
 		EVENTS.add(RenderListener.class, this);
 	}
 	
-	
 	private BlockPos argsToPos(String... args) throws CmdException
 	{
-		if (args.length == 1 && args[0].equalsIgnoreCase("previous")) {
+		if(args.length == 1 && args[0].equalsIgnoreCase("previous"))
+		{
 			File f = new File("coordinates.txt");
-			try {
+			try
+			{
 				BufferedReader reader = new BufferedReader(new FileReader(f));
-				try {
+				try
+				{
 					String line = reader.readLine();
 					int i = 0;
-					while (line != null) {
-						if (i == index-2) {
-							ChatUtils.message("Going to position " + index + " at " + line);
+					while(line != null)
+					{
+						if(i == index - 2)
+						{
+							ChatUtils.message(
+								"Going to position " + index + " at " + line);
 							return argsToPos(line.split(" "));
 						}
 						i++;
 						line = reader.readLine();
 					}
 					throw new CmdError("End of list reached.");
-				} catch (Exception e) {
+				}catch(Exception e)
+				{
 					throw new CmdError("Error reading coordinates file.");
-				} finally {
-					try {
+				}finally
+				{
+					try
+					{
 						reader.close();
-					} catch (IOException e) {
+					}catch(IOException e)
+					{
 					}
 				}
-			} catch (FileNotFoundException e) {
+			}catch(FileNotFoundException e)
+			{
 				throw new CmdError("No coordinates file found.");
 			}
 			
 		}
-		if (args.length == 1 && args[0].equalsIgnoreCase("start")) {
+		if(args.length == 1 && args[0].equalsIgnoreCase("start"))
+		{
 			index = 0;
 			ChatUtils.message("Set route index to 1");
 			throw new CmdError("Use next to go there.");
 		}
-		if (args.length == 2 && args[0].equalsIgnoreCase("index")) {
-			try {
-				index = Integer.parseInt(args[1])-1;
-				ChatUtils.message("Set route index to " + (1+index));
+		if(args.length == 2 && args[0].equalsIgnoreCase("index"))
+		{
+			try
+			{
+				index = Integer.parseInt(args[1]) - 1;
+				ChatUtils.message("Set route index to " + (1 + index));
 				throw new CmdError("Use next to go there.");
-			} catch (NumberFormatException e){
+			}catch(NumberFormatException e)
+			{
 				throw new CmdError("Please use a number.");
-
+				
 			}
 			
 		}
-		if (args.length == 1 && args[0].equalsIgnoreCase("next")) {
+		if(args.length == 1 && args[0].equalsIgnoreCase("next"))
+		{
 			File f = new File("coordinates.txt");
-			try {
+			try
+			{
 				BufferedReader reader = new BufferedReader(new FileReader(f));
-				try {
+				try
+				{
 					String line = reader.readLine();
 					int i = 0;
-					while (line != null) {
-						if (i == index) {
+					while(line != null)
+					{
+						if(i == index)
+						{
 							index++;
-							ChatUtils.message("Going to position " + index + " at " + line);
+							ChatUtils.message(
+								"Going to position " + index + " at " + line);
 							return argsToPos(line.split(" "));
 						}
 						line = reader.readLine();
 						i++;
 					}
 					throw new CmdError("End of list reached.");
-				} catch (Exception e) {
+				}catch(Exception e)
+				{
+					e.printStackTrace();
+					
 					throw new CmdError("Error reading coordinates file.");
-				} finally {
-					try {
+				}finally
+				{
+					try
+					{
 						reader.close();
-					} catch (IOException e) {
+					}catch(IOException e)
+					{
 					}
 				}
-			} catch (FileNotFoundException e) {
+			}catch(FileNotFoundException e)
+			{
 				throw new CmdError("No coordinates file found.");
 			}
 		}
@@ -161,6 +189,10 @@ public final class GoToCmd extends Command
 			
 			case 1:
 			return argsToEntityPos(args[0]);
+			
+			case 2:
+			return argsToXyzPos(
+				new String[]{args[0], MC.player.getBlockY() + "", args[1]});
 			
 			case 3:
 			return argsToXyzPos(args);
@@ -203,6 +235,19 @@ public final class GoToCmd extends Command
 			else
 				throw new CmdSyntaxError("Invalid coordinates.");
 			
+		try
+		{
+			WURST.getCmds().targetCmd
+				.call(new String[]{pos[0] + "", pos[1] + "", pos[2] + ""});
+		}catch(CmdException e)
+		{
+			e.printStackTrace();
+		}
+		if(WurstClient.MC.player.getAbilities().flying
+			|| WURST.getHax().flightHack.isEnabled())
+		{
+			pos[1] = playerPos.getY();
+		}
 		return new BlockPos(pos[0], pos[1], pos[2]);
 	}
 	
@@ -212,6 +257,7 @@ public final class GoToCmd extends Command
 		// find path
 		if(!pathFinder.isDone())
 		{
+			ChatUtils.rawMessage("thinking.");
 			PathProcessor.lockControls();
 			
 			pathFinder.think();
@@ -263,14 +309,14 @@ public final class GoToCmd extends Command
 	{
 		EVENTS.remove(UpdateListener.class, this);
 		EVENTS.remove(RenderListener.class, this);
-		if (!pathFinder.isFailed())
+		if(!pathFinder.isFailed())
 			ChatUtils.message("Destination reached.");
 		pathFinder = null;
 		processor = null;
 		PathProcessor.releaseControls();
 		
 		enabled = false;
-
+		
 	}
 	
 	public boolean isActive()

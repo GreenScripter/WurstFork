@@ -65,7 +65,14 @@ public abstract class PathProcessor
 	{
 		// disable keys
 		for(KeyBinding key : CONTROLS)
-			key.setPressed(false);
+		{
+			if((key == MC.options.jumpKey || key == MC.options.sneakKey)
+				&& (WurstClient.MC.player.getAbilities().flying
+					|| WURST.getHax().flightHack.isEnabled()))
+			{
+			}else
+				key.setPressed(false);
+		}
 		
 		// disable sprinting
 		WurstClient.MC.player.setSprinting(false);
