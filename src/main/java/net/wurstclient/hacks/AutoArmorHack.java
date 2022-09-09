@@ -47,7 +47,10 @@ public final class AutoArmorHack extends Hack
 		"Whether or not to swap armor pieces while the player is moving.\n\n"
 			+ "\u00a7c\u00a7lWARNING:\u00a7r This would not be possible without cheats. It may raise suspicion.",
 		false);
-	
+	private final CheckboxSetting repairMode = new CheckboxSetting(
+		"Repair mode", "Won't use tools that are about to break.", false);
+	private final SliderSetting repairThreshold = new SliderSetting(
+		"Repair threshold", 4, 1, 200, 1, ValueDisplay.INTEGER);
 	private final SliderSetting delay = new SliderSetting("Delay",
 		"Amount of ticks to wait before swapping the next piece of armor.", 2,
 		0, 20, 1, ValueDisplay.INTEGER);
@@ -61,6 +64,8 @@ public final class AutoArmorHack extends Hack
 		addSetting(useEnchantments);
 		addSetting(swapWhileMoving);
 		addSetting(delay);
+		addSetting(repairMode);
+		addSetting(repairThreshold);
 	}
 	
 	@Override
@@ -165,6 +170,12 @@ public final class AutoArmorHack extends Hack
 		}
 	}
 	
+	private boolean isToolDamaged(ItemStack stack)
+	{
+		return stack.getMaxDamage() - stack.getDamage() <= repairThreshold
+			.getValueI();
+	}
+	
 	@Override
 	public void onSentPacket(PacketOutputEvent event)
 	{
@@ -179,7 +190,10 @@ public final class AutoArmorHack extends Hack
 		int armorToughness = (int)((IArmorItem)item).getToughness();
 		int armorType =
 			item.getMaterial().getProtectionAmount(EquipmentSlot.LEGS);
-		
+		if(isToolDamaged(stack))
+		{
+			return 0;
+		}
 		if(useEnchantments.isChecked())
 		{
 			Enchantment protection = Enchantments.PROTECTION;
