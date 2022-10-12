@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.render.BackgroundRenderer;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.BackgroundRenderer.FogType;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
@@ -24,22 +24,6 @@ import net.wurstclient.WurstClient;
 @Mixin(BackgroundRenderer.class)
 public class BackgroundRendererMixin
 {
-	@Redirect(at = @At(value = "INVOKE",
-		target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z",
-		ordinal = 0),
-		method = "render(Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/world/ClientWorld;IF)V")
-	private static boolean hasStatusEffectRender(LivingEntity entity,
-		StatusEffect effect)
-	{
-		if(effect == StatusEffects.BLINDNESS
-			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
-			return false;
-		if(effect == StatusEffects.DARKNESS
-			&& WurstClient.INSTANCE.getHax().antiBlindHack.isEnabled())
-			return false;
-		
-		return entity.hasStatusEffect(effect);
-	}
 	
 	@Redirect(at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z",

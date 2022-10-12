@@ -15,6 +15,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.wurstclient.command.CmdError;
 import net.wurstclient.command.CmdException;
 import net.wurstclient.command.CmdSyntaxError;
 import net.wurstclient.command.Command;
@@ -38,10 +39,15 @@ public final class VClipCmd extends Command
 		if(args.length != 1)
 			throw new CmdSyntaxError();
 		
-		ClientPlayerEntity player = MC.player;
+		if(MathUtils.isDouble(args[0]))
+		{
+			vclip(Double.parseDouble(args[0]));
+			return;
+		}
 		
 		if(!MathUtils.isInteger(args[0]))
 		{
+			var player = MC.player;
 			Stream<BlockPos> blockStream = null;
 			boolean above;
 			switch(args[0].toLowerCase())
@@ -87,8 +93,12 @@ public final class VClipCmd extends Command
 			return;
 		}
 		
-		player.setPosition(player.getX(),
-			player.getY() + Integer.parseInt(args[0]), player.getZ());
-		
+		throw new CmdError("There are no free blocks where you can fit!");
+	}
+	
+	private void vclip(double height)
+	{
+		ClientPlayerEntity p = MC.player;
+		p.setPosition(p.getX(), p.getY() + height, p.getZ());
 	}
 }
